@@ -1,6 +1,8 @@
-package main
+package sugar
 
-import "strings"
+import (
+	"strings"
+)
 
 func Format(format string, args ...string) string {
 	var builder strings.Builder

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"Falcon/sugar"
+	"Falcon/types"
 	"strconv"
 	"strings"
 )
@@ -21,21 +23,21 @@ func NewLexer(source string) *Lexer {
 	}
 }
 
-var simpleCharTypes = map[uint8]Type{
-	'+': Operator, '-': Operator, '*': Operator, '/': Operator,
-	'(': OpenCurve, ')': CloseCurve,
-	'[': OpenSquare, ']': CloseSquare,
-	'{': OpenCurly, '}': CloseCurly,
-	'=': Equals,
+var simpleCharTypes = map[uint8]types.Type{
+	'+': types.Operator, '-': types.Operator, '*': types.Operator, '/': types.Operator,
+	'(': types.OpenCurve, ')': types.CloseCurve,
+	'[': types.OpenSquare, ']': types.CloseSquare,
+	'{': types.OpenCurly, '}': types.CloseCurly,
+	'=': types.Equals,
 }
 
-var keywordTypes = map[string]Type{
-	"true":  Bool,
-	"false": Bool,
+var keywordTypes = map[string]types.Type{
+	"true":  types.Bool,
+	"false": types.Bool,
 }
 
-func (l *Lexer) Lex() []Token {
-	var tokens []Token
+func (l *Lexer) Lex() []types.Token {
+	var tokens []types.Token
 	for {
 		l.trim()
 		if l.isEOF() {
@@ -62,13 +64,13 @@ func (l *Lexer) trim() {
 	}
 }
 
-func (l *Lexer) parse() Token {
+func (l *Lexer) parse() types.Token {
 	char := l.next()
 	s := string(char)
 	resType, ok := simpleCharTypes[char]
 
 	if ok {
-		return Token{Type: resType, Line: l.currLine}
+		return l.makeToken(resType, s)
 	}
 
 	switch char {
@@ -83,19 +85,19 @@ func (l *Lexer) parse() Token {
 		}
 	}
 	l.lexError("Unexpected character '%'", s)
-	return Token{}
+	return types.Token{}
 }
 
-func (l *Lexer) parseText() Token {
+func (l *Lexer) parseText() types.Token {
 	startIndex := l.currIndex
 	for l.notEOF() && l.peek() != '"' {
 		l.currIndex++
 	}
 	l.eat('"')
-	return l.makeToken(Text, l.source[startIndex:l.currIndex-1])
+	return l.makeToken(types.Text, l.source[startIndex:l.currIndex-1])
 }
 
-func (l *Lexer) parseAlpha() Token {
+func (l *Lexer) parseAlpha() types.Token {
 	startIndex := l.currIndex
 	l.currIndex++
 	for l.notEOF() && l.isAlphaNumeric() {
@@ -107,10 +109,10 @@ func (l *Lexer) parseAlpha() Token {
 		// it's a keyword!
 		return l.makeToken(resType, content)
 	}
-	return l.makeToken(Alpha, content)
+	return l.makeToken(types.Alpha, content)
 }
 
-func (l *Lexer) parseNumeric() Token {
+func (l *Lexer) parseNumeric() types.Token {
 	var numb strings.Builder
 	l.writeNumeric(&numb)
 
@@ -118,7 +120,7 @@ func (l *Lexer) parseNumeric() Token {
 		numb.WriteByte('.')
 		l.writeNumeric(&numb)
 	}
-	return l.makeToken(Number, numb.String())
+	return l.makeToken(types.Number, numb.String())
 }
 
 func (l *Lexer) writeNumeric(builder *strings.Builder) {
@@ -152,7 +154,7 @@ func (l *Lexer) eat(expect uint8) {
 }
 
 func (l *Lexer) lexError(message string, args ...string) {
-	panic("[line " + strconv.Itoa(l.currLine) + "] " + Format(message, args...))
+	panic("[line " + strconv.Itoa(l.currLine) + "] " + sugar.Format(message, args...))
 }
 
 func (l *Lexer) consume(expect uint8) bool {
@@ -181,6 +183,6 @@ func (l *Lexer) notEOF() bool {
 	return l.currIndex < l.sourceLen
 }
 
-func (l *Lexer) makeToken(t Type, content string) Token {
-	return Token{Type: t, Line: l.currLine, Content: &content}
+func (l *Lexer) makeToken(t types.Type, content string) types.Token {
+	return types.Token{Type: t, Line: l.currLine, Content: &content}
 }

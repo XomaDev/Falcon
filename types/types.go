@@ -1,4 +1,9 @@
-package main
+package types
+
+import (
+	"Falcon/sugar"
+	"strconv"
+)
 
 //go:generate stringer -type=Type
 type Type int
@@ -30,4 +35,8 @@ func (t Token) String() string {
 		return t.Type.String()
 	}
 	return t.Type.String() + " " + *t.Content
+}
+
+func (t Token) Error(message string, args ...string) {
+	panic("[line " + strconv.Itoa(t.Line) + "] " + sugar.Format(message, args...))
 }
