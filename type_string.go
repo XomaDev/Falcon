@@ -15,14 +15,16 @@ func _() {
 	_ = x[CloseSquare-4]
 	_ = x[OpenCurly-5]
 	_ = x[CloseCurly-6]
-	_ = x[Number-7]
-	_ = x[Text-8]
-	_ = x[Bool-9]
+	_ = x[Equals-7]
+	_ = x[Number-8]
+	_ = x[Text-9]
+	_ = x[Bool-10]
+	_ = x[Alpha-11]
 }
 
-const _Type_name = "OperatorOpenCurveCloseCurveOpenSquareCloseSquareOpenCurlyCloseCurlyNumberTextBool"
+const _Type_name = "OperatorOpenCurveCloseCurveOpenSquareCloseSquareOpenCurlyCloseCurlyEqualsNumberTextBoolAlpha"
 
-var _Type_index = [...]uint8{0, 8, 17, 27, 37, 48, 57, 67, 73, 77, 81}
+var _Type_index = [...]uint8{0, 8, 17, 27, 37, 48, 57, 67, 73, 79, 83, 87, 92}
 
 func (i Type) String() string {
 	if i < 0 || i >= Type(len(_Type_index)-1) {

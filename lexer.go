@@ -21,6 +21,19 @@ func NewLexer(source string) *Lexer {
 	}
 }
 
+var simpleCharTypes = map[uint8]Type{
+	'+': Operator, '-': Operator, '*': Operator, '/': Operator,
+	'(': OpenCurve, ')': CloseCurve,
+	'[': OpenSquare, ']': CloseSquare,
+	'{': OpenCurly, '}': CloseCurly,
+	'=': Equals,
+}
+
+var keywordTypes = map[string]Type{
+	"true":  Bool,
+	"false": Bool,
+}
+
 func (l *Lexer) Lex() []Token {
 	var tokens []Token
 	for {
@@ -34,40 +47,67 @@ func (l *Lexer) Lex() []Token {
 }
 
 func (l *Lexer) trim() {
-	for l.notEOF() && l.peek() == ' ' {
-		l.currIndex++
+	for l.notEOF() {
+		p := l.peek()
+		switch p {
+		case ' ':
+			l.currIndex++
+			continue
+		case '\n':
+			l.currLine++
+			l.currLine++
+			continue
+		}
+		break
 	}
 }
 
 func (l *Lexer) parse() Token {
 	char := l.next()
 	s := string(char)
+	resType, ok := simpleCharTypes[char]
+
+	if ok {
+		return Token{Type: resType, Line: l.currLine}
+	}
+
 	switch char {
-	case '\n':
-		l.currLine++
-		break
-	case '+', '-', '*', '/':
-		return l.makeToken(Operator, s)
-	case '(':
-		return l.simpleToken(OpenCurve)
-	case ')':
-		return l.simpleToken(CloseCurve)
-	case '[':
-		return l.simpleToken(OpenSquare)
-	case ']':
-		return l.simpleToken(CloseSquare)
-	case '{':
-		return l.simpleToken(OpenCurly)
-	case '}':
-		return l.simpleToken(CloseCurly)
+	case '"':
+		return l.parseText()
 	default:
 		l.currIndex--
 		if l.isDigit() {
 			return l.parseNumeric()
+		} else if l.isAlpha() {
+			return l.parseAlpha()
 		}
 	}
 	l.lexError("Unexpected character '%'", s)
 	return Token{}
+}
+
+func (l *Lexer) parseText() Token {
+	startIndex := l.currIndex
+	for l.notEOF() && l.peek() != '"' {
+		l.currIndex++
+	}
+	l.eat('"')
+	return l.makeToken(Text, l.source[startIndex:l.currIndex-1])
+}
+
+func (l *Lexer) parseAlpha() Token {
+	startIndex := l.currIndex
+	l.currIndex++
+	for l.notEOF() && l.isAlphaNumeric() {
+		l.currIndex++
+	}
+	content := l.source[startIndex:l.currIndex]
+	resType, ok := keywordTypes[content]
+	if ok {
+		// it's a keyword!
+		return l.makeToken(resType, content)
+	}
+	return l.makeToken(Alpha, content)
 }
 
 func (l *Lexer) parseNumeric() Token {
@@ -108,6 +148,7 @@ func (l *Lexer) eat(expect uint8) {
 	if got != expect {
 		l.lexError("Expected '%', but got '%'", string(expect), string(got))
 	}
+	l.currIndex++
 }
 
 func (l *Lexer) lexError(message string, args ...string) {
@@ -138,10 +179,6 @@ func (l *Lexer) isEOF() bool {
 
 func (l *Lexer) notEOF() bool {
 	return l.currIndex < l.sourceLen
-}
-
-func (l *Lexer) simpleToken(t Type) Token {
-	return Token{Type: t, Line: l.currLine}
 }
 
 func (l *Lexer) makeToken(t Type, content string) Token {

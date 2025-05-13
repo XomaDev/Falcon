@@ -11,10 +11,12 @@ const (
 	CloseSquare
 	OpenCurly
 	CloseCurly
+	Equals
 
 	Number
 	Text
 	Bool
+	Alpha
 )
 
 type Token struct {
