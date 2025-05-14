@@ -9,6 +9,7 @@ const (
 	Dash
 	Times
 	Slash
+	Power
 
 	// || && | & ~
 	LogicOr
@@ -37,6 +38,7 @@ const (
 	Comma
 	Question
 	Not
+	RightArrow
 
 	True
 	False

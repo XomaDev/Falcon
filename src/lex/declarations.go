@@ -3,8 +3,9 @@ package lex
 var Symbols = map[string]StaticToken{
 	"+": staticOf(Plus, Binary, Operator),
 	"-": staticOf(Dash, Binary, Operator, Unary),
-	"*": staticOf(Times, BinaryL1, Operator),
-	"/": staticOf(Slash, BinaryL1, Operator),
+	"*": staticOf(Times, BinaryL1, Operator, PreserveOrder),
+	"/": staticOf(Slash, BinaryL1, Operator, PreserveOrder),
+	"^": staticOf(Power, BinaryL2, Operator, PreserveOrder),
 
 	"||": staticOf(LogicOr, LLogicOr, Operator),
 	"&&": staticOf(LogicAnd, LLogicAnd, Operator),

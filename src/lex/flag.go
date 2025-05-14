@@ -14,7 +14,10 @@ const (
 	Relational
 	Binary
 	BinaryL1
+	BinaryL2
 	Unary
 
 	Value
+
+	PreserveOrder
 )

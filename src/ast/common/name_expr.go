@@ -2,22 +2,22 @@ package common
 
 import (
 	"Falcon/ast/blockly"
-	"Falcon/label"
+	"Falcon/lex"
 )
 
-type NameExpr struct {
-	Where  label.Token
-	Name   *string
+type Name struct {
+	Where  lex.Token
+	Name   string
 	Global bool
 }
 
-func (ne *NameExpr) String() string {
+func (ne *Name) String() string {
 	if ne.Global {
-		return "glob." + *ne.Name
+		return "glob." + ne.Name
 	}
-	return *ne.Name
+	return ne.Name
 }
 
-func (ne *NameExpr) Blockly() blockly.Block {
+func (ne *Name) Blockly() blockly.Block {
 	panic("unimplemented")
 }

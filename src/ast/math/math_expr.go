@@ -2,12 +2,12 @@ package math
 
 import (
 	"Falcon/ast/blockly"
-	"Falcon/label"
+	"Falcon/lex"
 )
 
 type Expr struct {
 	Operands []blockly.Expr
-	Operator label.Token
+	Operator lex.Token
 }
 
 func (b *Expr) String() string {

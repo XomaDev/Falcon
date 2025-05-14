@@ -2,23 +2,23 @@ package math
 
 import (
 	"Falcon/ast/blockly"
-	"Falcon/label"
+	"Falcon/lex"
 	"Falcon/sugar"
 )
 
-type PropExpr struct {
-	Where label.Token
+type Prop struct {
+	Where lex.Token
 	On    blockly.Expr
-	Name  *string
+	Name  string
 }
 
-func (p *PropExpr) String() string {
-	return sugar.Format("%->%v", p.On.String(), *p.Name)
+func (p *Prop) String() string {
+	return sugar.Format("%->%v", p.On.String(), p.Name)
 }
 
-func (p *PropExpr) Blockly() blockly.Block {
+func (p *Prop) Blockly() blockly.Block {
 	var fieldOp string
-	switch *p.Name {
+	switch p.Name {
 	case "root":
 		fieldOp = "ROOT"
 	case "abs":
@@ -60,7 +60,7 @@ func (p *PropExpr) Blockly() blockly.Block {
 	case "fromBin":
 		fieldOp = "BIN_TO_DEC"
 	default:
-		p.Where.Error("Unknown property access ->%", *p.Name)
+		p.Where.Error("Unknown property access ->%", p.Name)
 	}
 	var blockType string
 

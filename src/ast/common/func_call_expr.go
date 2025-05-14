@@ -3,23 +3,23 @@ package common
 import (
 	"Falcon/ast/blockly"
 	"Falcon/ast/text"
-	"Falcon/label"
+	"Falcon/lex"
 	"Falcon/sugar"
 	"strconv"
 )
 
 type FuncCall struct {
-	Where label.Token
-	Name  *string
+	Where lex.Token
+	Name  string
 	Args  []blockly.Expr
 }
 
 func (f *FuncCall) String() string {
-	return sugar.Format("%(%)", *f.Name, blockly.JoinExprs(", ", f.Args))
+	return sugar.Format("%(%)", f.Name, blockly.JoinExprs(", ", f.Args))
 }
 
 func (f *FuncCall) Blockly() blockly.Block {
-	switch *f.Name {
+	switch f.Name {
 	case "bin", "octal", "hexa":
 		return f.mathRadix()
 	case "randInt":
@@ -64,7 +64,7 @@ func (f *FuncCall) atan2() blockly.Block {
 func (f *FuncCall) mathDivide() blockly.Block {
 	f.assertArgLen(2)
 	var fieldOp string
-	switch *f.Name {
+	switch f.Name {
 	case "mod":
 		fieldOp = "MODULO"
 	case "rem":
@@ -90,7 +90,7 @@ func (f *FuncCall) modeOf() blockly.Block {
 func (f *FuncCall) mathOnList() blockly.Block {
 	f.assertArgLen(1)
 	var fieldOp string
-	switch *f.Name {
+	switch f.Name {
 	case "avgOf":
 		fieldOp = "AVG"
 	case "maxOf":
@@ -114,10 +114,10 @@ func (f *FuncCall) mathOnList() blockly.Block {
 func (f *FuncCall) minOrMax() blockly.Block {
 	argSize := len(f.Args)
 	if argSize == 0 {
-		f.Where.Error("No arguments provided for %()", *f.Name)
+		f.Where.Error("No arguments provided for %()", f.Name)
 	}
 	var fieldOp string
-	switch *f.Name {
+	switch f.Name {
 	case "min":
 		fieldOp = "MIN"
 	case "max":
@@ -155,7 +155,7 @@ func (f *FuncCall) randInt() blockly.Block {
 func (f *FuncCall) mathRadix() blockly.Block {
 	f.assertArgLen(1)
 	var fieldOp string
-	switch *f.Name {
+	switch f.Name {
 	case "bin":
 		fieldOp = "BIN"
 	case "octal":
@@ -165,13 +165,13 @@ func (f *FuncCall) mathRadix() blockly.Block {
 	}
 	textExpr, ok := f.Args[0].(*text.Expr)
 	if !ok {
-		f.Where.Error("Expected a numeric string argument for %v()", *f.Name)
+		f.Where.Error("Expected a numeric string argument for %v()", f.Name)
 	}
 	return blockly.Block{
 		Type: "math_number_radix",
 		Fields: []blockly.Field{
 			{Name: "OP", Value: fieldOp},
-			{Name: "NUM", Value: *textExpr.Content},
+			{Name: "NUM", Value: textExpr.Content},
 		},
 	}
 }
@@ -179,6 +179,6 @@ func (f *FuncCall) mathRadix() blockly.Block {
 func (f *FuncCall) assertArgLen(expectLen int) {
 	argsLen := len(f.Args)
 	if argsLen != expectLen {
-		f.Where.Error("Expected % argument for %() but got %", strconv.Itoa(expectLen), *f.Name, strconv.Itoa(argsLen))
+		f.Where.Error("Expected % argument for %() but got %", strconv.Itoa(expectLen), f.Name, strconv.Itoa(argsLen))
 	}
 }

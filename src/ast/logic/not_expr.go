@@ -5,15 +5,15 @@ import (
 	"Falcon/sugar"
 )
 
-type NotExpr struct {
+type Not struct {
 	Expr blockly.Expr
 }
 
-func (n *NotExpr) String() string {
+func (n *Not) String() string {
 	return sugar.Format("!%", n.Expr.String())
 }
 
-func (n *NotExpr) Blockly() blockly.Block {
+func (n *Not) Blockly() blockly.Block {
 	return blockly.Block{
 		Type:   "logic_negate",
 		Values: []blockly.Value{{Name: "BOOL", Block: n.Expr.Blockly()}},

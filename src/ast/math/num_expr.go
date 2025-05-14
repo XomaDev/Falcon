@@ -4,17 +4,17 @@ import (
 	"Falcon/ast/blockly"
 )
 
-type NumExpr struct {
-	Content *string
+type Num struct {
+	Content string
 }
 
-func (n *NumExpr) String() string {
-	return *n.Content
+func (n *Num) String() string {
+	return n.Content
 }
 
-func (n *NumExpr) Blockly() blockly.Block {
+func (n *Num) Blockly() blockly.Block {
 	return blockly.Block{
 		Type:   "math_number",
-		Fields: blockly.ToFields(map[string]string{"NUM": *n.Content}),
+		Fields: blockly.ToFields(map[string]string{"NUM": n.Content}),
 	}
 }

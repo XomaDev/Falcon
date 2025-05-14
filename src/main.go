@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Falcon/analysis"
 	"Falcon/ast/blockly"
 	"Falcon/lex"
 	"encoding/xml"
@@ -24,7 +25,7 @@ func main() {
 
 	println("\n=== AST ===")
 
-	expressions := NewParser(tokens).ParseAll()
+	expressions := analysis.NewParser(tokens).ParseAll()
 	for _, expression := range expressions {
 		println(expression.String())
 	}

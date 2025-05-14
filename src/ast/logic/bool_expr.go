@@ -4,17 +4,20 @@ import (
 	"Falcon/ast/blockly"
 )
 
-type BoolExpr struct {
-	Value *string
+type Bool struct {
+	Value bool
 }
 
-func (b *BoolExpr) String() string {
-	return *b.Value
+func (b *Bool) String() string {
+	if b.Value {
+		return "true"
+	}
+	return "false"
 }
 
-func (b *BoolExpr) Blockly() blockly.Block {
+func (b *Bool) Blockly() blockly.Block {
 	var bText string
-	if *b.Value == "true" {
+	if b.Value {
 		bText = "TRUE"
 	} else {
 		bText = "FALSE"

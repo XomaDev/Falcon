@@ -2,23 +2,23 @@ package common
 
 import (
 	"Falcon/ast/blockly"
-	"Falcon/label"
+	"Falcon/lex"
 	"Falcon/sugar"
 )
 
-type QuestionExp struct {
-	Where    label.Token
+type Question struct {
+	Where    lex.Token
 	On       blockly.Expr
-	Question *string
+	Question string
 }
 
-func (q *QuestionExp) String() string {
-	return sugar.Format("% ? %", q.On.String(), *q.Question)
+func (q *Question) String() string {
+	return sugar.Format("% ? %", q.On.String(), q.Question)
 }
 
-func (q *QuestionExp) Blockly() blockly.Block {
+func (q *Question) Blockly() blockly.Block {
 	var fieldOp string
-	switch *q.Question {
+	switch q.Question {
 	case "number":
 		fieldOp = "NUMBER"
 	case "base10":
@@ -28,7 +28,7 @@ func (q *QuestionExp) Blockly() blockly.Block {
 	case "bin":
 		fieldOp = "BINARY"
 	default:
-		q.Where.Error("Unknown question ? %", *q.Question)
+		q.Where.Error("Unknown question ? %", q.Question)
 	}
 	return blockly.Block{
 		Type:   "math_is_a_number",
