@@ -61,6 +61,41 @@ func (p *Parser) element() ast.Expr {
 }
 
 func (p *Parser) term() ast.Expr {
+	value := p.value()
+	if p.isEOF() {
+		return value
+	}
+	neExpr, ok := value.(*ast.NameExpr)
+	if !ok {
+		return value
+	}
+	peek := p.peek()
+	switch peek.Type {
+	case types.OpenCurve:
+		return &ast.FuncCall{Where: neExpr.Where, Name: neExpr.Name, Args: p.arguments()}
+	default:
+		peek.Error("Unexpected token!")
+	}
+	panic("") // unreachable
+}
+
+func (p *Parser) arguments() []ast.Expr {
+	p.expect(types.OpenCurve)
+	var arguments []ast.Expr
+	if p.consume(types.CloseCurve) {
+		return arguments
+	}
+	for p.notEOF() {
+		arguments = append(arguments, p.parse())
+		if !p.consume(types.Dot) {
+			break
+		}
+	}
+	p.expect(types.CloseCurve)
+	return arguments
+}
+
+func (p *Parser) value() ast.Expr {
 	token := p.next()
 	switch token.Type {
 	case types.Number:
@@ -69,8 +104,29 @@ func (p *Parser) term() ast.Expr {
 		return &ast.BoolExpr{Value: token.Content}
 	case types.Text:
 		return &ast.TextExpr{Content: token.Content}
+	case types.Alpha:
+		return &ast.NameExpr{Where: token, Name: token.Content, Global: false}
 	}
 	panic(sugar.Format("Unknown value type '%'", token.Type.String()))
+}
+
+func (p *Parser) consume(t types.Type) bool {
+	if p.peek().Type == t {
+		p.skip()
+		return true
+	}
+	return false
+}
+
+func (p *Parser) expect(t types.Type) {
+	next := p.next()
+	if next.Type != t {
+		next.Error("Expected type '%' but got '%'", t.String(), next.Type.String())
+	}
+}
+
+func (p *Parser) isNext(t types.Type) bool {
+	return p.peek().Type == t
 }
 
 func (p *Parser) peek() types.Token {

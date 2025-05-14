@@ -10,6 +10,7 @@ type Type int
 
 const (
 	Operator Type = iota
+
 	OpenCurve
 	CloseCurve
 	OpenSquare
@@ -17,6 +18,7 @@ const (
 	OpenCurly
 	CloseCurly
 	Equals
+	Dot
 
 	Number
 	Text

@@ -1,7 +1,6 @@
 package ast
 
 type NumExpr struct {
-	Expr
 	Content *string
 }
 

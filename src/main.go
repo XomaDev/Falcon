@@ -3,11 +3,18 @@ package main
 import (
 	"Falcon/ast"
 	"encoding/xml"
+	"os"
 )
 
 func main() {
 	println("Hello from Falcon!")
-	sourceCode := `123 | 456 | 789`
+
+	filePath := "/home/kumaraswamy/GolandProjects/Falcon/hi.mist"
+	codeBytes, err := os.ReadFile(filePath)
+	if err != nil {
+		panic(err)
+	}
+	sourceCode := string(codeBytes)
 
 	tokens := NewLexer(sourceCode).Lex()
 	for _, token := range tokens {

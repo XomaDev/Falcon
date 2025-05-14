@@ -33,6 +33,7 @@ var simpleCharTypes = map[uint8]types.Type{
 	'[': types.OpenSquare, ']': types.CloseSquare,
 	'{': types.OpenCurly, '}': types.CloseCurly,
 	'=': types.Equals,
+	'.': types.Dot,
 }
 
 var keywordTypes = map[string]types.Type{
