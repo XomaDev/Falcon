@@ -1,1 +1,1 @@
-16->root->abs
+Quot(16->root, 8->sin)

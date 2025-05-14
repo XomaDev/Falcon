@@ -32,8 +32,28 @@ func (f *FuncCall) Blockly() Block {
 		return f.mathOnList()
 	case "ModeOf":
 		return f.modeOf()
+	case "Mod", "Rem", "Quot":
+		return f.mathDivide()
 	default:
 		panic("Unimplemented")
+	}
+}
+
+func (f *FuncCall) mathDivide() Block {
+	f.assertArgLen(2)
+	var fieldOp string
+	switch *f.Name {
+	case "Mod":
+		fieldOp = "MODULO"
+	case "Rem":
+		fieldOp = "REMAINDER"
+	case "QUOTIENT":
+		fieldOp = "Quot"
+	}
+	return Block{
+		Type:   "math_divide",
+		Fields: []Field{{Name: "OP", Value: fieldOp}},
+		Values: MakeValues(f.Args, "DIVIDEND", "DIVISOR"),
 	}
 }
 

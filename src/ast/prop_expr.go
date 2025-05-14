@@ -34,11 +34,30 @@ func (p *PropExpr) Blockly() Block {
 		fieldOp = "CEILING"
 	case "floor":
 		fieldOp = "FLOOR"
+	case "sin":
+		fieldOp = "SIN"
+	case "cos":
+		fieldOp = "COS"
+	case "tan":
+		fieldOp = "TAN"
+	case "asin":
+		fieldOp = "ASIN"
+	case "acos":
+		fieldOp = "ACOS"
+	case "atan":
+		fieldOp = "ATAN"
 	default:
 		p.Where.Error("Unknown property access ->%", *p.Name)
 	}
+	var blockType string
+	if fieldOp == "SIN" || fieldOp == "COS" || fieldOp == "TAN" ||
+		fieldOp == "ASIN" || fieldOp == "ACOS" || fieldOp == "ATAN" {
+		blockType = "math_trig"
+	} else {
+		blockType = "math_single"
+	}
 	return Block{
-		Type:   "math_single",
+		Type:   blockType,
 		Fields: []Field{{Name: "OP", Value: fieldOp}},
 		Values: []Value{{Name: "NUM", Block: p.On.Blockly()}},
 	}
