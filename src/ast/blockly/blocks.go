@@ -1,4 +1,4 @@
-package ast
+package blockly
 
 import (
 	"encoding/xml"
@@ -34,6 +34,8 @@ type Value struct {
 type Mutation struct {
 	XMLName       xml.Name    `xml:"mutation"`
 	ItemCount     int         `xml:"items,attr,omitempty"`
+	ElseIfCount   int         `xml:"elseif,attr,omitempty"`
+	ElseCount     int         `xml:"else,attr,omitempty"`
 	LocalNames    []LocalName `xml:"localname"`
 	Args          []Arg       `xml:"arg"`
 	Key           string      `xml:"key,attr,omitempty"`
@@ -52,6 +54,7 @@ type LocalName struct {
 
 type Statement struct {
 	XMLName xml.Name `xml:"statement"`
+	Name    string   `xml:"name,attr"`
 	Block   *Block   `xml:"block"`
 }
 

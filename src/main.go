@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Falcon/ast"
+	"Falcon/ast/blockly"
 	"encoding/xml"
 	"os"
 )
@@ -30,11 +30,11 @@ func main() {
 
 	println("\n=== Blockly XML ===\n")
 
-	blocks := make([]ast.Block, len(expressions))
+	blocks := make([]blockly.Block, len(expressions))
 	for i, expression := range expressions {
 		blocks[i] = expression.Blockly()
 	}
-	xmlBlock := ast.XmlRoot{
+	xmlBlock := blockly.XmlRoot{
 		Blocks: blocks,
 		XMLNS:  "https://developers.google.com/blockly/xml",
 	}

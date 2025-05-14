@@ -1,6 +1,9 @@
-package ast
+package common
 
-import "Falcon/types"
+import (
+	"Falcon/ast/blockly"
+	"Falcon/types"
+)
 
 type NameExpr struct {
 	Where  types.Token
@@ -15,6 +18,6 @@ func (ne *NameExpr) String() string {
 	return *ne.Name
 }
 
-func (ne *NameExpr) Blockly() Block {
+func (ne *NameExpr) Blockly() blockly.Block {
 	panic("unimplemented")
 }

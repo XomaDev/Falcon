@@ -1,6 +1,8 @@
-package ast
+package common
 
 import (
+	"Falcon/ast/blockly"
+	"Falcon/ast/text"
 	"Falcon/sugar"
 	"Falcon/types"
 	"strconv"
@@ -9,14 +11,14 @@ import (
 type FuncCall struct {
 	Where types.Token
 	Name  *string
-	Args  []Expr
+	Args  []blockly.Expr
 }
 
 func (f *FuncCall) String() string {
-	return sugar.Format("%(%)", *f.Name, JoinExprs(", ", f.Args))
+	return sugar.Format("%(%)", *f.Name, blockly.JoinExprs(", ", f.Args))
 }
 
-func (f *FuncCall) Blockly() Block {
+func (f *FuncCall) Blockly() blockly.Block {
 	switch *f.Name {
 	case "bin", "octal", "hexa":
 		return f.mathRadix()
@@ -43,23 +45,23 @@ func (f *FuncCall) Blockly() Block {
 	}
 }
 
-func (f *FuncCall) formatDecimal() Block {
+func (f *FuncCall) formatDecimal() blockly.Block {
 	f.assertArgLen(2)
-	return Block{
+	return blockly.Block{
 		Type:   "math_format_as_decimal",
-		Values: MakeValues(f.Args, "NUM", "PLACES"),
+		Values: blockly.MakeValues(f.Args, "NUM", "PLACES"),
 	}
 }
 
-func (f *FuncCall) atan2() Block {
+func (f *FuncCall) atan2() blockly.Block {
 	f.assertArgLen(2)
-	return Block{
+	return blockly.Block{
 		Type:   "math_atan2",
-		Values: MakeValues(f.Args, "Y", "X"),
+		Values: blockly.MakeValues(f.Args, "Y", "X"),
 	}
 }
 
-func (f *FuncCall) mathDivide() Block {
+func (f *FuncCall) mathDivide() blockly.Block {
 	f.assertArgLen(2)
 	var fieldOp string
 	switch *f.Name {
@@ -70,22 +72,22 @@ func (f *FuncCall) mathDivide() Block {
 	case "quot":
 		fieldOp = "QUOTIENT"
 	}
-	return Block{
+	return blockly.Block{
 		Type:   "math_divide",
-		Fields: []Field{{Name: "OP", Value: fieldOp}},
-		Values: MakeValues(f.Args, "DIVIDEND", "DIVISOR"),
+		Fields: []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Values: blockly.MakeValues(f.Args, "DIVIDEND", "DIVISOR"),
 	}
 }
 
-func (f *FuncCall) modeOf() Block {
+func (f *FuncCall) modeOf() blockly.Block {
 	f.assertArgLen(1)
-	return Block{
+	return blockly.Block{
 		Type:   "math_mode_of_list",
-		Values: MakeValues(f.Args, "LIST"),
+		Values: blockly.MakeValues(f.Args, "LIST"),
 	}
 }
 
-func (f *FuncCall) mathOnList() Block {
+func (f *FuncCall) mathOnList() blockly.Block {
 	f.assertArgLen(1)
 	var fieldOp string
 	switch *f.Name {
@@ -102,14 +104,14 @@ func (f *FuncCall) mathOnList() Block {
 	case "stdErrOf":
 		fieldOp = "SE"
 	}
-	return Block{
+	return blockly.Block{
 		Type:   "math_on_list2",
-		Fields: []Field{{Name: "OP", Value: fieldOp}},
-		Values: MakeValues(f.Args, "LIST"),
+		Fields: []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Values: blockly.MakeValues(f.Args, "LIST"),
 	}
 }
 
-func (f *FuncCall) minOrMax() Block {
+func (f *FuncCall) minOrMax() blockly.Block {
 	argSize := len(f.Args)
 	if argSize == 0 {
 		f.Where.Error("No arguments provided for %()", *f.Name)
@@ -121,36 +123,36 @@ func (f *FuncCall) minOrMax() Block {
 	case "max":
 		fieldOp = "MAX"
 	}
-	return Block{
+	return blockly.Block{
 		Type:     "math_on_list",
-		Fields:   []Field{{Name: "OP", Value: fieldOp}},
-		Mutation: &Mutation{ItemCount: argSize},
-		Values:   ToValues("NUM", f.Args),
+		Fields:   []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Mutation: &blockly.Mutation{ItemCount: argSize},
+		Values:   blockly.ToValues("NUM", f.Args),
 	}
 }
 
-func (f *FuncCall) setRandSeed() Block {
+func (f *FuncCall) setRandSeed() blockly.Block {
 	f.assertArgLen(1)
-	return Block{
+	return blockly.Block{
 		Type:   "math_random_set_seed",
-		Values: MakeValues(f.Args, "NUM"),
+		Values: blockly.MakeValues(f.Args, "NUM"),
 	}
 }
 
-func (f *FuncCall) randFloat() Block {
+func (f *FuncCall) randFloat() blockly.Block {
 	f.assertArgLen(0)
-	return Block{Type: "math_random_float"}
+	return blockly.Block{Type: "math_random_float"}
 }
 
-func (f *FuncCall) randInt() Block {
+func (f *FuncCall) randInt() blockly.Block {
 	f.assertArgLen(2)
-	return Block{
+	return blockly.Block{
 		Type:   "math_random_int",
-		Values: MakeValues(f.Args, "FROM", "TO"),
+		Values: blockly.MakeValues(f.Args, "FROM", "TO"),
 	}
 }
 
-func (f *FuncCall) mathRadix() Block {
+func (f *FuncCall) mathRadix() blockly.Block {
 	f.assertArgLen(1)
 	var fieldOp string
 	switch *f.Name {
@@ -161,13 +163,13 @@ func (f *FuncCall) mathRadix() Block {
 	case "hexa":
 		fieldOp = "HEX"
 	}
-	textExpr, ok := f.Args[0].(*TextExpr)
+	textExpr, ok := f.Args[0].(*text.TextExpr)
 	if !ok {
 		f.Where.Error("Expected a numeric string argument for %v()", *f.Name)
 	}
-	return Block{
+	return blockly.Block{
 		Type: "math_number_radix",
-		Fields: []Field{
+		Fields: []blockly.Field{
 			{Name: "OP", Value: fieldOp},
 			{Name: "NUM", Value: *textExpr.Content},
 		},

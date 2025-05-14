@@ -32,6 +32,10 @@ const (
 	Text
 	Bool
 	Alpha
+
+	If
+	Elif
+	Else
 )
 
 type Token struct {

@@ -1,7 +1,13 @@
 package main
 
 import (
-	"Falcon/ast"
+	"Falcon/ast/blockly"
+	"Falcon/ast/common"
+	"Falcon/ast/control"
+	"Falcon/ast/list"
+	"Falcon/ast/logic"
+	"Falcon/ast/math"
+	"Falcon/ast/text"
 	"Falcon/sugar"
 	"Falcon/types"
 )
@@ -20,23 +26,58 @@ func NewParser(tokens []types.Token) *Parser {
 	}
 }
 
-func (p *Parser) ParseAll() []ast.Expr {
-	var expressions []ast.Expr
+func (p *Parser) ParseAll() []blockly.Expr {
+	var expressions []blockly.Expr
 	for p.notEOF() {
 		expressions = append(expressions, p.parse())
 	}
 	return expressions
 }
 
-func (p *Parser) parse() ast.Expr {
+func (p *Parser) parse() blockly.Expr {
 	token := p.peek()
 	switch token.Type {
+	case types.If:
+		return p.ifExpr()
 	default:
 		return p.expression()
 	}
 }
 
-func (p *Parser) expression() ast.Expr {
+func (p *Parser) ifExpr() blockly.Expr {
+	p.skip()
+	var conditions []blockly.Expr
+	var bodies [][]blockly.Expr
+
+	conditions = append(conditions, p.parse())
+	bodies = append(bodies, p.body())
+
+	for p.notEOF() && p.consume(types.Elif) {
+		conditions = append(conditions, p.parse())
+		bodies = append(bodies, p.body())
+	}
+	var elseBody []blockly.Expr
+	if p.notEOF() && p.consume(types.Else) {
+		elseBody = p.body()
+	}
+	return &control.IfExpr{
+		Conditions: conditions,
+		Bodies:     bodies,
+		ElseBody:   elseBody,
+	}
+}
+
+func (p *Parser) body() []blockly.Expr {
+	p.expect(types.OpenCurly)
+	var expressions []blockly.Expr
+	for p.notEOF() && !p.isNext(types.CloseCurly) {
+		expressions = append(expressions, p.parse())
+	}
+	p.expect(types.CloseCurly)
+	return expressions
+}
+
+func (p *Parser) expression() blockly.Expr {
 	left := p.element()
 	for p.notEOF() {
 		op := p.peek()
@@ -45,26 +86,26 @@ func (p *Parser) expression() ast.Expr {
 		}
 		p.skip()
 		newOperand := p.element()
-		if mExpr, ok := left.(*ast.MathExpr); ok && mExpr.Operator.Type == op.Type {
+		if mExpr, ok := left.(*math.MathExpr); ok && mExpr.Operator.Type == op.Type {
 			// New MathExpr if last operator mismatch
 			mExpr.Operands = append(mExpr.Operands, newOperand)
 		} else {
-			left = &ast.MathExpr{Operands: []ast.Expr{left, newOperand}, Operator: op}
+			left = &math.MathExpr{Operands: []blockly.Expr{left, newOperand}, Operator: op}
 		}
 	}
 	return left
 }
 
-func (p *Parser) element() ast.Expr {
+func (p *Parser) element() blockly.Expr {
 	left := p.term()
 	for p.notEOF() {
 		peek := p.peek()
 		switch {
 		case peek.Type == types.RightArrow:
-			left = &ast.PropExpr{Where: p.next(), On: left, Name: p.readName()}
+			left = &math.PropExpr{Where: p.next(), On: left, Name: p.readName()}
 			continue
 		case peek.Type == types.Question:
-			left = &ast.QuestionExp{Where: p.next(), On: left, Question: p.readName()}
+			left = &common.QuestionExp{Where: p.next(), On: left, Question: p.readName()}
 			continue
 		}
 		break
@@ -72,7 +113,7 @@ func (p *Parser) element() ast.Expr {
 	return left
 }
 
-func (p *Parser) term() ast.Expr {
+func (p *Parser) term() blockly.Expr {
 	token := p.next()
 
 	switch token.Type {
@@ -84,22 +125,22 @@ func (p *Parser) term() ast.Expr {
 	if p.isEOF() {
 		return value
 	}
-	neExpr, ok := value.(*ast.NameExpr)
+	neExpr, ok := value.(*common.NameExpr)
 	if !ok {
 		return value
 	}
 	peek := p.peek()
 	switch peek.Type {
 	case types.OpenCurve:
-		return &ast.FuncCall{Where: neExpr.Where, Name: neExpr.Name, Args: p.arguments()}
+		return &common.FuncCall{Where: neExpr.Where, Name: neExpr.Name, Args: p.arguments()}
 	default:
 		peek.Error("Unexpected token!")
 	}
 	panic("") // unreachable
 }
 
-func (p *Parser) list() ast.Expr {
-	var elements []ast.Expr
+func (p *Parser) list() blockly.Expr {
+	var elements []blockly.Expr
 	for p.notEOF() {
 		elements = append(elements, p.parse())
 		if !p.consume(types.Comma) {
@@ -107,12 +148,12 @@ func (p *Parser) list() ast.Expr {
 		}
 	}
 	p.expect(types.CloseSquare)
-	return &ast.ListExpr{Elements: elements}
+	return &list.ListExpr{Elements: elements}
 }
 
-func (p *Parser) arguments() []ast.Expr {
+func (p *Parser) arguments() []blockly.Expr {
 	p.expect(types.OpenCurve)
-	var arguments []ast.Expr
+	var arguments []blockly.Expr
 	if p.consume(types.CloseCurve) {
 		return arguments
 	}
@@ -126,16 +167,16 @@ func (p *Parser) arguments() []ast.Expr {
 	return arguments
 }
 
-func (p *Parser) value(token types.Token) ast.Expr {
+func (p *Parser) value(token types.Token) blockly.Expr {
 	switch token.Type {
 	case types.Number:
-		return &ast.NumExpr{Content: token.Content}
+		return &math.NumExpr{Content: token.Content}
 	case types.Bool:
-		return &ast.BoolExpr{Value: token.Content}
+		return &logic.BoolExpr{Value: token.Content}
 	case types.Text:
-		return &ast.TextExpr{Content: token.Content}
+		return &text.TextExpr{Content: token.Content}
 	case types.Alpha:
-		return &ast.NameExpr{Where: token, Name: token.Content, Global: false}
+		return &common.NameExpr{Where: token, Name: token.Content, Global: false}
 	}
 	panic(sugar.Format("Unknown value type '%'", token.Type.String()))
 }

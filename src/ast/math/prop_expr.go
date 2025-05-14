@@ -1,13 +1,14 @@
-package ast
+package math
 
 import (
+	"Falcon/ast/blockly"
 	"Falcon/sugar"
 	"Falcon/types"
 )
 
 type PropExpr struct {
 	Where types.Token
-	On    Expr
+	On    blockly.Expr
 	Name  *string
 }
 
@@ -15,7 +16,7 @@ func (p *PropExpr) String() string {
 	return sugar.Format("%->%v", p.On.String(), *p.Name)
 }
 
-func (p *PropExpr) Blockly() Block {
+func (p *PropExpr) Blockly() blockly.Block {
 	var fieldOp string
 	switch *p.Name {
 	case "root":
@@ -74,9 +75,9 @@ func (p *PropExpr) Blockly() Block {
 		blockType = "math_single"
 	}
 
-	return Block{
+	return blockly.Block{
 		Type:   blockType,
-		Fields: []Field{{Name: "OP", Value: fieldOp}},
-		Values: []Value{{Name: "NUM", Block: p.On.Blockly()}},
+		Fields: []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Values: []blockly.Value{{Name: "NUM", Block: p.On.Blockly()}},
 	}
 }

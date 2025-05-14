@@ -1,4 +1,4 @@
-package ast
+package blockly
 
 import (
 	"strconv"
@@ -30,6 +30,27 @@ func MakeValues(operands []Expr, names ...string) []Value {
 		values[i] = Value{Name: names[i], Block: operand.Blockly()}
 	}
 	return values
+}
+
+func CreateStatement(name string, body []Expr) Statement {
+	headBlock := body[0].Blockly()
+	bodyLen := len(body)
+	currI := 1
+
+	for currI < bodyLen {
+		aBlock := body[currI].Blockly()
+		headBlock.Next = &Next{Block: &aBlock}
+		currI++
+	}
+	return Statement{Name: name, Block: &headBlock}
+}
+
+func ToStatements(namePrefix string, bodies [][]Expr) []Statement {
+	statements := make([]Statement, len(bodies))
+	for i, aBody := range bodies {
+		statements[i] = CreateStatement(namePrefix+strconv.Itoa(i), aBody)
+	}
+	return statements
 }
 
 func JoinExprs(separator string, expressions []Expr) string {

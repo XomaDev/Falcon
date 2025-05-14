@@ -1,13 +1,14 @@
-package ast
+package common
 
 import (
+	"Falcon/ast/blockly"
 	"Falcon/sugar"
 	"Falcon/types"
 )
 
 type QuestionExp struct {
 	Where    types.Token
-	On       Expr
+	On       blockly.Expr
 	Question *string
 }
 
@@ -15,7 +16,7 @@ func (q *QuestionExp) String() string {
 	return sugar.Format("% ? %", q.On.String(), *q.Question)
 }
 
-func (q *QuestionExp) Blockly() Block {
+func (q *QuestionExp) Blockly() blockly.Block {
 	var fieldOp string
 	switch *q.Question {
 	case "number":
@@ -29,9 +30,9 @@ func (q *QuestionExp) Blockly() Block {
 	default:
 		q.Where.Error("Unknown question ? %", *q.Question)
 	}
-	return Block{
+	return blockly.Block{
 		Type:   "math_is_a_number",
-		Fields: []Field{{Name: "OP", Value: fieldOp}},
-		Values: []Value{{Name: "NUM", Block: q.On.Blockly()}},
+		Fields: []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Values: []blockly.Value{{Name: "NUM", Block: q.On.Blockly()}},
 	}
 }

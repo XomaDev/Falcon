@@ -42,6 +42,9 @@ var simpleCharTypes = map[string]types.Type{
 var keywordTypes = map[string]types.Type{
 	"true":  types.Bool,
 	"false": types.Bool,
+	"if":    types.If,
+	"elif":  types.Elif,
+	"else":  types.Else,
 }
 
 func (l *Lexer) Lex() []types.Token {

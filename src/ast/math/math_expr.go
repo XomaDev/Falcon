@@ -1,19 +1,20 @@
-package ast
+package math
 
 import (
+	"Falcon/ast/blockly"
 	"Falcon/types"
 )
 
 type MathExpr struct {
-	Operands []Expr
+	Operands []blockly.Expr
 	Operator types.Token
 }
 
 func (b *MathExpr) String() string {
-	return JoinExprs(*b.Operator.Content, b.Operands)
+	return blockly.JoinExprs(*b.Operator.Content, b.Operands)
 }
 
-func (b *MathExpr) Blockly() Block {
+func (b *MathExpr) Blockly() blockly.Block {
 	operator := *b.Operator.Content
 	var blockType string
 
@@ -33,7 +34,7 @@ func (b *MathExpr) Blockly() Block {
 	default:
 		b.Operator.Error("Unknown binary operator (%v)", *b.Operator.Content)
 	}
-	var fields []Field
+	var fields []blockly.Field
 	if blockType == "math_bitwise" {
 		var fieldOp string
 		switch operator {
@@ -44,12 +45,12 @@ func (b *MathExpr) Blockly() Block {
 		case "~":
 			fieldOp = "BITXOR"
 		}
-		fields = append(fields, Field{Name: "OP", Value: fieldOp})
+		fields = append(fields, blockly.Field{Name: "OP", Value: fieldOp})
 	}
-	return Block{
+	return blockly.Block{
 		Type:     blockType,
-		Values:   ToValues("NUM", b.Operands),
-		Mutation: &Mutation{ItemCount: len(b.Operands)},
+		Values:   blockly.ToValues("NUM", b.Operands),
+		Mutation: &blockly.Mutation{ItemCount: len(b.Operands)},
 		Fields:   fields,
 	}
 }
