@@ -2,6 +2,7 @@ package main
 
 import (
 	"Falcon/ast/blockly"
+	"Falcon/lex"
 	"encoding/xml"
 	"os"
 )
@@ -16,7 +17,7 @@ func main() {
 	}
 	sourceCode := string(codeBytes)
 
-	tokens := NewLexer(sourceCode).Lex()
+	tokens := lex.NewLexer(sourceCode).Lex()
 	for _, token := range tokens {
 		println(token.String())
 	}
