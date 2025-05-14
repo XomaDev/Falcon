@@ -2,19 +2,19 @@ package math
 
 import (
 	"Falcon/ast/blockly"
-	"Falcon/types"
+	"Falcon/label"
 )
 
-type MathExpr struct {
+type Expr struct {
 	Operands []blockly.Expr
-	Operator types.Token
+	Operator label.Token
 }
 
-func (b *MathExpr) String() string {
+func (b *Expr) String() string {
 	return blockly.JoinExprs(*b.Operator.Content, b.Operands)
 }
 
-func (b *MathExpr) Blockly() blockly.Block {
+func (b *Expr) Blockly() blockly.Block {
 	operator := *b.Operator.Content
 	var blockType string
 

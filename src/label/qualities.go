@@ -1,26 +1,26 @@
-package types
+package label
 
 import (
 	"Falcon/sugar"
 	"strconv"
 )
 
-//go:generate stringer -type=Type
-type Type int
+//go:generate stringer -type=Quality
+type Quality int
 
 const (
-	Operator Type = iota
-
-	OpenCurve
+	// Hard Qualities
+	OpenCurve Quality = iota
 	CloseCurve
 	OpenSquare
 	CloseSquare
 	OpenCurly
 	CloseCurly
-	Equals
+	Assignment
 	Dot
 	Comma
 	Question
+	Not
 	Hyphen
 	LesserThan
 	LesserThanEquals
@@ -36,19 +36,25 @@ const (
 	If
 	Elif
 	Else
+
+	// Soft Qualities
+	Operator
+	Unary
+	Equality
 )
 
 type Token struct {
-	Type    Type
-	Content *string
-	Line    int
+	Quality      Quality
+	AllQualities []Quality
+	Content      *string
+	Line         int
 }
 
 func (t Token) String() string {
 	if t.Content == nil {
-		return t.Type.String()
+		return t.Quality.String()
 	}
-	return t.Type.String() + " " + *t.Content
+	return t.Quality.String() + " " + *t.Content
 }
 
 func (t Token) Error(message string, args ...string) {

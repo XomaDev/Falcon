@@ -3,13 +3,13 @@ package common
 import (
 	"Falcon/ast/blockly"
 	"Falcon/ast/text"
+	"Falcon/label"
 	"Falcon/sugar"
-	"Falcon/types"
 	"strconv"
 )
 
 type FuncCall struct {
-	Where types.Token
+	Where label.Token
 	Name  *string
 	Args  []blockly.Expr
 }
@@ -163,7 +163,7 @@ func (f *FuncCall) mathRadix() blockly.Block {
 	case "hexa":
 		fieldOp = "HEX"
 	}
-	textExpr, ok := f.Args[0].(*text.TextExpr)
+	textExpr, ok := f.Args[0].(*text.Expr)
 	if !ok {
 		f.Where.Error("Expected a numeric string argument for %v()", *f.Name)
 	}

@@ -1,8 +1,8 @@
 package main
 
 import (
+	"Falcon/label"
 	"Falcon/sugar"
-	"Falcon/types"
 	"strconv"
 	"strings"
 )
@@ -23,32 +23,35 @@ func NewLexer(source string) *Lexer {
 	}
 }
 
-var simpleCharTypes = map[string]types.Type{
-	"+": types.Operator,
+var symbols = map[string][]label.Quality{
+	"+": {label.Operator},
 	// '-' parsed manually
-	"*": types.Operator, "/": types.Operator, "^": types.Operator,
-	"&": types.Operator, "|": types.Operator,
-	"~": types.Operator,
+	"*": {label.Operator}, "/": {label.Operator}, "^": {label.Operator},
+	"&": {label.Operator}, "|": {label.Operator},
+	"~": {label.Operator},
 
-	"(": types.OpenCurve, ")": types.CloseCurve,
-	"[": types.OpenSquare, "]": types.CloseSquare,
-	"{": types.OpenCurly, "}": types.CloseCurly,
-	"=": types.Equals,
-	".": types.Dot,
-	",": types.Comma,
-	"?": types.Question,
+	"(": {label.OpenCurve}, ")": {label.CloseCurve},
+	"[": {label.OpenSquare}, "]": {label.CloseSquare},
+	"{": {label.OpenCurly}, "}": {label.CloseCurly},
+	".": {label.Dot},
+	",": {label.Comma},
+	"?": {label.Question},
+	"!": {label.Not},
+
+	"==": {label.Equality},
+	"!=": {label.Equality},
 }
 
-var keywordTypes = map[string]types.Type{
-	"true":  types.Bool,
-	"false": types.Bool,
-	"if":    types.If,
-	"elif":  types.Elif,
-	"else":  types.Else,
+var keywords = map[string]label.Quality{
+	"true":  label.Bool,
+	"false": label.Bool,
+	"if":    label.If,
+	"elif":  label.Elif,
+	"else":  label.Else,
 }
 
-func (l *Lexer) Lex() []types.Token {
-	var tokens []types.Token
+func (l *Lexer) Lex() []label.Token {
+	var tokens []label.Token
 	for {
 		l.trim()
 		if l.isEOF() {
@@ -75,13 +78,13 @@ func (l *Lexer) trim() {
 	}
 }
 
-func (l *Lexer) parse() types.Token {
+func (l *Lexer) parse() label.Token {
 	char := l.next()
 	s := string(char)
-	resType, ok := simpleCharTypes[s]
+	qualities, ok := symbols[s]
 
 	if ok {
-		return l.makeToken(resType, s)
+		return l.makeToken(qualities, s)
 	}
 
 	switch char {
@@ -89,19 +92,19 @@ func (l *Lexer) parse() types.Token {
 		return l.parseText()
 	case '<':
 		if l.consume('=') {
-			return l.makeToken(types.LesserThanEquals, "<=")
+			return l.simpleToken(label.LesserThanEquals, "<=")
 		}
-		return l.makeToken(types.LesserThan, "<")
+		return l.simpleToken(label.LesserThan, "<")
 	case '>':
 		if l.consume('=') {
-			return l.makeToken(types.GreaterThanEquals, ">=")
+			return l.simpleToken(label.GreaterThanEquals, ">=")
 		}
-		return l.makeToken(types.GreaterThan, ">")
+		return l.simpleToken(label.GreaterThan, ">")
 	case '-':
 		if l.consume('>') {
-			return l.makeToken(types.RightArrow, "->")
+			return l.simpleToken(label.RightArrow, "->")
 		}
-		return l.makeToken(types.Operator, "-")
+		return l.simpleToken(label.Operator, "-")
 	default:
 		l.currIndex--
 		if l.isDigit() {
@@ -111,34 +114,34 @@ func (l *Lexer) parse() types.Token {
 		}
 	}
 	l.lexError("Unexpected character '%'", s)
-	return types.Token{}
+	return label.Token{}
 }
 
-func (l *Lexer) parseText() types.Token {
+func (l *Lexer) parseText() label.Token {
 	startIndex := l.currIndex
 	for l.notEOF() && l.peek() != '"' {
 		l.currIndex++
 	}
 	l.eat('"')
-	return l.makeToken(types.Text, l.source[startIndex:l.currIndex-1])
+	return l.simpleToken(label.Text, l.source[startIndex:l.currIndex-1])
 }
 
-func (l *Lexer) parseAlpha() types.Token {
+func (l *Lexer) parseAlpha() label.Token {
 	startIndex := l.currIndex
 	l.currIndex++
 	for l.notEOF() && l.isAlphaNumeric() {
 		l.currIndex++
 	}
 	content := l.source[startIndex:l.currIndex]
-	resType, ok := keywordTypes[content]
+	resType, ok := keywords[content]
 	if ok {
 		// it's a keyword!
-		return l.makeToken(resType, content)
+		return l.simpleToken(resType, content)
 	}
-	return l.makeToken(types.Alpha, content)
+	return l.simpleToken(label.Alpha, content)
 }
 
-func (l *Lexer) parseNumeric() types.Token {
+func (l *Lexer) parseNumeric() label.Token {
 	var numb strings.Builder
 	l.writeNumeric(&numb)
 
@@ -147,7 +150,7 @@ func (l *Lexer) parseNumeric() types.Token {
 		numb.WriteByte('.')
 		l.writeNumeric(&numb)
 	}
-	return l.makeToken(types.Number, numb.String())
+	return l.simpleToken(label.Number, numb.String())
 }
 
 func (l *Lexer) writeNumeric(builder *strings.Builder) {
@@ -210,6 +213,10 @@ func (l *Lexer) notEOF() bool {
 	return l.currIndex < l.sourceLen
 }
 
-func (l *Lexer) makeToken(t types.Type, content string) types.Token {
-	return types.Token{Type: t, Line: l.currLine, Content: &content}
+func (l *Lexer) simpleToken(quality label.Quality, content string) label.Token {
+	return label.Token{Quality: quality, Content: &content}
+}
+
+func (l *Lexer) makeToken(q []label.Quality, content string) label.Token {
+	return label.Token{Quality: q[0], AllQualities: q[1:], Line: l.currLine, Content: &content}
 }

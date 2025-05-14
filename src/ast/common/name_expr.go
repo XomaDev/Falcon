@@ -2,11 +2,11 @@ package common
 
 import (
 	"Falcon/ast/blockly"
-	"Falcon/types"
+	"Falcon/label"
 )
 
 type NameExpr struct {
-	Where  types.Token
+	Where  label.Token
 	Name   *string
 	Global bool
 }

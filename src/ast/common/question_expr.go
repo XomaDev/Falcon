@@ -2,12 +2,12 @@ package common
 
 import (
 	"Falcon/ast/blockly"
+	"Falcon/label"
 	"Falcon/sugar"
-	"Falcon/types"
 )
 
 type QuestionExp struct {
-	Where    types.Token
+	Where    label.Token
 	On       blockly.Expr
 	Question *string
 }

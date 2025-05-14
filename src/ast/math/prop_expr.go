@@ -2,12 +2,12 @@ package math
 
 import (
 	"Falcon/ast/blockly"
+	"Falcon/label"
 	"Falcon/sugar"
-	"Falcon/types"
 )
 
 type PropExpr struct {
-	Where types.Token
+	Where label.Token
 	On    blockly.Expr
 	Name  *string
 }

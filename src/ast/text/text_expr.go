@@ -4,15 +4,15 @@ import (
 	"Falcon/ast/blockly"
 )
 
-type TextExpr struct {
+type Expr struct {
 	Content *string
 }
 
-func (t *TextExpr) String() string {
+func (t *Expr) String() string {
 	return "\"" + *t.Content + "\""
 }
 
-func (t *TextExpr) Blockly() blockly.Block {
+func (t *Expr) Blockly() blockly.Block {
 	return blockly.Block{
 		Type:   "text",
 		Fields: blockly.ToFields(map[string]string{"TEXT": *t.Content}),
