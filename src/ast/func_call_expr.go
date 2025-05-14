@@ -18,24 +18,44 @@ func (f *FuncCall) String() string {
 
 func (f *FuncCall) Blockly() Block {
 	switch *f.Name {
-	case "Bin", "Octal", "Hexa":
+	case "bin", "octal", "hexa":
 		return f.mathRadix()
-	case "RandInt":
+	case "randInt":
 		return f.randInt()
-	case "RandFloat":
+	case "randFloat":
 		return f.randFloat()
-	case "SetRandSeed":
+	case "setRandSeed":
 		return f.setRandSeed()
-	case "Min", "Max":
+	case "min", "max":
 		return f.minOrMax()
-	case "AvgOf", "MaxOf", "MinOf", "GeoMeanOf", "StdDevOf", "StdErrOf":
+	case "avgOf", "maxOf", "minOf", "geoMeanOf", "stdDevOf", "stdErrOf":
 		return f.mathOnList()
-	case "ModeOf":
+	case "nodeOf":
 		return f.modeOf()
-	case "Mod", "Rem", "Quot":
+	case "mod", "rem", "quot":
 		return f.mathDivide()
+	case "aTan2":
+		return f.atan2()
+	case "formatDecimal":
+		return f.formatDecimal()
 	default:
 		panic("Unimplemented")
+	}
+}
+
+func (f *FuncCall) formatDecimal() Block {
+	f.assertArgLen(2)
+	return Block{
+		Type:   "math_format_as_decimal",
+		Values: MakeValues(f.Args, "NUM", "PLACES"),
+	}
+}
+
+func (f *FuncCall) atan2() Block {
+	f.assertArgLen(2)
+	return Block{
+		Type:   "math_atan2",
+		Values: MakeValues(f.Args, "Y", "X"),
 	}
 }
 
@@ -43,12 +63,12 @@ func (f *FuncCall) mathDivide() Block {
 	f.assertArgLen(2)
 	var fieldOp string
 	switch *f.Name {
-	case "Mod":
+	case "mod":
 		fieldOp = "MODULO"
-	case "Rem":
+	case "rem":
 		fieldOp = "REMAINDER"
-	case "QUOTIENT":
-		fieldOp = "Quot"
+	case "quot":
+		fieldOp = "QUOTIENT"
 	}
 	return Block{
 		Type:   "math_divide",
@@ -69,17 +89,17 @@ func (f *FuncCall) mathOnList() Block {
 	f.assertArgLen(1)
 	var fieldOp string
 	switch *f.Name {
-	case "AvgOf":
+	case "avgOf":
 		fieldOp = "AVG"
-	case "MaxOf":
+	case "maxOf":
 		fieldOp = "MAX"
-	case "MinOf":
+	case "minOf":
 		fieldOp = "MIN"
-	case "GeoMeanOf":
+	case "geoMeanOf":
 		fieldOp = "GM"
-	case "StdDevOf":
+	case "stdDevOf":
 		fieldOp = "SD"
-	case "StdErrOf":
+	case "stdErrOf":
 		fieldOp = "SE"
 	}
 	return Block{
@@ -96,9 +116,9 @@ func (f *FuncCall) minOrMax() Block {
 	}
 	var fieldOp string
 	switch *f.Name {
-	case "Min":
+	case "min":
 		fieldOp = "MIN"
-	case "Max":
+	case "max":
 		fieldOp = "MAX"
 	}
 	return Block{
@@ -134,11 +154,11 @@ func (f *FuncCall) mathRadix() Block {
 	f.assertArgLen(1)
 	var fieldOp string
 	switch *f.Name {
-	case "Bin":
+	case "bin":
 		fieldOp = "BIN"
-	case "Octal":
+	case "octal":
 		fieldOp = "OCT"
-	case "Hexa":
+	case "hexa":
 		fieldOp = "HEX"
 	}
 	textExpr, ok := f.Args[0].(*TextExpr)

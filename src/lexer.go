@@ -139,6 +139,7 @@ func (l *Lexer) parseNumeric() types.Token {
 	l.writeNumeric(&numb)
 
 	if l.notEOF() && l.peek() == '.' {
+		l.next()
 		numb.WriteByte('.')
 		l.writeNumeric(&numb)
 	}

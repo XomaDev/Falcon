@@ -46,6 +46,10 @@ func (p *PropExpr) Blockly() Block {
 		fieldOp = "ACOS"
 	case "atan":
 		fieldOp = "ATAN"
+	case "degrees":
+		fieldOp = "RADIANS_TO_DEGREES"
+	case "radians":
+		fieldOp = "DEGREES_TO_RADIANS"
 	default:
 		p.Where.Error("Unknown property access ->%", *p.Name)
 	}
@@ -53,6 +57,8 @@ func (p *PropExpr) Blockly() Block {
 	if fieldOp == "SIN" || fieldOp == "COS" || fieldOp == "TAN" ||
 		fieldOp == "ASIN" || fieldOp == "ACOS" || fieldOp == "ATAN" {
 		blockType = "math_trig"
+	} else if fieldOp == "RADIANS_TO_DEGREES" || fieldOp == "DEGREES_TO_RADIANS" {
+		blockType = "math_convert_angles"
 	} else {
 		blockType = "math_single"
 	}
