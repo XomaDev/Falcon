@@ -44,8 +44,7 @@ func (p *Parser) expression() ast.Expr {
 			break
 		}
 		p.skip()
-		newOperand := p.parse()
-
+		newOperand := p.element()
 		if mExpr, ok := left.(*ast.MathExpr); ok && mExpr.Operator.Type == op.Type {
 			// New MathExpr if last operator mismatch
 			mExpr.Operands = append(mExpr.Operands, newOperand)
@@ -68,6 +67,8 @@ func (p *Parser) term() ast.Expr {
 		return &ast.NumExpr{Content: token.Content}
 	case types.Bool:
 		return &ast.BoolExpr{Value: token.Content}
+	case types.Text:
+		return &ast.TextExpr{Content: token.Content}
 	}
 	panic(sugar.Format("Unknown value type '%'", token.Type.String()))
 }

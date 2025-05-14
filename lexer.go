@@ -24,7 +24,11 @@ func NewLexer(source string) *Lexer {
 }
 
 var simpleCharTypes = map[uint8]types.Type{
-	'+': types.Operator, '-': types.Operator, '*': types.Operator, '/': types.Operator,
+	'+': types.Operator, '-': types.Operator,
+	'*': types.Operator, '/': types.Operator, '^': types.Operator,
+	'&': types.Operator, '|': types.Operator,
+	'~': types.Operator,
+
 	'(': types.OpenCurve, ')': types.CloseCurve,
 	'[': types.OpenSquare, ']': types.CloseSquare,
 	'{': types.OpenCurly, '}': types.CloseCurly,

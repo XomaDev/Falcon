@@ -7,7 +7,7 @@ import (
 
 func main() {
 	println("Hello from Falcon!")
-	sourceCode := `123 + 456`
+	sourceCode := `123 | 456 | 789`
 
 	tokens := NewLexer(sourceCode).Lex()
 	for _, token := range tokens {
