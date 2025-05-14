@@ -57,6 +57,14 @@ func (p *Parser) expression() ast.Expr {
 
 func (p *Parser) element() ast.Expr {
 	left := p.term()
+	for p.notEOF() {
+		peek := p.peek()
+		if peek.Type != types.RightArrow {
+			break
+		}
+		p.skip()
+		left = &ast.PropExpr{Where: peek, On: left, Name: p.readName()}
+	}
 	return left
 }
 
@@ -126,6 +134,14 @@ func (p *Parser) value(token types.Token) ast.Expr {
 		return &ast.NameExpr{Where: token, Name: token.Content, Global: false}
 	}
 	panic(sugar.Format("Unknown value type '%'", token.Type.String()))
+}
+
+func (p *Parser) readName() *string {
+	next := p.next()
+	if next.Type != types.Alpha {
+		next.Error("Expected name but got %", next.Type.String())
+	}
+	return next.Content
 }
 
 func (p *Parser) consume(t types.Type) bool {

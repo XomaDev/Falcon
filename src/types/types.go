@@ -20,6 +20,12 @@ const (
 	Equals
 	Dot
 	Comma
+	Hyphen
+	LesserThan
+	LesserThanEquals
+	GreaterThan
+	GreaterThanEquals
+	RightArrow
 
 	Number
 	Text

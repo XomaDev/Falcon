@@ -23,18 +23,19 @@ func NewLexer(source string) *Lexer {
 	}
 }
 
-var simpleCharTypes = map[uint8]types.Type{
-	'+': types.Operator, '-': types.Operator,
-	'*': types.Operator, '/': types.Operator, '^': types.Operator,
-	'&': types.Operator, '|': types.Operator,
-	'~': types.Operator,
+var simpleCharTypes = map[string]types.Type{
+	"+": types.Operator,
+	// '-' parsed manually
+	"*": types.Operator, "/": types.Operator, "^": types.Operator,
+	"&": types.Operator, "|": types.Operator,
+	"~": types.Operator,
 
-	'(': types.OpenCurve, ')': types.CloseCurve,
-	'[': types.OpenSquare, ']': types.CloseSquare,
-	'{': types.OpenCurly, '}': types.CloseCurly,
-	'=': types.Equals,
-	'.': types.Dot,
-	',': types.Comma,
+	"(": types.OpenCurve, ")": types.CloseCurve,
+	"[": types.OpenSquare, "]": types.CloseSquare,
+	"{": types.OpenCurly, "}": types.CloseCurly,
+	"=": types.Equals,
+	".": types.Dot,
+	",": types.Comma,
 }
 
 var keywordTypes = map[string]types.Type{
@@ -73,7 +74,7 @@ func (l *Lexer) trim() {
 func (l *Lexer) parse() types.Token {
 	char := l.next()
 	s := string(char)
-	resType, ok := simpleCharTypes[char]
+	resType, ok := simpleCharTypes[s]
 
 	if ok {
 		return l.makeToken(resType, s)
@@ -82,6 +83,21 @@ func (l *Lexer) parse() types.Token {
 	switch char {
 	case '"':
 		return l.parseText()
+	case '<':
+		if l.consume('=') {
+			return l.makeToken(types.LesserThanEquals, "<=")
+		}
+		return l.makeToken(types.LesserThan, "<")
+	case '>':
+		if l.consume('=') {
+			return l.makeToken(types.GreaterThanEquals, ">=")
+		}
+		return l.makeToken(types.GreaterThan, ">")
+	case '-':
+		if l.consume('>') {
+			return l.makeToken(types.RightArrow, "->")
+		}
+		return l.makeToken(types.Operator, "-")
 	default:
 		l.currIndex--
 		if l.isDigit() {
