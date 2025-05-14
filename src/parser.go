@@ -87,7 +87,7 @@ func (p *Parser) arguments() []ast.Expr {
 	}
 	for p.notEOF() {
 		arguments = append(arguments, p.parse())
-		if !p.consume(types.Dot) {
+		if !p.consume(types.Comma) {
 			break
 		}
 	}

@@ -34,6 +34,7 @@ var simpleCharTypes = map[uint8]types.Type{
 	'{': types.OpenCurly, '}': types.CloseCurly,
 	'=': types.Equals,
 	'.': types.Dot,
+	',': types.Comma,
 }
 
 var keywordTypes = map[string]types.Type{
@@ -61,7 +62,7 @@ func (l *Lexer) trim() {
 			l.currIndex++
 			continue
 		case '\n':
-			l.currLine++
+			l.currIndex++
 			l.currLine++
 			continue
 		}

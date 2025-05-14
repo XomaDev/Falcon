@@ -19,6 +19,7 @@ const (
 	CloseCurly
 	Equals
 	Dot
+	Comma
 
 	Number
 	Text

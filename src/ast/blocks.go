@@ -13,8 +13,8 @@ type XmlRoot struct {
 type Block struct {
 	XMLName    xml.Name    `xml:"block"`
 	Type       string      `xml:"type,attr"`
-	Fields     []Field     `xml:"field"`
 	Mutation   *Mutation   `xml:"mutation,omitempty"`
+	Fields     []Field     `xml:"field"`
 	Values     []Value     `xml:"value"`
 	Statements []Statement `xml:"statement"`
 	Next       *Next       `xml:"next"`
