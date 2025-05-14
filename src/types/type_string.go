@@ -18,21 +18,22 @@ func _() {
 	_ = x[Equals-7]
 	_ = x[Dot-8]
 	_ = x[Comma-9]
-	_ = x[Hyphen-10]
-	_ = x[LesserThan-11]
-	_ = x[LesserThanEquals-12]
-	_ = x[GreaterThan-13]
-	_ = x[GreaterThanEquals-14]
-	_ = x[RightArrow-15]
-	_ = x[Number-16]
-	_ = x[Text-17]
-	_ = x[Bool-18]
-	_ = x[Alpha-19]
+	_ = x[Question-10]
+	_ = x[Hyphen-11]
+	_ = x[LesserThan-12]
+	_ = x[LesserThanEquals-13]
+	_ = x[GreaterThan-14]
+	_ = x[GreaterThanEquals-15]
+	_ = x[RightArrow-16]
+	_ = x[Number-17]
+	_ = x[Text-18]
+	_ = x[Bool-19]
+	_ = x[Alpha-20]
 }
 
-const _Type_name = "OperatorOpenCurveCloseCurveOpenSquareCloseSquareOpenCurlyCloseCurlyEqualsDotCommaHyphenLesserThanLesserThanEqualsGreaterThanGreaterThanEqualsRightArrowNumberTextBoolAlpha"
+const _Type_name = "OperatorOpenCurveCloseCurveOpenSquareCloseSquareOpenCurlyCloseCurlyEqualsDotCommaQuestionHyphenLesserThanLesserThanEqualsGreaterThanGreaterThanEqualsRightArrowNumberTextBoolAlpha"
 
-var _Type_index = [...]uint8{0, 8, 17, 27, 37, 48, 57, 67, 73, 76, 81, 87, 97, 113, 124, 141, 151, 157, 161, 165, 170}
+var _Type_index = [...]uint8{0, 8, 17, 27, 37, 48, 57, 67, 73, 76, 81, 89, 95, 105, 121, 132, 149, 159, 165, 169, 173, 178}
 
 func (i Type) String() string {
 	if i < 0 || i >= Type(len(_Type_index)-1) {

@@ -50,18 +50,30 @@ func (p *PropExpr) Blockly() Block {
 		fieldOp = "RADIANS_TO_DEGREES"
 	case "radians":
 		fieldOp = "DEGREES_TO_RADIANS"
+	case "hex":
+		fieldOp = "DEC_TO_HEX"
+	case "bin":
+		fieldOp = "DEC_TO_BIN"
+	case "fromHex":
+		fieldOp = "HEX_TO_DEC"
+	case "fromBin":
+		fieldOp = "BIN_TO_DEC"
 	default:
 		p.Where.Error("Unknown property access ->%", *p.Name)
 	}
 	var blockType string
-	if fieldOp == "SIN" || fieldOp == "COS" || fieldOp == "TAN" ||
-		fieldOp == "ASIN" || fieldOp == "ACOS" || fieldOp == "ATAN" {
+
+	switch fieldOp {
+	case "SIN", "COS", "TAN", "ASIN", "ACOS", "ATAN":
 		blockType = "math_trig"
-	} else if fieldOp == "RADIANS_TO_DEGREES" || fieldOp == "DEGREES_TO_RADIANS" {
+	case "RADIANS_TO_DEGREES", "DEGREES_TO_RADIANS":
 		blockType = "math_convert_angles"
-	} else {
+	case "DEC_TO_HEX", "HEX_TO_DEC", "DEC_TO_BIN", "BIN_TO_DEC":
+		blockType = "math_convert_number"
+	default:
 		blockType = "math_single"
 	}
+
 	return Block{
 		Type:   blockType,
 		Fields: []Field{{Name: "OP", Value: fieldOp}},

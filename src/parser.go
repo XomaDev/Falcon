@@ -59,11 +59,15 @@ func (p *Parser) element() ast.Expr {
 	left := p.term()
 	for p.notEOF() {
 		peek := p.peek()
-		if peek.Type != types.RightArrow {
-			break
+		switch {
+		case peek.Type == types.RightArrow:
+			left = &ast.PropExpr{Where: p.next(), On: left, Name: p.readName()}
+			continue
+		case peek.Type == types.Question:
+			left = &ast.QuestionExp{Where: p.next(), On: left, Question: p.readName()}
+			continue
 		}
-		p.skip()
-		left = &ast.PropExpr{Where: peek, On: left, Name: p.readName()}
+		break
 	}
 	return left
 }
@@ -159,8 +163,14 @@ func (p *Parser) expect(t types.Type) {
 	}
 }
 
-func (p *Parser) isNext(t types.Type) bool {
-	return p.peek().Type == t
+func (p *Parser) isNext(types ...types.Type) bool {
+	got := p.peek().Type
+	for _, t := range types {
+		if got == t {
+			return true
+		}
+	}
+	return false
 }
 
 func (p *Parser) peek() types.Token {

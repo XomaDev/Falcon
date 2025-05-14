@@ -36,6 +36,7 @@ var simpleCharTypes = map[string]types.Type{
 	"=": types.Equals,
 	".": types.Dot,
 	",": types.Comma,
+	"?": types.Question,
 }
 
 var keywordTypes = map[string]types.Type{

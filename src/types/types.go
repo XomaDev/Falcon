@@ -20,6 +20,7 @@ const (
 	Equals
 	Dot
 	Comma
+	Question
 	Hyphen
 	LesserThan
 	LesserThanEquals
