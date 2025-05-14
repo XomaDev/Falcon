@@ -61,7 +61,14 @@ func (p *Parser) element() ast.Expr {
 }
 
 func (p *Parser) term() ast.Expr {
-	value := p.value()
+	token := p.next()
+
+	switch token.Type {
+	case types.OpenSquare:
+		return p.list()
+	}
+
+	value := p.value(token)
 	if p.isEOF() {
 		return value
 	}
@@ -77,6 +84,18 @@ func (p *Parser) term() ast.Expr {
 		peek.Error("Unexpected token!")
 	}
 	panic("") // unreachable
+}
+
+func (p *Parser) list() ast.Expr {
+	var elements []ast.Expr
+	for p.notEOF() {
+		elements = append(elements, p.parse())
+		if !p.consume(types.Comma) {
+			break
+		}
+	}
+	p.expect(types.CloseSquare)
+	return &ast.ListExpr{Elements: elements}
 }
 
 func (p *Parser) arguments() []ast.Expr {
@@ -95,8 +114,7 @@ func (p *Parser) arguments() []ast.Expr {
 	return arguments
 }
 
-func (p *Parser) value() ast.Expr {
-	token := p.next()
+func (p *Parser) value(token types.Token) ast.Expr {
 	switch token.Type {
 	case types.Number:
 		return &ast.NumExpr{Content: token.Content}

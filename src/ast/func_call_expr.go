@@ -28,8 +28,44 @@ func (f *FuncCall) Blockly() Block {
 		return f.setRandSeed()
 	case "Min", "Max":
 		return f.minOrMax()
+	case "AvgOf", "MaxOf", "MinOf", "GeoMeanOf", "StdDevOf", "StdErrOf":
+		return f.mathOnList()
+	case "ModeOf":
+		return f.modeOf()
 	default:
 		panic("Unimplemented")
+	}
+}
+
+func (f *FuncCall) modeOf() Block {
+	f.assertArgLen(1)
+	return Block{
+		Type:   "math_mode_of_list",
+		Values: MakeValues(f.Args, "LIST"),
+	}
+}
+
+func (f *FuncCall) mathOnList() Block {
+	f.assertArgLen(1)
+	var fieldOp string
+	switch *f.Name {
+	case "AvgOf":
+		fieldOp = "AVG"
+	case "MaxOf":
+		fieldOp = "MAX"
+	case "MinOf":
+		fieldOp = "MIN"
+	case "GeoMeanOf":
+		fieldOp = "GM"
+	case "StdDevOf":
+		fieldOp = "SD"
+	case "StdErrOf":
+		fieldOp = "SE"
+	}
+	return Block{
+		Type:   "math_on_list2",
+		Fields: []Field{{Name: "OP", Value: fieldOp}},
+		Values: MakeValues(f.Args, "LIST"),
 	}
 }
 
