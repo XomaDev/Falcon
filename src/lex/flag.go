@@ -19,6 +19,7 @@ const (
 	Unary
 
 	Value
+	ConstantValue
 
 	PreserveOrder
 )

@@ -110,6 +110,8 @@ func (l *Lexer) parse() {
 		} else {
 			l.createOp("!")
 		}
+	case ':':
+		l.createOp(":")
 	case '"':
 		l.text()
 	default:
@@ -140,7 +142,7 @@ func (l *Lexer) text() {
 	}
 	l.eat('"')
 	content := l.source[startIndex : l.currIndex-1]
-	l.appendToken(Token{Type: Text, Content: &content})
+	l.appendToken(Token{Type: Text, Content: &content, Flags: []Flag{Value, ConstantValue}})
 }
 
 func (l *Lexer) alpha() {
@@ -154,7 +156,7 @@ func (l *Lexer) alpha() {
 	if ok {
 		l.appendToken(sToken.normal(l.currLine))
 	} else {
-		l.appendToken(Token{Type: Name, Content: &content})
+		l.appendToken(Token{Type: Name, Content: &content, Flags: []Flag{Value}})
 	}
 }
 
@@ -167,7 +169,7 @@ func (l *Lexer) numeric() {
 		l.writeNumeric(&numb)
 	}
 	content := numb.String()
-	l.appendToken(Token{Type: Number, Content: &content})
+	l.appendToken(Token{Type: Number, Content: &content, Flags: []Flag{Value, ConstantValue}})
 }
 
 func (l *Lexer) appendToken(token Token) {

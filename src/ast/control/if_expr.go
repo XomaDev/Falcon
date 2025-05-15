@@ -5,13 +5,13 @@ import (
 	"strings"
 )
 
-type IfExpr struct {
+type If struct {
 	Conditions []blockly.Expr
 	Bodies     [][]blockly.Expr
 	ElseBody   []blockly.Expr
 }
 
-func (i *IfExpr) String() string {
+func (i *If) String() string {
 	var builder strings.Builder
 
 	numConditions := len(i.Conditions)
@@ -38,7 +38,7 @@ func (i *IfExpr) String() string {
 	return builder.String()
 }
 
-func (i *IfExpr) Blockly() blockly.Block {
+func (i *If) Blockly() blockly.Block {
 	conditions := blockly.ToValues("IF", i.Conditions)
 	bodies := blockly.ToStatements("DO", i.Bodies)
 

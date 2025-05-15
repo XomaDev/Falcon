@@ -37,12 +37,44 @@ func (p *Parser) parse() blky.Expr {
 	switch p.peek().Type {
 	case l.If:
 		return p.ifExpr()
+	case l.For:
+		return p.forExpr()
+	case l.Each:
+		return p.eachExpr()
 	default:
 		return p.expr(0)
 	}
 }
 
-func (p *Parser) ifExpr() *control.IfExpr {
+func (p *Parser) eachExpr() *control.Each {
+	p.skip()
+	iName := p.name()
+	p.expect(l.In)
+	iterable := p.element()
+	body := p.body()
+	return &control.Each{IName: iName, Iterable: iterable, Body: body}
+}
+
+func (p *Parser) forExpr() *control.For {
+	p.skip()
+	iName := p.name()
+	p.expect(l.Colon)
+	from := p.expr(0)
+	p.expect(l.To)
+	to := p.expr(0)
+	p.expect(l.By)
+	by := p.expr(0)
+	body := p.body()
+	return &control.For{
+		IName: iName,
+		From:  from,
+		To:    to,
+		By:    by,
+		Body:  body,
+	}
+}
+
+func (p *Parser) ifExpr() *control.If {
 	p.skip()
 	var conditions []blky.Expr
 	var bodies [][]blky.Expr
@@ -58,7 +90,7 @@ func (p *Parser) ifExpr() *control.IfExpr {
 	if p.notEOF() && p.consume(l.Else) {
 		elseBody = p.body()
 	}
-	return &control.IfExpr{
+	return &control.If{
 		Conditions: conditions,
 		Bodies:     bodies,
 		ElseBody:   elseBody,
@@ -97,10 +129,14 @@ func (p *Parser) expr(minPrecedence int) blky.Expr {
 			right = p.expr(precedence)
 		}
 		if rBinExpr, ok := right.(*common.BinaryExpr); ok && rBinExpr.Operator == opToken.Type {
-			// merge binary expressions with same operator
+			// for NoPreserveOrder: merge binary expr with same operator (towards right)
 			rBinExpr.Operands = append([]blky.Expr{left}, rBinExpr.Operands...)
 			left = rBinExpr
+		} else if lBinExpr, ok := left.(*common.BinaryExpr); ok && lBinExpr.Operator == opToken.Type {
+			// for PreserveOder: merge binary expr with same operator (towards left)
+			lBinExpr.Operands = append(lBinExpr.Operands, right)
 		} else {
+			// a new binary node
 			left = &common.BinaryExpr{Where: opToken, Operands: []blky.Expr{left, right}, Operator: opToken.Type}
 		}
 	}
@@ -157,22 +193,15 @@ func (p *Parser) term() blky.Expr {
 	case l.Not:
 		return &logic.Not{Expr: p.element()}
 	default:
-		value := p.value(token)
-		if p.isEOF() {
+		if token.HasFlag(l.Value) {
+			value := p.value(token)
+			if nameExpr, ok := value.(*common.Name); ok && p.notEOF() && p.isNext(l.OpenCurve) {
+				return &common.FuncCall{Where: nameExpr.Where, Name: nameExpr.Name, Args: p.arguments()}
+			}
 			return value
 		}
-		nameExpr, ok := value.(*common.Name)
-		if !ok {
-			return value
-		}
-		pe := p.peek()
-		switch pe.Type {
-		case l.OpenCurve:
-			return &common.FuncCall{Where: nameExpr.Where, Name: nameExpr.Name, Args: p.arguments()}
-		default:
-			pe.Error("Unexpected!")
-			panic("") // unreachable
-		}
+		token.Error("Unexpected! %", token.String())
+		panic("") // unreachable
 	}
 }
 

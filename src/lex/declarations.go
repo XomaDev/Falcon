@@ -28,18 +28,25 @@ var Symbols = map[string]StaticToken{
 	"{": staticOf(OpenCurly),
 	"}": staticOf(CloseCurly),
 
-	"=": staticOf(Assign),
-	".": staticOf(Dot),
-	",": staticOf(Comma),
-	"?": staticOf(Question),
-	"!": staticOf(Not),
+	"=":  staticOf(Assign),
+	".":  staticOf(Dot),
+	",":  staticOf(Comma),
+	"?":  staticOf(Question),
+	"!":  staticOf(Not),
+	":":  staticOf(Colon),
+	"->": staticOf(RightArrow),
 }
 
 var Keywords = map[string]StaticToken{
-	"true":  staticOf(True, Value),
-	"false": staticOf(False, Value),
+	"true":  staticOf(True, Value, ConstantValue),
+	"false": staticOf(False, Value, ConstantValue),
 
 	"if":   staticOf(If),
 	"elif": staticOf(Elif),
 	"else": staticOf(Else),
+	"for":  staticOf(For),
+	"to":   staticOf(To),
+	"by":   staticOf(By),
+	"each": staticOf(Each),
+	"in":   staticOf(In),
 }

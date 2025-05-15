@@ -41,6 +41,7 @@ const (
 	Comma
 	Question
 	Not
+	Colon
 	RightArrow
 
 	True
@@ -52,4 +53,9 @@ const (
 	If
 	Elif
 	Else
+	For
+	To
+	By
+	Each
+	In
 )
