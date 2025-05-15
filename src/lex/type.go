@@ -56,4 +56,5 @@ const (
 	In
 	While
 	Do
+	Break
 )

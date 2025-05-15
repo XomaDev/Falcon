@@ -40,8 +40,60 @@ func (f *FuncCall) Blockly() blockly.Block {
 		return f.atan2()
 	case "formatDecimal":
 		return f.formatDecimal()
+	case "println":
+		return f.println()
+	case "openScreen":
+		return f.openScreen()
+	case "openScreenWithValue":
+		return f.openScreenWithValue()
+	case "controls_closeScreenWithValue":
+		return f.closeScreenWithValue()
+	case "getStartValue":
+		return f.ctrlSimpleBlock("controls_getStartValue")
+	case "closeScreen":
+		return f.ctrlSimpleBlock("controls_closeScreen")
+	case "closeApp":
+		return f.ctrlSimpleBlock("controls_closeApplication")
+	case "getPlainStartText":
+		return f.ctrlSimpleBlock("controls_getPlainStartText")
 	default:
 		panic("Unimplemented")
+	}
+}
+
+func (f *FuncCall) ctrlSimpleBlock(blockType string) blockly.Block {
+	return blockly.Block{Type: blockType}
+}
+
+func (f *FuncCall) closeScreenWithValue() blockly.Block {
+	f.assertArgLen(1)
+	return blockly.Block{
+		Type:   "controls_closeScreenWithValue",
+		Values: blockly.MakeValues(f.Args, "SCREEN"),
+	}
+}
+
+func (f *FuncCall) openScreenWithValue() blockly.Block {
+	f.assertArgLen(2)
+	return blockly.Block{
+		Type:   "controls_openAnotherScreenWithStartValue",
+		Values: blockly.MakeValues(f.Args, "SCREENNAME", "STARTVALUE"),
+	}
+}
+
+func (f *FuncCall) openScreen() blockly.Block {
+	f.assertArgLen(1)
+	return blockly.Block{
+		Type:   "controls_openAnotherScreen",
+		Values: blockly.MakeValues(f.Args, "SCREEN"),
+	}
+}
+
+func (f *FuncCall) println() blockly.Block {
+	f.assertArgLen(1)
+	return blockly.Block{
+		Type:   "controls_eval_but_ignore",
+		Values: blockly.MakeValues(f.Args, "VALUE"),
 	}
 }
 

@@ -44,6 +44,8 @@ func (p *Parser) parse() blky.Expr {
 		return p.eachExpr()
 	case l.While:
 		return p.whileExpr()
+	case l.Break:
+		return &control.Break{}
 	default:
 		return p.expr(0)
 	}

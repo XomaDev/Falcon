@@ -1,3 +1,3 @@
-do {
-  setRandSeed(1 + 2 * 3 + 4 / 2)
-} -> 2 * 3
+println("Hello, World!")
+openScreen("Screen1")
+openScreenWithValue("Screen1", "Cat")
