@@ -13,6 +13,9 @@ var Symbols = map[string]StaticToken{
 	"&":  staticOf(BitwiseAnd, BBitwiseAnd, Operator),
 	"~":  staticOf(BitwiseXor, BBitwiseXor, Operator),
 
+	"==": staticOf(Equals, Equality, Operator),
+	"!=": staticOf(NotEquals, Equality, Operator),
+
 	"<":  staticOf(LessThan, Relational, Operator),
 	"<=": staticOf(LessThanEqual, Relational, Operator),
 	">":  staticOf(GreatThan, Relational, Operator),
@@ -25,7 +28,7 @@ var Symbols = map[string]StaticToken{
 	"{": staticOf(OpenCurly),
 	"}": staticOf(CloseCurly),
 
-	"=": staticOf(Equal),
+	"=": staticOf(Assign),
 	".": staticOf(Dot),
 	",": staticOf(Comma),
 	"?": staticOf(Question),

@@ -93,7 +93,11 @@ func (l *Lexer) parse() {
 	case '}':
 		l.createOp("}")
 	case '=':
-		l.createOp("=")
+		if l.consume('=') {
+			l.createOp("==")
+		} else {
+			l.createOp("=")
+		}
 	case '.':
 		l.createOp(".")
 	case ',':
@@ -101,7 +105,13 @@ func (l *Lexer) parse() {
 	case '?':
 		l.createOp("?")
 	case '!':
-		l.createOp("!")
+		if l.consume('=') {
+			l.createOp("!=")
+		} else {
+			l.createOp("!")
+		}
+	case '"':
+		l.text()
 	default:
 		l.currIndex--
 		if l.isAlpha() {

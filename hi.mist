@@ -1,9 +1,5 @@
-if true {
-  setRandSeed(1)
-  setRandSeed(2)
-} elif false {
-  setRandSeed(3)
-  setRandSeed(4)
+if true && !false || false {
+ setRandSeed(1)
 } else {
-  setRandSeed(1 + 2)
+ setRandSeed(2)
 }

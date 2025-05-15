@@ -23,7 +23,7 @@ func main() {
 		println(token.String())
 	}
 
-	println("\n=== AST ===")
+	println("\n=== AST ===\n")
 
 	expressions := analysis.NewParser(tokens).ParseAll()
 	for _, expression := range expressions {

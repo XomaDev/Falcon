@@ -96,10 +96,12 @@ func (p *Parser) expr(minPrecedence int) blky.Expr {
 		} else {
 			right = p.expr(precedence)
 		}
-		if mExpr, ok := left.(*math.Expr); ok && mExpr.Operator == opToken.Type {
-			mExpr.Operands = append(mExpr.Operands, right)
+		if rBinExpr, ok := right.(*common.BinaryExpr); ok && rBinExpr.Operator == opToken.Type {
+			// merge binary expressions with same operator
+			rBinExpr.Operands = append([]blky.Expr{left}, rBinExpr.Operands...)
+			left = rBinExpr
 		} else {
-			left = &math.Expr{Where: opToken, Operands: []blky.Expr{left, right}, Operator: opToken.Type}
+			left = &common.BinaryExpr{Where: opToken, Operands: []blky.Expr{left, right}, Operator: opToken.Type}
 		}
 	}
 	return left
@@ -117,12 +119,14 @@ func precedenceOf(flag l.Flag) int {
 		return 4
 	case l.BBitwiseXor:
 		return 5
-	case l.Relational:
+	case l.Equality:
 		return 6
-	case l.Binary:
+	case l.Relational:
 		return 7
-	case l.BinaryL1:
+	case l.Binary:
 		return 8
+	case l.BinaryL1:
+		return 9
 	default:
 		return -1
 	}
@@ -151,7 +155,7 @@ func (p *Parser) term() blky.Expr {
 	case l.OpenSquare:
 		return p.list()
 	case l.Not:
-		return &logic.Not{Expr: p.expr(0)}
+		return &logic.Not{Expr: p.element()}
 	default:
 		value := p.value(token)
 		if p.isEOF() {

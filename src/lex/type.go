@@ -18,6 +18,9 @@ const (
 	BitwiseAnd
 	BitwiseXor
 
+	Equals
+	NotEquals
+
 	// < <= > >=
 	LessThan
 	LessThanEqual
@@ -33,7 +36,7 @@ const (
 	CloseCurly
 
 	// =.,?!
-	Equal
+	Assign
 	Dot
 	Comma
 	Question

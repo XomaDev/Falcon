@@ -12,6 +12,7 @@ const (
 	BBitwiseXor
 
 	Relational
+	Equality
 	Binary
 	BinaryL1
 	BinaryL2
