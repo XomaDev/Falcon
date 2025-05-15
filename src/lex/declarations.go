@@ -52,4 +52,5 @@ var Keywords = map[string]StaticToken{
 	"each":  staticOf(Each),
 	"in":    staticOf(In),
 	"while": staticOf(While),
+	"do":    staticOf(Do),
 }

@@ -26,8 +26,29 @@ func (b *BinaryExpr) Blockly() blockly.Block {
 		return b.boolExpr()
 	case l.Colon:
 		return b.pairExpr()
+	case l.Plus, l.Times:
+		return b.addOrTimes()
+	case l.Dash, l.Slash, l.Power:
+		return b.simpleMathExpr()
 	default:
-		return b.mathExpr()
+		b.Where.Error("Unknown binary operator! " + b.Operator.String())
+		panic("") // unreachable
+	}
+}
+
+// CanRepeat: return true if the binary expr can be optimized into one struct
+//
+//	without the need to create additional BinaryExpr struct for the same Operator.
+//	This factor also depends on the type of Operator being used. (Some support, some don't)
+func (b *BinaryExpr) CanRepeat(testOperator l.Type) bool {
+	if b.Operator != testOperator {
+		return false
+	}
+	switch b.Operator {
+	case l.Power, l.Dash, l.Slash, l.Colon:
+		return false
+	default:
+		return true
 	}
 }
 
@@ -95,24 +116,25 @@ func (b *BinaryExpr) bitwiseExpr() blockly.Block {
 	}
 }
 
-func (b *BinaryExpr) mathExpr() blockly.Block {
+func (b *BinaryExpr) simpleMathExpr() blockly.Block {
 	var blockType string
-
 	switch b.Operator {
-	case l.Plus:
-		blockType = "math_add"
 	case l.Dash:
 		blockType = "math_subtract"
-	case l.Times:
-		blockType = "math_multiply"
 	case l.Slash:
 		blockType = "math_division"
 	case l.Power:
 		blockType = "math_power"
-	case l.BitwiseAnd, l.BitwiseOr, l.BitwiseXor:
-		blockType = "math_bitwise"
-	default:
-		b.Where.Error("Unknown math operator (%)", b.Operator.String())
+	}
+	return blockly.Block{Type: blockType, Values: blockly.MakeValues(b.Operands, "A", "B")}
+}
+
+func (b *BinaryExpr) addOrTimes() blockly.Block {
+	var blockType string
+	if b.Operator == l.Plus {
+		blockType = "math_add"
+	} else {
+		blockType = "math_multiply"
 	}
 	return blockly.Block{
 		Type:     blockType,

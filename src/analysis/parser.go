@@ -106,11 +106,7 @@ func (p *Parser) ifExpr() *control.If {
 	if p.notEOF() && p.consume(l.Else) {
 		elseBody = p.body()
 	}
-	return &control.If{
-		Conditions: conditions,
-		Bodies:     bodies,
-		ElseBody:   elseBody,
-	}
+	return &control.If{Conditions: conditions, Bodies: bodies, ElseBody: elseBody}
 }
 
 func (p *Parser) body() []blky.Expr {
@@ -144,11 +140,11 @@ func (p *Parser) expr(minPrecedence int) blky.Expr {
 		} else {
 			right = p.expr(precedence)
 		}
-		if rBinExpr, ok := right.(*common.BinaryExpr); ok && rBinExpr.Operator == opToken.Type {
+		if rBinExpr, ok := right.(*common.BinaryExpr); ok && rBinExpr.CanRepeat(opToken.Type) {
 			// for NoPreserveOrder: merge binary expr with same operator (towards right)
 			rBinExpr.Operands = append([]blky.Expr{left}, rBinExpr.Operands...)
 			left = rBinExpr
-		} else if lBinExpr, ok := left.(*common.BinaryExpr); ok && lBinExpr.Operator == opToken.Type {
+		} else if lBinExpr, ok := left.(*common.BinaryExpr); ok && lBinExpr.CanRepeat(opToken.Type) {
 			// for PreserveOder: merge binary expr with same operator (towards left)
 			lBinExpr.Operands = append(lBinExpr.Operands, right)
 		} else {
@@ -212,6 +208,10 @@ func (p *Parser) term() blky.Expr {
 		return p.dictionary()
 	case l.Not:
 		return &logic.Not{Expr: p.element()}
+	case l.If:
+		return p.simpleIf()
+	case l.Do:
+		return p.doExpr()
 	default:
 		if token.HasFlag(l.Value) {
 			value := p.value(token)
@@ -223,6 +223,23 @@ func (p *Parser) term() blky.Expr {
 		token.Error("Unexpected! %", token.String())
 		panic("") // unreachable
 	}
+}
+
+func (p *Parser) doExpr() *control.Do {
+	body := p.body()
+	p.expect(l.RightArrow)
+	result := p.expr(0)
+	return &control.Do{Body: body, Result: result}
+}
+
+func (p *Parser) simpleIf() *control.SimpleIf {
+	p.expect(l.OpenCurve)
+	condition := p.element()
+	p.expect(l.CloseCurve)
+	then := p.element()
+	p.expect(l.Else)
+	elze := p.element()
+	return &control.SimpleIf{Condition: condition, Then: then, Else: elze}
 }
 
 func (p *Parser) dictionary() *dictionary.Dictionary {

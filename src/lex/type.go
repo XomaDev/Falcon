@@ -55,4 +55,5 @@ const (
 	Each
 	In
 	While
+	Do
 )
