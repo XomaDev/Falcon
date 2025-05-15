@@ -71,7 +71,7 @@ func (p *Parser) body() []blky.Expr {
 	if p.consume(l.CloseCurly) {
 		return expressions
 	}
-	for p.notEOF() {
+	for p.notEOF() && !p.isNext(l.CloseCurly) {
 		expressions = append(expressions, p.parse())
 	}
 	p.expect(l.CloseCurly)
@@ -86,7 +86,7 @@ func (p *Parser) expr(minPrecedence int) blky.Expr {
 			break
 		}
 		precedence := precedenceOf(opToken.Flags[0])
-		if precedence == -1 {
+		if precedence == -1 || precedence < minPrecedence {
 			break
 		}
 		p.skip()
@@ -96,10 +96,10 @@ func (p *Parser) expr(minPrecedence int) blky.Expr {
 		} else {
 			right = p.expr(precedence)
 		}
-		if mExpr, ok := left.(*math.Expr); ok && mExpr.Operator.Type == opToken.Type {
+		if mExpr, ok := left.(*math.Expr); ok && mExpr.Operator == opToken.Type {
 			mExpr.Operands = append(mExpr.Operands, right)
 		} else {
-			left = &math.Expr{Operands: []blky.Expr{left, right}, Operator: opToken}
+			left = &math.Expr{Where: opToken, Operands: []blky.Expr{left, right}, Operator: opToken.Type}
 		}
 	}
 	return left

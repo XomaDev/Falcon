@@ -2,47 +2,47 @@ package math
 
 import (
 	"Falcon/ast/blockly"
-	"Falcon/lex"
+	l "Falcon/lex"
 )
 
 type Expr struct {
+	Where    l.Token
 	Operands []blockly.Expr
-	Operator lex.Token
+	Operator l.Type
 }
 
 func (b *Expr) String() string {
-	return blockly.JoinExprs(*b.Operator.Content, b.Operands)
+	return blockly.JoinExprs(" "+*b.Where.Content+" ", b.Operands)
 }
 
 func (b *Expr) Blockly() blockly.Block {
-	operator := *b.Operator.Content
 	var blockType string
 
-	switch operator {
-	case "+":
+	switch b.Operator {
+	case l.Plus:
 		blockType = "math_add"
-	case "-":
+	case l.Dash:
 		blockType = "math_subtract"
-	case "*":
+	case l.Times:
 		blockType = "math_multiply"
-	case "/":
+	case l.Slash:
 		blockType = "math_division"
-	case "^":
+	case l.Power:
 		blockType = "math_power"
-	case "&", "|", "~":
+	case l.BitwiseAnd, l.BitwiseOr, l.BitwiseXor:
 		blockType = "math_bitwise"
 	default:
-		b.Operator.Error("Unknown binary operator (%v)", *b.Operator.Content)
+		b.Where.Error("Unknown binary operator (%v)", b.Operator.String())
 	}
 	var fields []blockly.Field
 	if blockType == "math_bitwise" {
 		var fieldOp string
-		switch operator {
-		case "&":
+		switch b.Operator {
+		case l.BitwiseAnd:
 			fieldOp = "BITAND"
-		case "|":
+		case l.BitwiseOr:
 			fieldOp = "BITIOR"
-		case "~":
+		case l.BitwiseXor:
 			fieldOp = "BITXOR"
 		}
 		fields = append(fields, blockly.Field{Name: "OP", Value: fieldOp})

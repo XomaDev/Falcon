@@ -18,8 +18,8 @@ func NewLexer(source string) *Lexer {
 	return &Lexer{
 		source:    source,
 		sourceLen: len(source),
-		currIndex: 1,
-		currLine:  0,
+		currIndex: 0,
+		currLine:  1,
 		Tokens:    []Token{},
 	}
 }
@@ -33,9 +33,12 @@ func (l *Lexer) Lex() []Token {
 
 func (l *Lexer) parse() {
 	c := l.next()
-	if c == '\n' {
+
+	switch c {
+	case '\n':
 		l.currLine++
-	} else if c == ' ' {
+		return
+	case ' ', '\t':
 		return
 	}
 	switch c {
@@ -116,7 +119,7 @@ func (l *Lexer) createOp(op string) {
 	if !ok {
 		l.error("Bad createOp('%')", op)
 	} else {
-		l.appendToken(sToken.normal(l.currLine))
+		l.appendToken(sToken.normal(l.currLine, op))
 	}
 }
 
@@ -196,7 +199,7 @@ func (l *Lexer) error(message string, args ...string) {
 
 func (l *Lexer) consume(expect uint8) bool {
 	if l.peek() == expect {
-		l.currLine++
+		l.currIndex++
 		return true
 	}
 	return false
@@ -213,9 +216,9 @@ func (l *Lexer) next() uint8 {
 }
 
 func (l *Lexer) isEOF() bool {
-	return l.currLine < l.sourceLen
+	return l.currIndex >= l.sourceLen
 }
 
 func (l *Lexer) notEOF() bool {
-	return l.currIndex >= l.sourceLen
+	return l.currIndex < l.sourceLen
 }

@@ -14,9 +14,9 @@ type Token struct {
 
 func (t *Token) String() string {
 	if t.Content == nil {
-		return "(" + t.Type.String() + ")"
+		return sugar.Format("(%)", t.Type.String())
 	}
-	return *t.Content
+	return sugar.Format("(% %)", t.Type.String(), *t.Content)
 }
 
 func (t *Token) HasFlag(flag Flag) bool {
@@ -41,9 +41,13 @@ func staticOf(t Type, flags ...Flag) StaticToken {
 	return StaticToken{t, flags}
 }
 
-func (s *StaticToken) normal(line int, content ...string) Token {
-	if len(content) > 1 {
+func (s *StaticToken) normal(line int, optionalContent ...string) Token {
+	if len(optionalContent) > 1 {
 		panic("Too many contents...")
 	}
-	return Token{Line: line, Type: s.Type, Flags: s.Flags, Content: &content[0]}
+	var content string
+	if len(optionalContent) == 1 {
+		content = optionalContent[0]
+	}
+	return Token{Line: line, Type: s.Type, Flags: s.Flags, Content: &content}
 }
