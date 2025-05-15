@@ -71,12 +71,16 @@ func (l *Lexer) parse() {
 	case '<':
 		if l.consume('=') {
 			l.createOp("<=")
+		} else if l.consume('<') {
+			l.createOp("<<")
 		} else {
 			l.createOp("<")
 		}
 	case '>':
 		if l.consume('=') {
 			l.createOp(">=")
+		} else if l.consume('>') {
+			l.createOp(">>")
 		} else {
 			l.createOp(">")
 		}
@@ -94,7 +98,11 @@ func (l *Lexer) parse() {
 		l.createOp("}")
 	case '=':
 		if l.consume('=') {
-			l.createOp("==")
+			if l.consume('=') {
+				l.createOp("===")
+			} else {
+				l.createOp("==")
+			}
 		} else {
 			l.createOp("=")
 		}
@@ -106,7 +114,11 @@ func (l *Lexer) parse() {
 		l.createOp("?")
 	case '!':
 		if l.consume('=') {
-			l.createOp("!=")
+			if l.consume('=') {
+				l.createOp("!==")
+			} else {
+				l.createOp("!=")
+			}
 		} else {
 			l.createOp("!")
 		}
@@ -116,6 +128,8 @@ func (l *Lexer) parse() {
 		} else {
 			l.createOp(":")
 		}
+	case '_':
+		l.createOp("_")
 	case '"':
 		l.text()
 	default:

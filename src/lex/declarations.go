@@ -13,14 +13,20 @@ var Symbols = map[string]StaticToken{
 	"&":  staticOf(BitwiseAnd, BBitwiseAnd, Operator),
 	"~":  staticOf(BitwiseXor, BBitwiseXor, Operator),
 
-	"==": staticOf(Equals, Equality, Operator),
-	"!=": staticOf(NotEquals, Equality, Operator),
+	"==":  staticOf(Equals, Equality, Operator),
+	"!=":  staticOf(NotEquals, Equality, Operator),
+	"===": staticOf(TextEquals, Equality, Operator),
+	"!==": staticOf(TextNotEquals, Equality, Operator),
 
 	"<":  staticOf(LessThan, Relational, Operator),
 	"<=": staticOf(LessThanEqual, Relational, Operator),
 	">":  staticOf(GreatThan, Relational, Operator),
 	">=": staticOf(GreaterThanEqual, Relational, Operator),
 
+	"<<": staticOf(TextLessThan, Relational, Operator),
+	">>": staticOf(TextGreaterThan, Relational, Operator),
+
+	"_":  staticOf(Underscore, TextJoin, Operator),
 	":":  staticOf(Colon, Pair, Operator),
 	"::": staticOf(DoubleColon),
 

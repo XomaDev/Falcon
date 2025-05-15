@@ -24,6 +24,12 @@ const (
 	GreatThan
 	GreaterThanEqual
 
+	TextEquals
+	TextNotEquals
+
+	TextLessThan
+	TextGreaterThan
+
 	OpenCurve
 	CloseCurve
 	OpenSquare
@@ -39,6 +45,7 @@ const (
 	Colon
 	DoubleColon
 	RightArrow
+	Underscore
 
 	True
 	False

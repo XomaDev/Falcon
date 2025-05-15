@@ -16,6 +16,7 @@ const (
 	Binary
 	BinaryL1
 	BinaryL2
+	TextJoin
 	Pair
 	Unary
 

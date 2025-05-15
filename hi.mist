@@ -1,3 +1,5 @@
-println("Hello, World!")
-openScreen("Screen1")
-openScreenWithValue("Screen1", "Cat")
+if "cat" << "Cat" {
+  println("Catty!")
+} else {
+  println("Oh, no!")
+}

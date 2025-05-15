@@ -16,6 +16,22 @@ func (b *BinaryExpr) String() string {
 	return blockly.JoinExprs(" "+*b.Where.Content+" ", b.Operands)
 }
 
+// CanRepeat: return true if the binary expr can be optimized into one struct
+//
+//	without the need to create additional BinaryExpr struct for the same Operator.
+//	This factor also depends on the type of Operator being used. (Some support, some don't)
+func (b *BinaryExpr) CanRepeat(testOperator l.Type) bool {
+	if b.Operator != testOperator {
+		return false
+	}
+	switch b.Operator {
+	case l.Power, l.Dash, l.Slash, l.Colon:
+		return false
+	default:
+		return true
+	}
+}
+
 func (b *BinaryExpr) Blockly() blockly.Block {
 	switch b.Operator {
 	case l.BitwiseAnd, l.BitwiseOr, l.BitwiseXor:
@@ -30,25 +46,40 @@ func (b *BinaryExpr) Blockly() blockly.Block {
 		return b.addOrTimes()
 	case l.Dash, l.Slash, l.Power:
 		return b.simpleMathExpr()
+	case l.Underscore:
+		return b.textJoin()
+	case l.TextEquals, l.TextNotEquals, l.TextLessThan, l.TextGreaterThan:
+		return b.textCompare()
 	default:
 		b.Where.Error("Unknown binary operator! " + b.Operator.String())
 		panic("") // unreachable
 	}
 }
 
-// CanRepeat: return true if the binary expr can be optimized into one struct
-//
-//	without the need to create additional BinaryExpr struct for the same Operator.
-//	This factor also depends on the type of Operator being used. (Some support, some don't)
-func (b *BinaryExpr) CanRepeat(testOperator l.Type) bool {
-	if b.Operator != testOperator {
-		return false
-	}
+func (b *BinaryExpr) textCompare() blockly.Block {
+	var fieldOp string
 	switch b.Operator {
-	case l.Power, l.Dash, l.Slash, l.Colon:
-		return false
-	default:
-		return true
+	case l.TextEquals:
+		fieldOp = "EQUAL"
+	case l.NotEquals:
+		fieldOp = "NEQ"
+	case l.TextLessThan:
+		fieldOp = "LT"
+	case l.TextGreaterThan:
+		fieldOp = "GT"
+	}
+	return blockly.Block{
+		Type:   "text_compare",
+		Fields: []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Values: blockly.MakeValues(b.Operands, "TEXT1", "TEXT2"),
+	}
+}
+
+func (b *BinaryExpr) textJoin() blockly.Block {
+	return blockly.Block{
+		Type:     "text_join",
+		Mutation: &blockly.Mutation{ItemCount: len(b.Operands)},
+		Values:   blockly.ToValues("ADD", b.Operands),
 	}
 }
 

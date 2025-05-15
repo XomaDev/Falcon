@@ -57,7 +57,7 @@ func (f *FuncCall) Blockly() blockly.Block {
 	case "getPlainStartText":
 		return f.ctrlSimpleBlock("controls_getPlainStartText")
 	default:
-		panic("Unimplemented")
+		panic("Unknown function " + f.Name)
 	}
 }
 
