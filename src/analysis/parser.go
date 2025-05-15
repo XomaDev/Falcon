@@ -4,6 +4,7 @@ import (
 	blky "Falcon/ast/blockly"
 	"Falcon/ast/common"
 	"Falcon/ast/control"
+	"Falcon/ast/dictionary"
 	"Falcon/ast/list"
 	"Falcon/ast/logic"
 	"Falcon/ast/math"
@@ -41,18 +42,33 @@ func (p *Parser) parse() blky.Expr {
 		return p.forExpr()
 	case l.Each:
 		return p.eachExpr()
+	case l.While:
+		return p.whileExpr()
 	default:
 		return p.expr(0)
 	}
 }
 
-func (p *Parser) eachExpr() *control.Each {
+func (p *Parser) whileExpr() *control.While {
 	p.skip()
-	iName := p.name()
-	p.expect(l.In)
-	iterable := p.element()
+	condition := p.expr(0)
 	body := p.body()
-	return &control.Each{IName: iName, Iterable: iterable, Body: body}
+	return &control.While{Condition: condition, Body: body}
+}
+
+func (p *Parser) eachExpr() blky.Expr {
+	p.skip()
+	keyName := p.name()
+	if p.consume(l.DoubleColon) {
+		// a dictionary pair iteration
+		valueName := p.name()
+		p.expect(l.RightArrow)
+		return &control.EachPair{KeyName: keyName, ValueName: valueName, Iterable: p.element(), Body: p.body()}
+	} else {
+		// a simple list iteration
+		p.expect(l.RightArrow)
+		return &control.Each{IName: keyName, Iterable: p.element(), Body: p.body()}
+	}
 }
 
 func (p *Parser) forExpr() *control.For {
@@ -163,6 +179,8 @@ func precedenceOf(flag l.Flag) int {
 		return 8
 	case l.BinaryL1:
 		return 9
+	case l.Pair:
+		return 10
 	default:
 		return -1
 	}
@@ -190,6 +208,8 @@ func (p *Parser) term() blky.Expr {
 	switch token.Type {
 	case l.OpenSquare:
 		return p.list()
+	case l.OpenCurly:
+		return p.dictionary()
 	case l.Not:
 		return &logic.Not{Expr: p.element()}
 	default:
@@ -203,6 +223,20 @@ func (p *Parser) term() blky.Expr {
 		token.Error("Unexpected! %", token.String())
 		panic("") // unreachable
 	}
+}
+
+func (p *Parser) dictionary() *dictionary.Dictionary {
+	var elements []blky.Expr
+	if !p.consume(l.CloseCurly) {
+		for p.notEOF() {
+			elements = append(elements, p.expr(0))
+			if !p.consume(l.Comma) {
+				break
+			}
+		}
+	}
+	p.expect(l.CloseCurly)
+	return &dictionary.Dictionary{Elements: elements}
 }
 
 func (p *Parser) list() *list.Expr {

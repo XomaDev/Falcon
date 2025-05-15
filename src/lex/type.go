@@ -4,14 +4,12 @@ package lex
 type Type int
 
 const (
-	// +-*/
 	Plus Type = iota
 	Dash
 	Times
 	Slash
 	Power
 
-	// || && | & ~
 	LogicOr
 	LogicAnd
 	BitwiseOr
@@ -21,13 +19,11 @@ const (
 	Equals
 	NotEquals
 
-	// < <= > >=
 	LessThan
 	LessThanEqual
 	GreatThan
 	GreaterThanEqual
 
-	// ()[]{}
 	OpenCurve
 	CloseCurve
 	OpenSquare
@@ -35,13 +31,13 @@ const (
 	OpenCurly
 	CloseCurly
 
-	// =.,?!
 	Assign
 	Dot
 	Comma
 	Question
 	Not
 	Colon
+	DoubleColon
 	RightArrow
 
 	True
@@ -58,4 +54,5 @@ const (
 	By
 	Each
 	In
+	While
 )

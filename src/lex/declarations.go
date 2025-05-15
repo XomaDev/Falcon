@@ -21,6 +21,9 @@ var Symbols = map[string]StaticToken{
 	">":  staticOf(GreatThan, Relational, Operator),
 	">=": staticOf(GreaterThanEqual, Relational, Operator),
 
+	":":  staticOf(Colon, Pair, Operator),
+	"::": staticOf(DoubleColon),
+
 	"(": staticOf(OpenCurve),
 	")": staticOf(CloseCurve),
 	"[": staticOf(OpenSquare),
@@ -33,7 +36,6 @@ var Symbols = map[string]StaticToken{
 	",":  staticOf(Comma),
 	"?":  staticOf(Question),
 	"!":  staticOf(Not),
-	":":  staticOf(Colon),
 	"->": staticOf(RightArrow),
 }
 
@@ -41,12 +43,13 @@ var Keywords = map[string]StaticToken{
 	"true":  staticOf(True, Value, ConstantValue),
 	"false": staticOf(False, Value, ConstantValue),
 
-	"if":   staticOf(If),
-	"elif": staticOf(Elif),
-	"else": staticOf(Else),
-	"for":  staticOf(For),
-	"to":   staticOf(To),
-	"by":   staticOf(By),
-	"each": staticOf(Each),
-	"in":   staticOf(In),
+	"if":    staticOf(If),
+	"elif":  staticOf(Elif),
+	"else":  staticOf(Else),
+	"for":   staticOf(For),
+	"to":    staticOf(To),
+	"by":    staticOf(By),
+	"each":  staticOf(Each),
+	"in":    staticOf(In),
+	"while": staticOf(While),
 }

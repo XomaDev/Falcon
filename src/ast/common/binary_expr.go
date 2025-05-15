@@ -24,9 +24,18 @@ func (b *BinaryExpr) Blockly() blockly.Block {
 		return b.compareExpr()
 	case l.LogicAnd, l.LogicOr:
 		return b.boolExpr()
+	case l.Colon:
+		return b.pairExpr()
 	default:
 		return b.mathExpr()
 	}
+}
+
+func (b *BinaryExpr) pairExpr() blockly.Block {
+	if len(b.Operands) != 2 {
+		b.Where.Error("Pair operator ':' received more than two operands")
+	}
+	return blockly.Block{Type: "pair", Values: blockly.MakeValues(b.Operands, "KEY", "VALUE")}
 }
 
 func (b *BinaryExpr) boolExpr() blockly.Block {

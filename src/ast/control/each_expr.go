@@ -12,7 +12,7 @@ type Each struct {
 }
 
 func (e *Each) String() string {
-	return sugar.Format("each % in % {\n%}", e.IName, e.Iterable.String(), blockly.PadBody(e.Body))
+	return sugar.Format("each % -> % {\n%}", e.IName, e.Iterable.String(), blockly.PadBody(e.Body))
 }
 
 func (e *Each) Blockly() blockly.Block {
