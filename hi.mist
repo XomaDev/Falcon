@@ -1,5 +1,1 @@
-if "cat" << "Cat" {
-  println("Catty!")
-} else {
-  println("Oh, no!")
-}
+"hello".replaceFromLongestFirst({})

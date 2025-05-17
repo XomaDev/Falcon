@@ -17,6 +17,25 @@ func (q *Question) String() string {
 }
 
 func (q *Question) Blockly() blockly.Block {
+	switch q.Question {
+	case "number", "base10", "hexa", "bin":
+		return q.mathQuestion()
+	case "text":
+		return q.textQuestion()
+	default:
+		q.Where.Error("Unknown question ? %", q.Question)
+	}
+	panic("Unreachable")
+}
+
+func (q *Question) textQuestion() blockly.Block {
+	return blockly.Block{
+		Type:   "text_is_string",
+		Values: []blockly.Value{{Name: "ITEM", Block: q.On.Blockly()}},
+	}
+}
+
+func (q *Question) mathQuestion() blockly.Block {
 	var fieldOp string
 	switch q.Question {
 	case "number":
@@ -27,8 +46,6 @@ func (q *Question) Blockly() blockly.Block {
 		fieldOp = "HEXADECIMAL"
 	case "bin":
 		fieldOp = "BINARY"
-	default:
-		q.Where.Error("Unknown question ? %", q.Question)
 	}
 	return blockly.Block{
 		Type:   "math_is_a_number",

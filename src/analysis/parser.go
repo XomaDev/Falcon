@@ -8,6 +8,7 @@ import (
 	"Falcon/ast/list"
 	"Falcon/ast/logic"
 	"Falcon/ast/math"
+	"Falcon/ast/method"
 	"Falcon/ast/text"
 )
 import l "Falcon/lex"
@@ -192,13 +193,22 @@ func (p *Parser) element() blky.Expr {
 		pe := p.peek()
 		switch pe.Type {
 		case l.Dot:
-			left = &common.Prop{Where: p.next(), On: left, Name: p.name()}
+			where := p.next()
+			name := p.name()
+			if p.notEOF() && p.isNext(l.OpenCurve) {
+				left = &method.Call{Where: where, On: left, Name: name, Args: p.arguments()}
+			} else {
+				left = &common.Prop{Where: where, On: left, Name: name}
+			}
 		case l.RightArrow:
 			left = &common.Convert{Where: p.next(), On: left, Name: p.name()}
 			continue
 		case l.Question:
 			left = &common.Question{Where: p.next(), On: left, Question: p.name()}
 			continue
+		case l.DoubleColon:
+			// constant value transformer
+			left = &common.Transform{Where: p.next(), On: left, Name: p.name()}
 		}
 		break
 	}
@@ -257,8 +267,8 @@ func (p *Parser) dictionary() *dictionary.Dictionary {
 				break
 			}
 		}
+		p.expect(l.CloseCurly)
 	}
-	p.expect(l.CloseCurly)
 	return &dictionary.Dictionary{Elements: elements}
 }
 
@@ -271,8 +281,8 @@ func (p *Parser) list() *list.Expr {
 				break
 			}
 		}
+		p.expect(l.CloseSquare)
 	}
-	p.expect(l.CloseSquare)
 	return &list.Expr{Elements: elements}
 }
 

@@ -7,9 +7,13 @@ import (
 )
 
 var Properties = map[string][]string{
-	"len":     {"text", "text_length", "VALUE"},
-	"isEmpty": {"text", "text_isEmpty", "VALUE"},
-	"trim":    {"text", "text_trim", "TEXT"},
+	"len":           {"text", "text_length", "VALUE"},
+	"isEmpty":       {"text", "text_isEmpty", "VALUE"},
+	"trim":          {"text", "text_trim", "TEXT"},
+	"upper":         {"text", "text_changeCase", "TEXT", "UPCASE"},
+	"lower":         {"text", "text_changeCase", "TEXT", "DOWNCASE"},
+	"splitAtSpaces": {"text", "text_split_at_spaces", "TEXT"},
+	"reverse":       {"text", "text_reverse", "VALUE"},
 }
 
 type Prop struct {
@@ -39,10 +43,20 @@ func (p *Prop) textProp(tags []string) blockly.Block {
 	blockType := tags[1]
 	valName := tags[2]
 	switch blockType {
-	case "text_length", "text_isEmpty", "text_trim":
+	case "text_length", "text_isEmpty", "text_trim", "text_split_at_spaces", "text_reverse":
 		return p.simpleOperand(blockType, valName)
+	case "text_changeCase":
+		return p.textChangeCase(blockType, valName, tags[3])
 	default:
 		panic("Not implemented text property " + blockType)
+	}
+}
+
+func (p *Prop) textChangeCase(blockType string, valName string, fieldOp string) blockly.Block {
+	return blockly.Block{
+		Type:   blockType,
+		Fields: []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Values: []blockly.Value{{Name: valName, Block: p.On.Blockly()}},
 	}
 }
 
