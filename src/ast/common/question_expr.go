@@ -22,10 +22,28 @@ func (q *Question) Blockly() blockly.Block {
 		return q.mathQuestion()
 	case "text":
 		return q.textQuestion()
+	case "emptyText":
+		return q.textIsEmpty()
+	case "emptyList":
+		return q.listIsEmpty()
 	default:
 		q.Where.Error("Unknown question ? %", q.Question)
 	}
 	panic("Unreachable")
+}
+
+func (q *Question) listIsEmpty() blockly.Block {
+	return blockly.Block{
+		Type:   "lists_is_empty",
+		Values: []blockly.Value{{Name: "LIST", Block: q.On.Blockly()}},
+	}
+}
+
+func (q *Question) textIsEmpty() blockly.Block {
+	return blockly.Block{
+		Type:   "text_isEmpty",
+		Values: []blockly.Value{{Name: "VALUE", Block: q.On.Blockly()}},
+	}
 }
 
 func (q *Question) textQuestion() blockly.Block {

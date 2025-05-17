@@ -24,7 +24,7 @@ func makeSignature(module string, name string, paramCount int) *Signature {
 	return &Signature{Module: module, Name: name, ParamCount: paramCount}
 }
 
-var Signatures = map[string]*Signature{
+var signatures = map[string]*Signature{
 	"startsWith":              makeSignature("text", "text_starts_at", 1),
 	"contains":                makeSignature("text", "text_contains", 1),
 	"containsAny":             makeSignature("text", "text_contains", 1),
@@ -37,6 +37,9 @@ var Signatures = map[string]*Signature{
 	"replace":                 makeSignature("text", "text_replace_all", 2),
 	"replaceFrom":             makeSignature("text", "text_replace_mappings", 1),
 	"replaceFromLongestFirst": makeSignature("text", "text_replace_mappings", 1),
+
+	"add":          makeSignature("list", "lists_add_items", -1),
+	"containsItem": makeSignature("list", "lists_is_in", 1),
 }
 
 func (m *Call) String() string {
@@ -44,18 +47,28 @@ func (m *Call) String() string {
 }
 
 func (m *Call) Blockly() blockly.Block {
-	signature, ok := Signatures[m.Name]
+	signature, ok := signatures[m.Name]
 	if !ok {
 		m.Where.Error("Cannot find method .%", m.Name)
 	}
 	gotArgLen := len(m.Args)
-	if signature.ParamCount != gotArgLen {
-		m.Where.Error("Expected % args but got % for method .%",
-			strconv.Itoa(signature.ParamCount), strconv.Itoa(gotArgLen), m.Name)
+	if signature.ParamCount >= 0 {
+		if signature.ParamCount != gotArgLen {
+			m.Where.Error("Expected % args but got % for method .%",
+				strconv.Itoa(signature.ParamCount), strconv.Itoa(gotArgLen), m.Name)
+		}
+	} else {
+		minArgs := -signature.ParamCount
+		if gotArgLen < minArgs {
+			m.Where.Error("Expected at least % args but got only % for method .%",
+				strconv.Itoa(minArgs), strconv.Itoa(gotArgLen), m.Name)
+		}
 	}
 	switch signature.Module {
 	case "text":
 		return m.textMethods(signature)
+	case "list":
+		return m.listMethods(signature)
 	default:
 		panic("Unknown module " + signature.Module)
 	}

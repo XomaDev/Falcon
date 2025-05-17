@@ -179,7 +179,7 @@ func (f *FuncCall) minOrMax() blockly.Block {
 		Type:     "math_on_list",
 		Fields:   []blockly.Field{{Name: "OP", Value: fieldOp}},
 		Mutation: &blockly.Mutation{ItemCount: argSize},
-		Values:   blockly.ToValues("NUM", f.Args),
+		Values:   blockly.ValuesByPrefix("NUM", f.Args),
 	}
 }
 

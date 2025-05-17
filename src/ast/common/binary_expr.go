@@ -79,7 +79,7 @@ func (b *BinaryExpr) textJoin() blockly.Block {
 	return blockly.Block{
 		Type:     "text_join",
 		Mutation: &blockly.Mutation{ItemCount: len(b.Operands)},
-		Values:   blockly.ToValues("ADD", b.Operands),
+		Values:   blockly.ValuesByPrefix("ADD", b.Operands),
 	}
 }
 
@@ -141,7 +141,7 @@ func (b *BinaryExpr) bitwiseExpr() blockly.Block {
 	}
 	return blockly.Block{
 		Type:     "math_bitwise",
-		Values:   blockly.ToValues("NUM", b.Operands),
+		Values:   blockly.ValuesByPrefix("NUM", b.Operands),
 		Mutation: &blockly.Mutation{ItemCount: len(b.Operands)},
 		Fields:   []blockly.Field{{Name: "OP", Value: fieldOp}},
 	}
@@ -169,7 +169,7 @@ func (b *BinaryExpr) addOrTimes() blockly.Block {
 	}
 	return blockly.Block{
 		Type:     blockType,
-		Values:   blockly.ToValues("NUM", b.Operands),
+		Values:   blockly.ValuesByPrefix("NUM", b.Operands),
 		Mutation: &blockly.Mutation{ItemCount: len(b.Operands)},
 	}
 }

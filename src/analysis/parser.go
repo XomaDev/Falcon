@@ -9,6 +9,7 @@ import (
 	"Falcon/ast/logic"
 	"Falcon/ast/math"
 	"Falcon/ast/method"
+	"Falcon/ast/properties"
 	"Falcon/ast/text"
 )
 import l "Falcon/lex"
@@ -198,7 +199,7 @@ func (p *Parser) element() blky.Expr {
 			if p.notEOF() && p.isNext(l.OpenCurve) {
 				left = &method.Call{Where: where, On: left, Name: name, Args: p.arguments()}
 			} else {
-				left = &common.Prop{Where: where, On: left, Name: name}
+				left = &properties.Prop{Where: where, On: left, Name: name}
 			}
 		case l.RightArrow:
 			left = &common.Convert{Where: p.next(), On: left, Name: p.name()}

@@ -39,7 +39,7 @@ func (i *If) String() string {
 }
 
 func (i *If) Blockly() blockly.Block {
-	conditions := blockly.ToValues("IF", i.Conditions)
+	conditions := blockly.ValuesByPrefix("IF", i.Conditions)
 	bodies := blockly.ToStatements("DO", i.Bodies)
 
 	numbElifs := len(i.Conditions) - 1

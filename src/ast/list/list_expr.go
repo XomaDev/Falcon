@@ -17,6 +17,6 @@ func (l *Expr) Blockly() blockly.Block {
 	return blockly.Block{
 		Type:     "lists_create_with",
 		Mutation: &blockly.Mutation{ItemCount: len(l.Elements)},
-		Values:   blockly.ToValues("ADD", l.Elements),
+		Values:   blockly.ValuesByPrefix("ADD", l.Elements),
 	}
 }
