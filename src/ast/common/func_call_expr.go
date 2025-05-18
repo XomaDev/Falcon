@@ -60,8 +60,17 @@ func (f *FuncCall) Blockly() blockly.Block {
 
 	case "copyList":
 		return f.copyList()
+	case "copyDict":
+		return f.copyDict()
 	default:
 		panic("Unknown function " + f.Name)
+	}
+}
+
+func (f *FuncCall) copyDict() blockly.Block {
+	return blockly.Block{
+		Type:   "dictionaries_copy",
+		Values: blockly.MakeValues(f.Args, "DICT"),
 	}
 }
 

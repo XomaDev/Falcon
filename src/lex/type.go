@@ -64,4 +64,5 @@ const (
 	While
 	Do
 	Break
+	WalkAll
 )

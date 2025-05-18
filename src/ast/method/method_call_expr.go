@@ -42,11 +42,20 @@ var signatures = map[string]*Signature{
 	"listContainsItem": makeSignature("list", "lists_is_in", 1),
 	"indexOf":          makeSignature("list", "lists_position_in", 1),
 	"insert":           makeSignature("list", "lists_insert_item", 2),
-	"removeAt":         makeSignature("list", "lists_remove_item", 1),
+	"remove":           makeSignature("list", "lists_remove_item", 1),
 	"appendList":       makeSignature("list", "lists_append_list", 1),
 	"lookupInPairs":    makeSignature("list", "lists_lookup_in_pairs", 2),
 	"join":             makeSignature("list", "lists_join_with_separator", 1),
 	"slice":            makeSignature("list", "lists_slice", 2),
+
+	"get":         makeSignature("dict", "dictionaries_lookup", 2),
+	"set":         makeSignature("dict", "dictionaries_set_pair", 2),
+	"delete":      makeSignature("dict", "dictionaries_delete_pair", 1),
+	"getAtPath":   makeSignature("dict", "dictionaries_recursive_lookup", 2),
+	"setAtPath":   makeSignature("dict", "dictionaries_recursive_set", 2),
+	"containsKey": makeSignature("dict", "dictionaries_is_key_in", 1),
+	"mergeInto":   makeSignature("dict", "dictionaries_combine_dicts", 1),
+	"walkTree":    makeSignature("dict", "dictionaries_walk_tree", 1),
 }
 
 func (m *Call) String() string {
@@ -76,6 +85,8 @@ func (m *Call) Blockly() blockly.Block {
 		return m.textMethods(signature)
 	case "list":
 		return m.listMethods(signature)
+	case "dict":
+		return m.dictMethods(signature)
 	default:
 		panic("Unknown module " + signature.Module)
 	}

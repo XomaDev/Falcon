@@ -41,6 +41,12 @@ var properties = map[string]*Signature{
 	"sort":        makeSignature("list", "lists_sort", "LIST"),
 	"allButFirst": makeSignature("list", "lists_but_first", "LIST"),
 	"allButLast":  makeSignature("list", "lists_but_last", "LIST"),
+	"pairsToDict": makeSignature("list", "dictionaries_alist_to_dict", "PAIRS"),
+
+	"keys":    makeSignature("dict", "dictionaries_getters", "DICT", "KEYS"),
+	"values":  makeSignature("dict", "dictionaries_getters", "DICT", "VALUES"),
+	"dictLen": makeSignature("dict", "dictionaries_length", "DICT"),
+	"toPairs": makeSignature("dict", "dictionaries_dict_to_alist", "DICT"),
 }
 
 func (p *Prop) String() string {
@@ -57,6 +63,8 @@ func (p *Prop) Blockly() blockly.Block {
 		return p.textProp(signature)
 	case "list":
 		return p.listProp(signature)
+	case "dict":
+		return p.dictProps(signature)
 	default:
 		panic("Unknown undefined module " + signature.Module)
 	}

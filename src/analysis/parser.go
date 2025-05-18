@@ -31,6 +31,7 @@ func NewParser(tokens []l.Token) *Parser {
 func (p *Parser) ParseAll() []blky.Expr {
 	var expressions []blky.Expr
 	for p.notEOF() {
+		println("")
 		expressions = append(expressions, p.parse())
 	}
 	return expressions
@@ -47,7 +48,11 @@ func (p *Parser) parse() blky.Expr {
 	case l.While:
 		return p.whileExpr()
 	case l.Break:
+		p.skip()
 		return &control.Break{}
+	case l.WalkAll:
+		p.skip()
+		return &dictionary.WalkAll{}
 	default:
 		return p.expr(0)
 	}

@@ -11,7 +11,8 @@ func (p *Prop) listProp(signature *Signature) blockly.Block {
 		"lists_to_csv_table",
 		"lists_sort",
 		"lists_but_first",
-		"lists_but_last":
+		"lists_but_last",
+		"dictionaries_alist_to_dict":
 		return p.simpleOperand(signature.BlockType, signature.ValueName)
 	default:
 		panic("Not implemented list property " + signature.BlockType)
