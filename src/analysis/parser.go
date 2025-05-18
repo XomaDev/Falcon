@@ -12,6 +12,7 @@ import (
 	"Falcon/ast/method"
 	"Falcon/ast/properties"
 	"Falcon/ast/text"
+	"Falcon/ast/variables"
 )
 import l "Falcon/lex"
 
@@ -32,7 +33,6 @@ func NewParser(tokens []l.Token) *Parser {
 func (p *Parser) ParseAll() []blky.Expr {
 	var expressions []blky.Expr
 	for p.notEOF() {
-		println("")
 		expressions = append(expressions, p.parse())
 	}
 	return expressions
@@ -54,8 +54,46 @@ func (p *Parser) parse() blky.Expr {
 	case l.WalkAll:
 		p.skip()
 		return &dictionary.WalkAll{}
+	case l.Var:
+		return p.varExpr()
+	case l.Let:
+		return p.globVar()
 	default:
 		return p.expr(0)
+	}
+}
+
+func (p *Parser) globVar() blky.Expr {
+	p.skip()
+	name := p.name()
+	p.expect(l.Assign)
+	return &variables.Global{Name: name, Value: p.parse()}
+}
+
+func (p *Parser) varExpr() blky.Expr {
+	p.skip()
+	p.expect(l.OpenCurve)
+
+	var varNames []string
+	var varValues []blky.Expr
+
+	for p.notEOF() && !p.isNext(l.CloseCurve) {
+		name := p.name()
+		p.expect(l.Assign)
+		value := p.parse()
+
+		varNames = append(varNames, name)
+		varValues = append(varValues, value)
+
+		if !p.consume(l.Comma) {
+			break
+		}
+	}
+	p.expect(l.CloseCurve)
+	if p.consume(l.RightArrow) {
+		return &variables.VarResult{Names: varNames, Values: varValues, Result: p.parse()}
+	} else {
+		return &variables.Var{Names: varNames, Values: varValues, Body: p.body()}
 	}
 }
 
@@ -275,7 +313,7 @@ func (p *Parser) term() blky.Expr {
 	default:
 		if token.HasFlag(l.Value) {
 			value := p.value(token)
-			if nameExpr, ok := value.(*common.Name); ok && p.notEOF() && p.isNext(l.OpenCurve) {
+			if nameExpr, ok := value.(*variables.Get); ok && p.notEOF() && p.isNext(l.OpenCurve) {
 				return &common.FuncCall{Where: nameExpr.Where, Name: nameExpr.Name, Args: p.arguments()}
 			}
 			return value
@@ -355,7 +393,10 @@ func (p *Parser) value(t l.Token) blky.Expr {
 	case l.Text:
 		return &text.Expr{Content: *t.Content}
 	case l.Name:
-		return &common.Name{Where: t, Name: *t.Content}
+		return &variables.Get{Where: t, Global: false, Name: *t.Content}
+	case l.Glob:
+		p.expect(l.Dot)
+		return &variables.Get{Where: t, Global: true, Name: p.name()}
 	case l.Color:
 		p.expect(l.Colon)
 		return &color.Color{Where: t, Name: p.name()}

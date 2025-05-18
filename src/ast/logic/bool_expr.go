@@ -24,6 +24,6 @@ func (b *Bool) Blockly() blockly.Block {
 	}
 	return blockly.Block{
 		Type:   "logic_boolean",
-		Fields: blockly.ToFields(map[string]string{"BOOL": bText}),
+		Fields: blockly.FieldsFromMap(map[string]string{"BOOL": bText}),
 	}
 }

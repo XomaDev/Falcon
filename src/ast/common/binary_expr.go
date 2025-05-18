@@ -3,6 +3,7 @@ package common
 import (
 	"Falcon/ast/blockly"
 	"Falcon/ast/list"
+	"Falcon/ast/variables"
 	l "Falcon/lex"
 	"strconv"
 )
@@ -69,6 +70,18 @@ func (b *BinaryExpr) assignment() blockly.Block {
 	if listGet, ok := settable.(*list.Get); ok {
 		listSet := list.Set{List: listGet.List, Index: listGet.Index, Value: newValue}
 		return listSet.Blockly()
+	} else if varGet, ok := settable.(*variables.Get); ok {
+		var name string
+		if varGet.Global {
+			name = "global " + varGet.Name
+		} else {
+			name = varGet.Name
+		}
+		return blockly.Block{
+			Type:   "lexical_variable_set",
+			Fields: []blockly.Field{{Name: "VAR", Value: name}},
+			Values: []blockly.Value{{Name: "VALUE", Block: newValue.Blockly()}},
+		}
 	}
 	panic("Unimplemented!")
 }

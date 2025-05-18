@@ -29,7 +29,7 @@ func (t *Token) HasFlag(flag Flag) bool {
 }
 
 func (t *Token) Error(message string, args ...string) {
-	panic("[line " + strconv.Itoa(t.Line) + "] " + sugar.Format(message, args...))
+	panic("[line " + strconv.Itoa(t.Line) + "] " + t.String() + " " + sugar.Format(message, args...))
 }
 
 type StaticToken struct {

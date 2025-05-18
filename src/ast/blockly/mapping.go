@@ -5,10 +5,18 @@ import (
 	"strings"
 )
 
-func ToFields(m map[string]string) []Field {
+func FieldsFromMap(m map[string]string) []Field {
 	fields := make([]Field, 0, len(m))
 	for k, v := range m {
 		fields = append(fields, Field{k, v})
+	}
+	return fields
+}
+
+func ToFields(prefix string, values []string) []Field {
+	fields := make([]Field, len(values))
+	for i, value := range values {
+		fields[i] = Field{prefix + strconv.Itoa(i), value}
 	}
 	return fields
 }
@@ -72,6 +80,14 @@ func ToStatements(namePrefix string, bodies [][]Expr) []Statement {
 		statements[i] = CreateStatement(namePrefix+strconv.Itoa(i), aBody)
 	}
 	return statements
+}
+
+func MakeLocalNames(names ...string) []LocalName {
+	localNames := make([]LocalName, len(names))
+	for i, name := range names {
+		localNames[i] = LocalName{Name: name}
+	}
+	return localNames
 }
 
 func JoinExprs(separator string, expressions []Expr) string {

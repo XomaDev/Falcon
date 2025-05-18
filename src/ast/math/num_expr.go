@@ -15,6 +15,6 @@ func (n *Num) String() string {
 func (n *Num) Blockly() blockly.Block {
 	return blockly.Block{
 		Type:   "math_number",
-		Fields: blockly.ToFields(map[string]string{"NUM": n.Content}),
+		Fields: blockly.FieldsFromMap(map[string]string{"NUM": n.Content}),
 	}
 }
