@@ -37,7 +37,7 @@ var Symbols = map[string]StaticToken{
 	"{": staticOf(OpenCurly),
 	"}": staticOf(CloseCurly),
 
-	"=":  staticOf(Assign),
+	"=":  staticOf(Assign, AssignmentType, Operator),
 	".":  staticOf(Dot),
 	",":  staticOf(Comma),
 	"?":  staticOf(Question),

@@ -40,6 +40,7 @@ func (f *FuncCall) Blockly() blockly.Block {
 		return f.atan2()
 	case "formatDecimal":
 		return f.formatDecimal()
+
 	case "println":
 		return f.println()
 	case "openScreen":
@@ -56,8 +57,18 @@ func (f *FuncCall) Blockly() blockly.Block {
 		return f.ctrlSimpleBlock("controls_closeApplication")
 	case "getPlainStartText":
 		return f.ctrlSimpleBlock("controls_getPlainStartText")
+
+	case "copyList":
+		return f.copyList()
 	default:
 		panic("Unknown function " + f.Name)
+	}
+}
+
+func (f *FuncCall) copyList() blockly.Block {
+	return blockly.Block{
+		Type:   "lists_copy",
+		Values: blockly.MakeValues(f.Args, "LIST"),
 	}
 }
 

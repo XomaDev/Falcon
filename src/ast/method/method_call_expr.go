@@ -38,8 +38,12 @@ var signatures = map[string]*Signature{
 	"replaceFrom":             makeSignature("text", "text_replace_mappings", 1),
 	"replaceFromLongestFirst": makeSignature("text", "text_replace_mappings", 1),
 
-	"add":          makeSignature("list", "lists_add_items", -1),
-	"containsItem": makeSignature("list", "lists_is_in", 1),
+	"add":              makeSignature("list", "lists_add_items", -1),
+	"listContainsItem": makeSignature("list", "lists_is_in", 1),
+	"indexOf":          makeSignature("list", "lists_position_in", 1),
+	"insert":           makeSignature("list", "lists_insert_item", 2),
+	"removeAt":         makeSignature("list", "lists_remove_item", 1),
+	"appendList":       makeSignature("list", "lists_append_list", 1),
 }
 
 func (m *Call) String() string {

@@ -22,6 +22,8 @@ func (q *Question) Blockly() blockly.Block {
 		return q.mathQuestion()
 	case "text":
 		return q.textQuestion()
+	case "list":
+		return q.listQuestion()
 	case "emptyText":
 		return q.textIsEmpty()
 	case "emptyList":
@@ -43,6 +45,13 @@ func (q *Question) textIsEmpty() blockly.Block {
 	return blockly.Block{
 		Type:   "text_isEmpty",
 		Values: []blockly.Value{{Name: "VALUE", Block: q.On.Blockly()}},
+	}
+}
+
+func (q *Question) listQuestion() blockly.Block {
+	return blockly.Block{
+		Type:   "lists_is_list",
+		Values: []blockly.Value{{Name: "ITEM", Block: q.On.Blockly()}},
 	}
 }
 

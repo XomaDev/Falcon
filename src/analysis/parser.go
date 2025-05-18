@@ -161,28 +161,30 @@ func (p *Parser) expr(minPrecedence int) blky.Expr {
 
 func precedenceOf(flag l.Flag) int {
 	switch flag {
-	case l.Pair:
+	case l.AssignmentType:
 		return 0
-	case l.TextJoin:
+	case l.Pair:
 		return 1
-	case l.LLogicOr:
+	case l.TextJoin:
 		return 2
-	case l.LLogicAnd:
+	case l.LLogicOr:
 		return 3
-	case l.BBitwiseOr:
+	case l.LLogicAnd:
 		return 4
-	case l.BBitwiseAnd:
+	case l.BBitwiseOr:
 		return 5
-	case l.BBitwiseXor:
+	case l.BBitwiseAnd:
 		return 6
-	case l.Equality:
+	case l.BBitwiseXor:
 		return 7
-	case l.Relational:
+	case l.Equality:
 		return 8
-	case l.Binary:
+	case l.Relational:
 		return 9
-	case l.BinaryL1:
+	case l.Binary:
 		return 10
+	case l.BinaryL1:
+		return 11
 	default:
 		return -1
 	}
@@ -210,6 +212,11 @@ func (p *Parser) element() blky.Expr {
 		case l.DoubleColon:
 			// constant value transformer
 			left = &common.Transform{Where: p.next(), On: left, Name: p.name()}
+		case l.OpenSquare:
+			p.skip()
+			// an index element access
+			left = &list.Get{List: left, Index: p.parse()}
+			p.expect(l.CloseSquare)
 		}
 		break
 	}

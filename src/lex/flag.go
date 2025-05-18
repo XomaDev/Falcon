@@ -18,6 +18,7 @@ const (
 	BinaryL2
 	TextJoin
 	Pair
+	AssignmentType
 	Unary
 
 	Value

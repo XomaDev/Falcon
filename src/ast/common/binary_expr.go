@@ -2,6 +2,7 @@ package common
 
 import (
 	"Falcon/ast/blockly"
+	"Falcon/ast/list"
 	l "Falcon/lex"
 	"strconv"
 )
@@ -50,10 +51,26 @@ func (b *BinaryExpr) Blockly() blockly.Block {
 		return b.textJoin()
 	case l.TextEquals, l.TextNotEquals, l.TextLessThan, l.TextGreaterThan:
 		return b.textCompare()
+	case l.Assign:
+		return b.assignment()
 	default:
 		b.Where.Error("Unknown binary operator! " + b.Operator.String())
 		panic("") // unreachable
 	}
+}
+
+func (b *BinaryExpr) assignment() blockly.Block {
+	if len(b.Operands) != 2 {
+		b.Where.Error("Assignment '=' received more than two operands")
+	}
+	settable := b.Operands[0]
+	newValue := b.Operands[1]
+
+	if listGet, ok := settable.(*list.Get); ok {
+		listSet := list.Set{List: listGet.List, Index: listGet.Index, Value: newValue}
+		return listSet.Blockly()
+	}
+	panic("Unimplemented!")
 }
 
 func (b *BinaryExpr) textCompare() blockly.Block {
