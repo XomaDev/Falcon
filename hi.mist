@@ -1,1 +1,1 @@
-["hello"].toCsvRow
+[1, 2, 3].filter { n -> true }

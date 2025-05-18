@@ -16,8 +16,26 @@ func (m *Call) listMethods(signature *Signature) blockly.Block {
 		return m.listRemoveAt()
 	case "lists_append_list":
 		return m.listAppendList()
+	case "lists_lookup_in_pairs":
+		return m.listLookupInPairs()
+	case "lists_join_with_separator":
+		return m.listJoin()
 	default:
 		panic("Unknown list method " + signature.Name)
+	}
+}
+
+func (m *Call) listJoin() blockly.Block {
+	return blockly.Block{
+		Type:   "lists_join_with_separator",
+		Values: blockly.MakeValueArgs(m.On, "LIST", m.Args, "SEPARATOR"),
+	}
+}
+
+func (m *Call) listLookupInPairs() blockly.Block {
+	return blockly.Block{
+		Type:   "lists_lookup_in_pairs",
+		Values: blockly.MakeValueArgs(m.On, "LIST", m.Args, "KEY", "NOTFOUND"),
 	}
 }
 

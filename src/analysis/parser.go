@@ -198,8 +198,8 @@ func (p *Parser) element() blky.Expr {
 		case l.Dot:
 			where := p.next()
 			name := p.name()
-			if p.notEOF() && p.isNext(l.OpenCurve) {
-				left = &method.Call{Where: where, On: left, Name: name, Args: p.arguments()}
+			if p.notEOF() && p.isNext(l.OpenCurve, l.OpenCurly) {
+				left = p.objectCall(where, name, left)
 			} else {
 				left = &properties.Prop{Where: where, On: left, Name: name}
 			}
@@ -221,6 +221,36 @@ func (p *Parser) element() blky.Expr {
 		break
 	}
 	return left
+}
+
+func (p *Parser) objectCall(where l.Token, name string, object blky.Expr) blky.Expr {
+	var args []blky.Expr
+	if p.isNext(l.OpenCurve) {
+		args = p.arguments()
+	}
+	if !p.consume(l.OpenCurly) {
+		// he's a simple call!
+		return &method.Call{Where: where, On: object, Name: name, Args: args}
+	}
+	// oh, no! he's a transformer >_>
+	var namesUsed []string
+	if !p.consume(l.RightArrow) {
+		for {
+			namesUsed = append(namesUsed, p.name())
+			if !p.consume(l.Comma) {
+				break
+			}
+		}
+		p.consume(l.RightArrow)
+	}
+	transformer := p.parse()
+	p.consume(l.CloseCurly)
+	return &list.Transformer{Where: where,
+		List:        object,
+		Name:        name,
+		Args:        args,
+		Names:       namesUsed,
+		Transformer: transformer}
 }
 
 func (p *Parser) term() blky.Expr {
@@ -339,6 +369,9 @@ func (p *Parser) consume(t l.Type) bool {
 }
 
 func (p *Parser) expect(t l.Type) l.Token {
+	if p.isEOF() {
+		panic("Early EOF! Was expecting type " + t.String())
+	}
 	got := p.next()
 	if got.Type != t {
 		got.Error("Expected type % but got %", t.String(), got.Type.String())
@@ -346,8 +379,14 @@ func (p *Parser) expect(t l.Type) l.Token {
 	return got
 }
 
-func (p *Parser) isNext(t l.Type) bool {
-	return p.peek().Type == t
+func (p *Parser) isNext(checkTypes ...l.Type) bool {
+	pType := p.peek().Type
+	for _, checkType := range checkTypes {
+		if checkType == pType {
+			return true
+		}
+	}
+	return false
 }
 
 func (p *Parser) peek() l.Token {
