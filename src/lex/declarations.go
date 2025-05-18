@@ -61,4 +61,5 @@ var Keywords = map[string]StaticToken{
 	"do":      staticOf(Do),
 	"break":   staticOf(Break),
 	"walkAll": staticOf(WalkAll),
+	"color":   staticOf(Color, Value, ConstantValue),
 }

@@ -62,8 +62,27 @@ func (f *FuncCall) Blockly() blockly.Block {
 		return f.copyList()
 	case "copyDict":
 		return f.copyDict()
+
+	case "makeColor":
+		return f.makeColor()
+	case "splitColor":
+		return f.splitColor()
 	default:
 		panic("Unknown function " + f.Name)
+	}
+}
+
+func (f *FuncCall) splitColor() blockly.Block {
+	return blockly.Block{
+		Type:   "color_make_color",
+		Values: blockly.MakeValues(f.Args, "COLOR"),
+	}
+}
+
+func (f *FuncCall) makeColor() blockly.Block {
+	return blockly.Block{
+		Type:   "color_make_color",
+		Values: blockly.MakeValues(f.Args, "COLORLIST"),
 	}
 }
 

@@ -52,6 +52,7 @@ const (
 	Text
 	Number
 	Name
+	Color
 
 	If
 	Elif

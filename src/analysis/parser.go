@@ -2,6 +2,7 @@ package analysis
 
 import (
 	blky "Falcon/ast/blockly"
+	"Falcon/ast/color"
 	"Falcon/ast/common"
 	"Falcon/ast/control"
 	"Falcon/ast/dictionary"
@@ -355,6 +356,9 @@ func (p *Parser) value(t l.Token) blky.Expr {
 		return &text.Expr{Content: *t.Content}
 	case l.Name:
 		return &common.Name{Where: t, Name: *t.Content}
+	case l.Color:
+		p.expect(l.Colon)
+		return &color.Color{Where: t, Name: p.name()}
 	default:
 		t.Error("Unknown value type '%'", t.Type.String())
 		panic("") // unreachable
