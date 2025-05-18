@@ -20,8 +20,17 @@ func (m *Call) listMethods(signature *Signature) blockly.Block {
 		return m.listLookupInPairs()
 	case "lists_join_with_separator":
 		return m.listJoin()
+	case "lists_slice":
+		return m.listSlice()
 	default:
 		panic("Unknown list method " + signature.Name)
+	}
+}
+
+func (m *Call) listSlice() blockly.Block {
+	return blockly.Block{
+		Type:   "lists_slice",
+		Values: blockly.MakeValueArgs(m.On, "LIST", m.Args, "INDEX1", "INDEX2"),
 	}
 }
 

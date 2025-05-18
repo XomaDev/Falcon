@@ -228,7 +228,7 @@ func (p *Parser) objectCall(where l.Token, name string, object blky.Expr) blky.E
 	if p.isNext(l.OpenCurve) {
 		args = p.arguments()
 	}
-	if !p.consume(l.OpenCurly) {
+	if p.isEOF() || !p.consume(l.OpenCurly) {
 		// he's a simple call!
 		return &method.Call{Where: where, On: object, Name: name, Args: args}
 	}

@@ -46,6 +46,7 @@ var signatures = map[string]*Signature{
 	"appendList":       makeSignature("list", "lists_append_list", 1),
 	"lookupInPairs":    makeSignature("list", "lists_lookup_in_pairs", 2),
 	"join":             makeSignature("list", "lists_join_with_separator", 1),
+	"slice":            makeSignature("list", "lists_slice", 2),
 }
 
 func (m *Call) String() string {

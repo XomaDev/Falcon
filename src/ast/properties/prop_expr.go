@@ -38,6 +38,9 @@ var properties = map[string]*Signature{
 	"reverseList": makeSignature("list", "lists_reverse", "LIST"),
 	"toCsvRow":    makeSignature("list", "lists_to_csv_row", "LIST"),
 	"toCsvTable":  makeSignature("list", "lists_to_csv_table", "LIST"),
+	"sort":        makeSignature("list", "lists_sort", "LIST"),
+	"allButFirst": makeSignature("list", "lists_but_first", "LIST"),
+	"allButLast":  makeSignature("list", "lists_but_last", "LIST"),
 }
 
 func (p *Prop) String() string {
