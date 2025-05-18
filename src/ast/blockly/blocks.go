@@ -47,6 +47,8 @@ type Mutation struct {
 	MethodName    string      `xml:"method_name,attr,omitempty"`
 	Mode          string      `xml:"mode,attr,omitempty"`
 	Cofounder     string      `xml:"confounder,attr,omitempty"`
+	Inline        bool        `xml:"inline,attr,omitempty"`
+	Name          string      `xml:"name,attr,omitempty"`
 }
 
 type LocalName struct {

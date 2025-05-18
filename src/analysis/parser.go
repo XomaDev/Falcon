@@ -10,6 +10,7 @@ import (
 	"Falcon/ast/logic"
 	"Falcon/ast/math"
 	"Falcon/ast/method"
+	"Falcon/ast/procedures"
 	"Falcon/ast/properties"
 	"Falcon/ast/text"
 	"Falcon/ast/variables"
@@ -20,6 +21,7 @@ type Parser struct {
 	Tokens    []l.Token
 	currIndex int
 	tokenSize int
+	resolver  *NameResolver
 }
 
 func NewParser(tokens []l.Token) *Parser {
@@ -27,6 +29,7 @@ func NewParser(tokens []l.Token) *Parser {
 		Tokens:    tokens,
 		tokenSize: len(tokens),
 		currIndex: 0,
+		resolver:  &NameResolver{Procedures: map[string]Procedure{}},
 	}
 }
 
@@ -58,8 +61,33 @@ func (p *Parser) parse() blky.Expr {
 		return p.varExpr()
 	case l.Let:
 		return p.globVar()
+	case l.Func:
+		return p.funcSmt()
 	default:
 		return p.expr(0)
+	}
+}
+
+func (p *Parser) funcSmt() blky.Expr {
+	p.skip()
+	name := p.name()
+	p.expect(l.OpenCurve)
+	var parameters []string
+	if !p.consume(l.CloseCurve) {
+		for p.notEOF() && !p.isNext(l.CloseCurve) {
+			parameters = append(parameters, p.name())
+			if !p.consume(l.Comma) {
+				break
+			}
+		}
+		p.expect(l.CloseCurve)
+	}
+	returning := p.consume(l.Assign)
+	p.resolver.Procedures[name] = Procedure{Name: name, Parameters: parameters, Returning: returning}
+	if returning {
+		return &procedures.RetProcedure{Name: name, Parameters: parameters, Result: p.parse()}
+	} else {
+		return &procedures.VoidProcedure{Name: name, Parameters: parameters, Body: p.body()}
 	}
 }
 
@@ -314,7 +342,16 @@ func (p *Parser) term() blky.Expr {
 		if token.HasFlag(l.Value) {
 			value := p.value(token)
 			if nameExpr, ok := value.(*variables.Get); ok && p.notEOF() && p.isNext(l.OpenCurve) {
-				return &common.FuncCall{Where: nameExpr.Where, Name: nameExpr.Name, Args: p.arguments()}
+				signature, ok := p.resolver.Procedures[nameExpr.Name]
+				if ok {
+					return &procedures.Call{
+						Name:       nameExpr.Name,
+						Parameters: signature.Parameters,
+						Arguments:  p.arguments(),
+						Returning:  signature.Returning}
+				} else {
+					return &common.FuncCall{Where: nameExpr.Where, Name: nameExpr.Name, Args: p.arguments()}
+				}
 			}
 			return value
 		}

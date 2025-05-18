@@ -69,4 +69,5 @@ const (
 	Var
 	Let
 	Glob
+	Func
 )

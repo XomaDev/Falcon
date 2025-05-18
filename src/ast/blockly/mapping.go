@@ -21,6 +21,14 @@ func ToFields(prefix string, values []string) []Field {
 	return fields
 }
 
+func ToArgs(names []string) []Arg {
+	args := make([]Arg, len(names))
+	for i, name := range names {
+		args[i] = Arg{Name: name}
+	}
+	return args
+}
+
 func ValuesByPrefix(namePrefix string, operands []Expr) []Value {
 	values := make([]Value, len(operands))
 	for i, operand := range operands {
