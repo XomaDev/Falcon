@@ -4,6 +4,11 @@ import "Falcon/ast/blockly"
 
 func (c *Call) listMethods(signature *Signature) blockly.Block {
 	switch signature.Name {
+	case "lists_length", "lists_pick_random_item", "lists_reverse", "lists_to_csv_row",
+		"lists_to_csv_table", "lists_sort", "lists_but_first", "lists_but_last":
+		return c.simpleOperand(signature.Name, "LIST")
+	case "dictionaries_alist_to_dict":
+		return c.simpleOperand(signature.Name, "PAIRS")
 	case "lists_add_items":
 		return c.listAdd()
 	case "lists_is_in":

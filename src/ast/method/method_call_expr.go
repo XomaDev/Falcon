@@ -25,6 +25,7 @@ func makeSignature(module string, name string, paramCount int) *Signature {
 }
 
 var signatures = map[string]*Signature{
+	"textLen":                 makeSignature("text", "text_length", 0),
 	"trim":                    makeSignature("text", "text_trim", 0),
 	"uppercase":               makeSignature("text", "text_changeCase", 0),
 	"lowercase":               makeSignature("text", "text_changeCase", 0),
@@ -45,6 +46,7 @@ var signatures = map[string]*Signature{
 	"replaceFrom":             makeSignature("text", "text_replace_mappings", 1),
 	"replaceFromLongestFirst": makeSignature("text", "text_replace_mappings", 1),
 
+	"listLen":       makeSignature("list", "lists_length", 0),
 	"add":           makeSignature("list", "lists_add_items", -1),
 	"containsItem":  makeSignature("list", "lists_is_in", 1),
 	"indexOf":       makeSignature("list", "lists_position_in", 1),
@@ -54,6 +56,14 @@ var signatures = map[string]*Signature{
 	"lookupInPairs": makeSignature("list", "lists_lookup_in_pairs", 2),
 	"join":          makeSignature("list", "lists_join_with_separator", 1),
 	"slice":         makeSignature("list", "lists_slice", 2),
+	"random":        makeSignature("list", "lists_pick_random_item", 0),
+	"reverseList":   makeSignature("list", "lists_reverse", 0),
+	"toCsvRow":      makeSignature("list", "lists_to_csv_row", 0),
+	"toCsvTable":    makeSignature("list", "lists_to_csv_table", 0),
+	"sort":          makeSignature("list", "lists_sort", 0),
+	"allButFirst":   makeSignature("list", "lists_but_first", 0),
+	"allButLast":    makeSignature("list", "lists_but_last", 0),
+	"pairsToDict":   makeSignature("list", "dictionaries_alist_to_dict", 0),
 
 	"get":         makeSignature("dict", "dictionaries_lookup", 2),
 	"set":         makeSignature("dict", "dictionaries_set_pair", 2),

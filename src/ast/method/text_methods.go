@@ -4,6 +4,8 @@ import "Falcon/ast/blockly"
 
 func (c *Call) textMethods(signature *Signature) blockly.Block {
 	switch signature.Name {
+	case "text_length":
+		return c.simpleOperand("text_length", "VALUE")
 	case "text_trim":
 		return c.simpleOperand("text_trim", "TEXT")
 	case "text_split_at_spaces":
