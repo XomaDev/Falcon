@@ -50,6 +50,8 @@ func (b *BinaryExpr) Blockly() blockly.Block {
 		return b.simpleMathExpr()
 	case l.Underscore:
 		return b.textJoin()
+	case l.LessThan, l.LessThanEqual, l.GreatThan, l.GreaterThanEqual:
+		return b.relationalExpr()
 	case l.TextEquals, l.TextNotEquals, l.TextLessThan, l.TextGreaterThan:
 		return b.textCompare()
 	case l.Assign:
@@ -102,6 +104,25 @@ func (b *BinaryExpr) textCompare() blockly.Block {
 		Type:   "text_compare",
 		Fields: []blockly.Field{{Name: "OP", Value: fieldOp}},
 		Values: blockly.MakeValues(b.Operands, "TEXT1", "TEXT2"),
+	}
+}
+
+func (b *BinaryExpr) relationalExpr() blockly.Block {
+	var fieldOp string
+	switch b.Operator {
+	case l.LessThan:
+		fieldOp = "LT"
+	case l.LessThanEqual:
+		fieldOp = "LT"
+	case l.GreatThan:
+		fieldOp = "GT"
+	case l.GreaterThanEqual:
+		fieldOp = "GTE"
+	}
+	return blockly.Block{
+		Type:   "math_compare",
+		Fields: []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Values: blockly.MakeValues(b.Operands, "A", "B"),
 	}
 }
 

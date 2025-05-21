@@ -1,4 +1,9 @@
-func procedure(x, y, z)
-    = x * y * z
+let LemonadeSold = [5, 6, "NA", 7, 3, "NA", 8]
 
-procedure(1, 2, 3)
+func getTotalProfit() =
+   glob.LemonadeSold
+     .filter { x -> x ? text}
+     .map { x -> x * 2}
+     .reduce(0) { item, soFar -> item + soFar }
+
+println("Week's profit was " _ getTotalProfit())

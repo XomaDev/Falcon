@@ -166,8 +166,11 @@ func (p *Parser) forExpr() *control.For {
 	}
 }
 
-func (p *Parser) ifExpr() *control.If {
+func (p *Parser) ifExpr() blky.Expr {
 	p.skip()
+	if p.isNext(l.OpenCurve) {
+		return p.simpleIf()
+	}
 	var conditions []blky.Expr
 	var bodies [][]blky.Expr
 
@@ -183,6 +186,16 @@ func (p *Parser) ifExpr() *control.If {
 		elseBody = p.body()
 	}
 	return &control.If{Conditions: conditions, Bodies: bodies, ElseBody: elseBody}
+}
+
+func (p *Parser) simpleIf() *control.SimpleIf {
+	p.expect(l.OpenCurve)
+	condition := p.parse()
+	p.expect(l.CloseCurve)
+	then := p.parse()
+	p.expect(l.Else)
+	elze := p.parse()
+	return &control.SimpleIf{Condition: condition, Then: then, Else: elze}
 }
 
 func (p *Parser) body() []blky.Expr {
@@ -275,6 +288,7 @@ func (p *Parser) element() blky.Expr {
 			} else {
 				left = &properties.Prop{Where: where, On: left, Name: name}
 			}
+			continue
 		case l.RightArrow:
 			left = &common.Convert{Where: p.next(), On: left, Name: p.name()}
 			continue
@@ -289,6 +303,7 @@ func (p *Parser) element() blky.Expr {
 			// an index element access
 			left = &list.Get{List: left, Index: p.parse()}
 			p.expect(l.CloseSquare)
+			continue
 		}
 		break
 	}
@@ -334,8 +349,6 @@ func (p *Parser) term() blky.Expr {
 		return p.dictionary()
 	case l.Not:
 		return &logic.Not{Expr: p.element()}
-	case l.If:
-		return p.simpleIf()
 	case l.Do:
 		return p.doExpr()
 	default:
@@ -365,16 +378,6 @@ func (p *Parser) doExpr() *control.Do {
 	p.expect(l.RightArrow)
 	result := p.expr(0)
 	return &control.Do{Body: body, Result: result}
-}
-
-func (p *Parser) simpleIf() *control.SimpleIf {
-	p.expect(l.OpenCurve)
-	condition := p.element()
-	p.expect(l.CloseCurve)
-	then := p.element()
-	p.expect(l.Else)
-	elze := p.element()
-	return &control.SimpleIf{Condition: condition, Then: then, Else: elze}
 }
 
 func (p *Parser) dictionary() *dictionary.Dictionary {
