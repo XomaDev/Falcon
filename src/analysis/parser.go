@@ -56,9 +56,9 @@ func (p *Parser) parse() blky.Expr {
 	case l.WalkAll:
 		p.skip()
 		return &dictionary.WalkAll{}
-	case l.Var:
+	case l.Local:
 		return p.varExpr()
-	case l.Let:
+	case l.Global:
 		return p.globVar()
 	case l.Func:
 		return p.funcSmt()
@@ -427,7 +427,7 @@ func (p *Parser) value(t l.Token) blky.Expr {
 		return &text.Expr{Content: *t.Content}
 	case l.Name:
 		return &variables.Get{Where: t, Global: false, Name: *t.Content}
-	case l.Glob:
+	case l.This:
 		p.expect(l.Dot)
 		return &variables.Get{Where: t, Global: true, Name: p.name()}
 	case l.Color:

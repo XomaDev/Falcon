@@ -66,8 +66,8 @@ const (
 	Do
 	Break
 	WalkAll
-	Var
-	Let
-	Glob
+	Global
+	Local
+	This
 	Func
 )

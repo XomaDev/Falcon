@@ -1,1 +1,3 @@
-{}.keys
+global name = "Kumaraswamy"
+
+func sayHello() = "Hey " _ name + "! How are you?"
