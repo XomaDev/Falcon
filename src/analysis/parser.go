@@ -11,7 +11,6 @@ import (
 	"Falcon/ast/math"
 	"Falcon/ast/method"
 	"Falcon/ast/procedures"
-	"Falcon/ast/properties"
 	"Falcon/ast/text"
 	"Falcon/ast/variables"
 )
@@ -281,13 +280,7 @@ func (p *Parser) element() blky.Expr {
 		pe := p.peek()
 		switch pe.Type {
 		case l.Dot:
-			where := p.next()
-			name := p.name()
-			if p.notEOF() && p.isNext(l.OpenCurve, l.OpenCurly) {
-				left = p.objectCall(where, name, left)
-			} else {
-				left = &properties.Prop{Where: where, On: left, Name: name}
-			}
+			left = p.objectCall(p.next(), p.name(), left)
 			continue
 		case l.RightArrow:
 			left = &common.Convert{Where: p.next(), On: left, Name: p.name()}

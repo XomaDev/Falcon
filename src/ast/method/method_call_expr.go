@@ -65,6 +65,7 @@ var signatures = map[string]*Signature{
 	"allButLast":    makeSignature("list", "lists_but_last", 0),
 	"pairsToDict":   makeSignature("list", "dictionaries_alist_to_dict", 0),
 
+	"dictLen":     makeSignature("dict", "dictionaries_length", 0),
 	"get":         makeSignature("dict", "dictionaries_lookup", 2),
 	"set":         makeSignature("dict", "dictionaries_set_pair", 2),
 	"delete":      makeSignature("dict", "dictionaries_delete_pair", 1),
@@ -73,6 +74,9 @@ var signatures = map[string]*Signature{
 	"containsKey": makeSignature("dict", "dictionaries_is_key_in", 1),
 	"mergeInto":   makeSignature("dict", "dictionaries_combine_dicts", 1),
 	"walkTree":    makeSignature("dict", "dictionaries_walk_tree", 1),
+	"keys":        makeSignature("dict", "dictionaries_getters", 0),
+	"values":      makeSignature("dict", "dictionaries_getters", 0),
+	"toPairs":     makeSignature("dict", "dictionaries_dict_to_alist", 0),
 }
 
 func (c *Call) String() string {

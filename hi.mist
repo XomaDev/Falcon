@@ -1,1 +1,1 @@
-"hello".uppercase()
+{}.keys

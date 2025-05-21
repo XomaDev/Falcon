@@ -4,6 +4,8 @@ import blky "Falcon/ast/blockly"
 
 func (c *Call) dictMethods(signature *Signature) blky.Block {
 	switch signature.Name {
+	case "dictionaries_length", "dictionaries_dict_to_alist":
+		return c.simpleOperand(signature.Name, "DICT")
 	case "dictionaries_lookup":
 		return c.dictGet()
 	case "dictionaries_set_pair":
@@ -22,6 +24,20 @@ func (c *Call) dictMethods(signature *Signature) blky.Block {
 		return c.dictWalkTree()
 	default:
 		panic("Unknown text method " + signature.Name)
+	}
+}
+
+func (c *Call) dictGetters() blky.Block {
+	var fieldOp string
+	if c.Name == "values" {
+		fieldOp = "VALUES"
+	} else {
+		fieldOp = "KEYS"
+	}
+	return blky.Block{
+		Type:   "dictionaries_getters",
+		Fields: []blky.Field{{Name: "OP", Value: fieldOp}},
+		Values: []blky.Value{{Name: "DICT", Block: c.On.Blockly()}},
 	}
 }
 
