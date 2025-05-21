@@ -25,6 +25,9 @@ func makeSignature(module string, name string, paramCount int) *Signature {
 }
 
 var signatures = map[string]*Signature{
+	"trim":                    makeSignature("text", "text_trim", 0),
+	"uppercase":               makeSignature("text", "text_changeCase", 0),
+	"lowercase":               makeSignature("text", "text_changeCase", 0),
 	"startsWith":              makeSignature("text", "text_starts_at", 1),
 	"contains":                makeSignature("text", "text_contains", 1),
 	"containsAny":             makeSignature("text", "text_contains", 1),
@@ -33,6 +36,10 @@ var signatures = map[string]*Signature{
 	"splitAtFirst":            makeSignature("text", "text_split", 1),
 	"splitAtAny":              makeSignature("text(", "text_split", 1),
 	"splitAtFirstOfAny":       makeSignature("text", "text_split", 1),
+	"splitAtSpaces":           makeSignature("text", "text_split_at_spaces", 0),
+	"reverse":                 makeSignature("text", "text_reverse", 0),
+	"csvRowToList":            makeSignature("text", "lists_from_csv_row", 0),
+	"csvTableToList":          makeSignature("text", "lists_from_csv_table", 0),
 	"segment":                 makeSignature("text", "text_segment", 2),
 	"replace":                 makeSignature("text", "text_replace_all", 2),
 	"replaceFrom":             makeSignature("text", "text_replace_mappings", 1),
@@ -58,36 +65,40 @@ var signatures = map[string]*Signature{
 	"walkTree":    makeSignature("dict", "dictionaries_walk_tree", 1),
 }
 
-func (m *Call) String() string {
-	return sugar.Format("%.%(%)", m.On.String(), m.Name, blockly.JoinExprs(", ", m.Args))
+func (c *Call) String() string {
+	return sugar.Format("%.%(%)", c.On.String(), c.Name, blockly.JoinExprs(", ", c.Args))
 }
 
-func (m *Call) Blockly() blockly.Block {
-	signature, ok := signatures[m.Name]
+func (c *Call) Blockly() blockly.Block {
+	signature, ok := signatures[c.Name]
 	if !ok {
-		m.Where.Error("Cannot find method .%", m.Name)
+		c.Where.Error("Cannot find method .%", c.Name)
 	}
-	gotArgLen := len(m.Args)
+	gotArgLen := len(c.Args)
 	if signature.ParamCount >= 0 {
 		if signature.ParamCount != gotArgLen {
-			m.Where.Error("Expected % args but got % for method .%",
-				strconv.Itoa(signature.ParamCount), strconv.Itoa(gotArgLen), m.Name)
+			c.Where.Error("Expected % args but got % for method .%",
+				strconv.Itoa(signature.ParamCount), strconv.Itoa(gotArgLen), c.Name)
 		}
 	} else {
 		minArgs := -signature.ParamCount
 		if gotArgLen < minArgs {
-			m.Where.Error("Expected at least % args but got only % for method .%",
-				strconv.Itoa(minArgs), strconv.Itoa(gotArgLen), m.Name)
+			c.Where.Error("Expected at least % args but got only % for method .%",
+				strconv.Itoa(minArgs), strconv.Itoa(gotArgLen), c.Name)
 		}
 	}
 	switch signature.Module {
 	case "text":
-		return m.textMethods(signature)
+		return c.textMethods(signature)
 	case "list":
-		return m.listMethods(signature)
+		return c.listMethods(signature)
 	case "dict":
-		return m.dictMethods(signature)
+		return c.dictMethods(signature)
 	default:
 		panic("Unknown module " + signature.Module)
 	}
+}
+
+func (c *Call) simpleOperand(blockType string, valueName string) blockly.Block {
+	return blockly.Block{Type: blockType, Values: []blockly.Value{{Name: valueName, Block: c.On.Blockly()}}}
 }

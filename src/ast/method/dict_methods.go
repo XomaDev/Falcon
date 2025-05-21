@@ -2,84 +2,84 @@ package method
 
 import blky "Falcon/ast/blockly"
 
-func (m *Call) dictMethods(signature *Signature) blky.Block {
+func (c *Call) dictMethods(signature *Signature) blky.Block {
 	switch signature.Name {
 	case "dictionaries_lookup":
-		return m.dictGet()
+		return c.dictGet()
 	case "dictionaries_set_pair":
-		return m.dictSet()
+		return c.dictSet()
 	case "dictionaries_delete_pair":
-		return m.dictDelete()
+		return c.dictDelete()
 	case "dictionaries_recursive_lookup":
-		return m.dictGetAtPath()
+		return c.dictGetAtPath()
 	case "dictionaries_recursive_set":
-		return m.dictSetAtPath()
+		return c.dictSetAtPath()
 	case "dictionaries_is_key_in":
-		return m.dictContainsKey()
+		return c.dictContainsKey()
 	case "dictionaries_combine_dicts":
-		return m.dictMergeInto()
+		return c.dictMergeInto()
 	case "dictionaries_walk_tree":
-		return m.dictWalkTree()
+		return c.dictWalkTree()
 	default:
 		panic("Unknown text method " + signature.Name)
 	}
 }
 
-func (m *Call) dictWalkTree() blky.Block {
+func (c *Call) dictWalkTree() blky.Block {
 	return blky.Block{
 		Type:   "dictionaries_walk_tree",
-		Values: blky.MakeValueArgs(m.On, "DICT", m.Args, "PATH"),
+		Values: blky.MakeValueArgs(c.On, "DICT", c.Args, "PATH"),
 	}
 }
 
-func (m *Call) dictMergeInto() blky.Block {
+func (c *Call) dictMergeInto() blky.Block {
 	return blky.Block{
 		Type: "dictionaries_combine_dicts",
 		Values: []blky.Value{
-			{Name: "DICT1", Block: m.Args[0].Blockly()},
-			{Name: "DICT2", Block: m.On.Blockly()},
+			{Name: "DICT1", Block: c.Args[0].Blockly()},
+			{Name: "DICT2", Block: c.On.Blockly()},
 		},
 	}
 }
 
-func (m *Call) dictContainsKey() blky.Block {
+func (c *Call) dictContainsKey() blky.Block {
 	return blky.Block{
 		Type:   "dictionaries_is_key_in",
-		Values: blky.MakeValueArgs(m.On, "DICT", m.Args, "KEY"),
+		Values: blky.MakeValueArgs(c.On, "DICT", c.Args, "KEY"),
 	}
 }
 
-func (m *Call) dictSetAtPath() blky.Block {
+func (c *Call) dictSetAtPath() blky.Block {
 	return blky.Block{
 		Type:   "dictionaries_recursive_set",
-		Values: blky.MakeValueArgs(m.On, "DICT", m.Args, "KEYS", "VALUE"),
+		Values: blky.MakeValueArgs(c.On, "DICT", c.Args, "KEYS", "VALUE"),
 	}
 }
 
-func (m *Call) dictGetAtPath() blky.Block {
+func (c *Call) dictGetAtPath() blky.Block {
 	return blky.Block{
 		Type:   "dictionaries_recursive_lookup",
-		Values: blky.MakeValueArgs(m.On, "DICT", m.Args, "KEYS", "NOTFOUND"),
+		Values: blky.MakeValueArgs(c.On, "DICT", c.Args, "KEYS", "NOTFOUND"),
 	}
 }
 
-func (m *Call) dictDelete() blky.Block {
+func (c *Call) dictDelete() blky.Block {
 	return blky.Block{
 		Type:   "dictionaries_delete_pair",
-		Values: blky.MakeValueArgs(m.On, "DICT", m.Args, "KEY"),
+		Values: blky.MakeValueArgs(c.On, "DICT", c.Args, "KEY"),
 	}
 }
 
-func (m *Call) dictSet() blky.Block {
+func (c *Call) dictSet() blky.Block {
 	return blky.Block{
 		Type:   "dictionaries_set_pair",
-		Values: blky.MakeValueArgs(m.On, "DICT", m.Args, "KEY", "VALUE"),
+		Values: blky.MakeValueArgs(c.On, "DICT", c.Args, "KEY", "VALUE"),
 	}
 }
 
-func (m *Call) dictGet() blky.Block {
+func (c *Call) dictGet() blky.Block {
 	return blky.Block{
 		Type:   "dictionaries_lookup",
-		Values: blky.MakeValueArgs(m.On, "DICT", m.Args, "KEY", "NOTFOUND"),
+		Values: blky.MakeValueArgs(c.On, "DICT", c.Args, "KEY", "NOTFOUND"),
 	}
 }

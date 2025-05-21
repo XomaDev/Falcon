@@ -24,14 +24,7 @@ func makeSignature(module string, blockType string, valueName string, extras ...
 }
 
 var properties = map[string]*Signature{
-	"textLen":        makeSignature("text", "text_length", "VALUE"),
-	"trim":           makeSignature("text", "text_trim", "TEXT"),
-	"upper":          makeSignature("text", "text_changeCase", "TEXT", "UPCASE"),
-	"lower":          makeSignature("text", "text_changeCase", "TEXT", "DOWNCASE"),
-	"splitAtSpaces":  makeSignature("text", "text_split_at_spaces", "TEXT"),
-	"reverse":        makeSignature("text", "text_reverse", "VALUE"),
-	"csvRowToList":   makeSignature("list", "lists_from_csv_row", "TEXT"),
-	"csvTableToList": makeSignature("list", "lists_from_csv_table", "TEXT"),
+	"textLen": makeSignature("text", "text_length", "VALUE"),
 
 	"listLen":     makeSignature("list", "lists_length", "LIST"),
 	"random":      makeSignature("list", "lists_pick_random_item", "LIST"),

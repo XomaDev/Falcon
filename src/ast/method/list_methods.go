@@ -2,91 +2,91 @@ package method
 
 import "Falcon/ast/blockly"
 
-func (m *Call) listMethods(signature *Signature) blockly.Block {
+func (c *Call) listMethods(signature *Signature) blockly.Block {
 	switch signature.Name {
 	case "lists_add_items":
-		return m.listAdd()
+		return c.listAdd()
 	case "lists_is_in":
-		return m.listContainsItem()
+		return c.listContainsItem()
 	case "lists_position_in":
-		return m.listIndexOf()
+		return c.listIndexOf()
 	case "lists_insert_item":
-		return m.listInsertItem()
+		return c.listInsertItem()
 	case "lists_remove_item":
-		return m.listRemoveAt()
+		return c.listRemoveAt()
 	case "lists_append_list":
-		return m.listAppendList()
+		return c.listAppendList()
 	case "lists_lookup_in_pairs":
-		return m.listLookupInPairs()
+		return c.listLookupInPairs()
 	case "lists_join_with_separator":
-		return m.listJoin()
+		return c.listJoin()
 	case "lists_slice":
-		return m.listSlice()
+		return c.listSlice()
 	default:
 		panic("Unknown list method " + signature.Name)
 	}
 }
 
-func (m *Call) listSlice() blockly.Block {
+func (c *Call) listSlice() blockly.Block {
 	return blockly.Block{
 		Type:   "lists_slice",
-		Values: blockly.MakeValueArgs(m.On, "LIST", m.Args, "INDEX1", "INDEX2"),
+		Values: blockly.MakeValueArgs(c.On, "LIST", c.Args, "INDEX1", "INDEX2"),
 	}
 }
 
-func (m *Call) listJoin() blockly.Block {
+func (c *Call) listJoin() blockly.Block {
 	return blockly.Block{
 		Type:   "lists_join_with_separator",
-		Values: blockly.MakeValueArgs(m.On, "LIST", m.Args, "SEPARATOR"),
+		Values: blockly.MakeValueArgs(c.On, "LIST", c.Args, "SEPARATOR"),
 	}
 }
 
-func (m *Call) listLookupInPairs() blockly.Block {
+func (c *Call) listLookupInPairs() blockly.Block {
 	return blockly.Block{
 		Type:   "lists_lookup_in_pairs",
-		Values: blockly.MakeValueArgs(m.On, "LIST", m.Args, "KEY", "NOTFOUND"),
+		Values: blockly.MakeValueArgs(c.On, "LIST", c.Args, "KEY", "NOTFOUND"),
 	}
 }
 
-func (m *Call) listAppendList() blockly.Block {
+func (c *Call) listAppendList() blockly.Block {
 	return blockly.Block{
 		Type:   "lists_append_list",
-		Values: blockly.MakeValueArgs(m.On, "LIST0", m.Args, "LIST1"),
+		Values: blockly.MakeValueArgs(c.On, "LIST0", c.Args, "LIST1"),
 	}
 }
 
-func (m *Call) listRemoveAt() blockly.Block {
+func (c *Call) listRemoveAt() blockly.Block {
 	return blockly.Block{
 		Type:   "lists_remove_item",
-		Values: blockly.MakeValueArgs(m.On, "LIST", m.Args, "INDEX"),
+		Values: blockly.MakeValueArgs(c.On, "LIST", c.Args, "INDEX"),
 	}
 }
 
-func (m *Call) listInsertItem() blockly.Block {
+func (c *Call) listInsertItem() blockly.Block {
 	return blockly.Block{
 		Type:   "lists_insert_item",
-		Values: blockly.MakeValueArgs(m.On, "LIST", m.Args, "INDEX", "ITEM"),
+		Values: blockly.MakeValueArgs(c.On, "LIST", c.Args, "INDEX", "ITEM"),
 	}
 }
 
-func (m *Call) listIndexOf() blockly.Block {
+func (c *Call) listIndexOf() blockly.Block {
 	return blockly.Block{
 		Type:   "lists_position_in",
-		Values: blockly.MakeValueArgs(m.On, "LIST", m.Args, "ITEM"),
+		Values: blockly.MakeValueArgs(c.On, "LIST", c.Args, "ITEM"),
 	}
 }
 
-func (m *Call) listContainsItem() blockly.Block {
+func (c *Call) listContainsItem() blockly.Block {
 	return blockly.Block{
 		Type:   "lists_is_in",
-		Values: blockly.MakeValueArgs(m.On, "LIST", m.Args, "ITEM"),
+		Values: blockly.MakeValueArgs(c.On, "LIST", c.Args, "ITEM"),
 	}
 }
 
-func (m *Call) listAdd() blockly.Block {
+func (c *Call) listAdd() blockly.Block {
 	return blockly.Block{
 		Type:     "lists_add_items",
-		Mutation: &blockly.Mutation{ItemCount: len(m.Args)},
-		Values:   blockly.ValueArgsByPrefix(m.On, "LIST", "ITEM", m.Args),
+		Mutation: &blockly.Mutation{ItemCount: len(c.Args)},
+		Values:   blockly.ValueArgsByPrefix(c.On, "LIST", "ITEM", c.Args),
 	}
 }

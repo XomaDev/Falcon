@@ -2,28 +2,54 @@ package method
 
 import "Falcon/ast/blockly"
 
-func (m *Call) textMethods(signature *Signature) blockly.Block {
+func (c *Call) textMethods(signature *Signature) blockly.Block {
 	switch signature.Name {
+	case "text_trim":
+		return c.simpleOperand("text_trim", "TEXT")
+	case "text_split_at_spaces":
+		return c.simpleOperand("text_split_at_spaces", "TEXT")
+	case "text_reverse":
+		return c.simpleOperand("text_reverse", "VALUE")
+	case "lists_from_csv_row":
+		return c.simpleOperand("lists_from_csv_row", "TEXT")
+	case "lists_from_csv_table":
+		return c.simpleOperand("lists_from_csv_table", "TEXT")
+	case "text_changeCase":
+		return c.textChangeCase()
 	case "text_starts_at":
-		return m.textStartsAt()
+		return c.textStartsAt()
 	case "text_contains":
-		return m.textContains()
+		return c.textContains()
 	case "text_split":
-		return m.textSplit()
+		return c.textSplit()
 	case "text_segment":
-		return m.textSegment()
+		return c.textSegment()
 	case "text_replace_all":
-		return m.textReplace()
+		return c.textReplace()
 	case "text_replace_mappings":
-		return m.textReplaceFrom()
+		return c.textReplaceFrom()
 	default:
 		panic("Unknown text method " + signature.Name)
 	}
 }
 
-func (m *Call) textReplaceFrom() blockly.Block {
+func (c *Call) textChangeCase() blockly.Block {
 	var fieldOp string
-	if m.Name == "replaceFrom" {
+	if c.Name == "uppercase" {
+		fieldOp = "UPCASE"
+	} else {
+		fieldOp = "DOWNCASE"
+	}
+	return blockly.Block{
+		Type:   "text_changeCase",
+		Fields: []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Values: []blockly.Value{{Name: "TEXT", Block: c.On.Blockly()}},
+	}
+}
+
+func (c *Call) textReplaceFrom() blockly.Block {
+	var fieldOp string
+	if c.Name == "replaceFrom" {
 		fieldOp = "DICTIONARY_ORDER"
 	} else {
 		fieldOp = "LONGEST_STRING_FIRST"
@@ -32,37 +58,37 @@ func (m *Call) textReplaceFrom() blockly.Block {
 		Type:   "text_replace_mappings",
 		Fields: []blockly.Field{{Name: "OP", Value: fieldOp}},
 		Values: []blockly.Value{
-			{Name: "MAPPINGS", Block: m.Args[0].Blockly()},
-			{Name: "TEXT", Block: m.On.Blockly()},
+			{Name: "MAPPINGS", Block: c.Args[0].Blockly()},
+			{Name: "TEXT", Block: c.On.Blockly()},
 		},
 	}
 }
 
-func (m *Call) textReplace() blockly.Block {
+func (c *Call) textReplace() blockly.Block {
 	return blockly.Block{
 		Type: "text_replace_all",
 		Values: []blockly.Value{
-			{Name: "TEXT", Block: m.On.Blockly()},
-			{Name: "SEGMENT", Block: m.Args[0].Blockly()},
-			{Name: "REPLACEMENT", Block: m.Args[1].Blockly()},
+			{Name: "TEXT", Block: c.On.Blockly()},
+			{Name: "SEGMENT", Block: c.Args[0].Blockly()},
+			{Name: "REPLACEMENT", Block: c.Args[1].Blockly()},
 		},
 	}
 }
 
-func (m *Call) textSegment() blockly.Block {
+func (c *Call) textSegment() blockly.Block {
 	return blockly.Block{
 		Type: "text_segment",
 		Values: []blockly.Value{
-			{Name: "TEXT", Block: m.On.Blockly()},
-			{Name: "START", Block: m.Args[0].Blockly()},
-			{Name: "LENGTH", Block: m.Args[1].Blockly()},
+			{Name: "TEXT", Block: c.On.Blockly()},
+			{Name: "START", Block: c.Args[0].Blockly()},
+			{Name: "LENGTH", Block: c.Args[1].Blockly()},
 		},
 	}
 }
 
-func (m *Call) textSplit() blockly.Block {
+func (c *Call) textSplit() blockly.Block {
 	var fieldOp string
-	switch m.Name {
+	switch c.Name {
 	case "split":
 		fieldOp = "SPLIT"
 	case "splitAtFirst":
@@ -77,15 +103,15 @@ func (m *Call) textSplit() blockly.Block {
 		Mutation: &blockly.Mutation{Mode: fieldOp},
 		Fields:   []blockly.Field{{Name: "OP", Value: fieldOp}},
 		Values: []blockly.Value{
-			{Name: "TEXT", Block: m.On.Blockly()},
-			{Name: "AT", Block: m.Args[0].Blockly()},
+			{Name: "TEXT", Block: c.On.Blockly()},
+			{Name: "AT", Block: c.Args[0].Blockly()},
 		},
 	}
 }
 
-func (m *Call) textContains() blockly.Block {
+func (c *Call) textContains() blockly.Block {
 	var fieldOp string
-	switch m.Name {
+	switch c.Name {
 	case "contains":
 		fieldOp = "CONTAINS"
 	case "containsAny":
@@ -98,18 +124,18 @@ func (m *Call) textContains() blockly.Block {
 		Mutation: &blockly.Mutation{Mode: fieldOp},
 		Fields:   []blockly.Field{{Name: "OP", Value: fieldOp}},
 		Values: []blockly.Value{
-			{Name: "TEXT", Block: m.On.Blockly()},
-			{Name: "PIECE", Block: m.Args[0].Blockly()},
+			{Name: "TEXT", Block: c.On.Blockly()},
+			{Name: "PIECE", Block: c.Args[0].Blockly()},
 		},
 	}
 }
 
-func (m *Call) textStartsAt() blockly.Block {
+func (c *Call) textStartsAt() blockly.Block {
 	return blockly.Block{
 		Type: "text_starts_at",
 		Values: []blockly.Value{
-			{Name: "TEXT", Block: m.On.Blockly()},
-			{Name: "PIECE", Block: m.Args[0].Blockly()},
+			{Name: "TEXT", Block: c.On.Blockly()},
+			{Name: "PIECE", Block: c.Args[0].Blockly()},
 		},
 	}
 }
