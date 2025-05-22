@@ -1,3 +1,4 @@
-global name = "Kumaraswamy"
+local name = "Kumaraswamy"
+local catName = "Mawo!"
 
-func sayHello() = "Hey " _ name + "! How are you?"
+println("My name is " _ name _ " and my cat's name is " _ catName)

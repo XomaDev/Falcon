@@ -99,28 +99,45 @@ func (p *Parser) globVar() blky.Expr {
 
 func (p *Parser) varExpr() blky.Expr {
 	p.skip()
-	p.expect(l.OpenCurve)
 
 	var varNames []string
 	var varValues []blky.Expr
+	if p.consume(l.OpenCurve) {
+		// a result local var
+		for p.notEOF() && !p.isNext(l.CloseCurve) {
+			name := p.name()
+			p.expect(l.Assign)
+			value := p.parse()
 
-	for p.notEOF() && !p.isNext(l.CloseCurve) {
-		name := p.name()
-		p.expect(l.Assign)
-		value := p.parse()
+			varNames = append(varNames, name)
+			varValues = append(varValues, value)
 
-		varNames = append(varNames, name)
-		varValues = append(varValues, value)
-
-		if !p.consume(l.Comma) {
-			break
+			if !p.consume(l.Comma) {
+				break
+			}
 		}
-	}
-	p.expect(l.CloseCurve)
-	if p.consume(l.RightArrow) {
-		return &variables.VarResult{Names: varNames, Values: varValues, Result: p.parse()}
+		p.expect(l.CloseCurve)
+		if p.consume(l.RightArrow) {
+			return &variables.VarResult{Names: varNames, Values: varValues, Result: p.parse()}
+		} else {
+			return &variables.Var{Names: varNames, Values: varValues, Body: p.body()}
+		}
 	} else {
-		return &variables.Var{Names: varNames, Values: varValues, Body: p.body()}
+		// a clean full scope variable
+		for {
+			name := p.name()
+			p.expect(l.Assign)
+			value := p.parse()
+
+			varNames = append(varNames, name)
+			varValues = append(varValues, value)
+
+			if !p.consume(l.Local) {
+				break
+			}
+		}
+		// we gotta parse rest of the body here
+		return &variables.Var{Names: varNames, Values: varValues, Body: p.bodyUntilCurly()}
 	}
 }
 
@@ -199,6 +216,12 @@ func (p *Parser) simpleIf() *control.SimpleIf {
 
 func (p *Parser) body() []blky.Expr {
 	p.expect(l.OpenCurly)
+	expressions := p.bodyUntilCurly()
+	p.expect(l.CloseCurly)
+	return expressions
+}
+
+func (p *Parser) bodyUntilCurly() []blky.Expr {
 	var expressions []blky.Expr
 	if p.consume(l.CloseCurly) {
 		return expressions
@@ -206,7 +229,6 @@ func (p *Parser) body() []blky.Expr {
 	for p.notEOF() && !p.isNext(l.CloseCurly) {
 		expressions = append(expressions, p.parse())
 	}
-	p.expect(l.CloseCurly)
 	return expressions
 }
 
