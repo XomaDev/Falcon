@@ -18,6 +18,7 @@ func (e *Each) String() string {
 func (e *Each) Blockly() blockly.Block {
 	return blockly.Block{
 		Type:       "controls_forEach",
+		Fields:     []blockly.Field{{Name: "VAR", Value: e.IName}},
 		Values:     []blockly.Value{{Name: "LIST", Block: e.Iterable.Blockly()}},
 		Statements: []blockly.Statement{blockly.CreateStatement("DO", e.Body)},
 	}

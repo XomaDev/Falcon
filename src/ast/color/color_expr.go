@@ -16,7 +16,8 @@ type Signature struct {
 }
 
 var colorsCodes = map[string]Signature{
-	"black":     {Code: "#ffffff", BlockType: "color_black"},
+	"white":     {Code: "#ffffff", BlockType: "color_white"},
+	"black":     {Code: "#000000", BlockType: "color_black"},
 	"red":       {Code: "#ff0000", BlockType: "color_red"},
 	"pink":      {Code: "#ffafaf", BlockType: "color_pink"},
 	"orange":    {Code: "#ffc800", BlockType: "color_orange"},

@@ -124,20 +124,11 @@ func (p *Parser) varExpr() blky.Expr {
 		}
 	} else {
 		// a clean full scope variable
-		for {
-			name := p.name()
-			p.expect(l.Assign)
-			value := p.parse()
-
-			varNames = append(varNames, name)
-			varValues = append(varValues, value)
-
-			if !p.consume(l.Local) {
-				break
-			}
-		}
+		name := p.name()
+		p.expect(l.Assign)
+		value := p.parse()
 		// we gotta parse rest of the body here
-		return &variables.Var{Names: varNames, Values: varValues, Body: p.bodyUntilCurly()}
+		return &variables.Var{Names: []string{name}, Values: []blky.Expr{value}, Body: p.bodyUntilCurly()}
 	}
 }
 
@@ -291,6 +282,8 @@ func precedenceOf(flag l.Flag) int {
 		return 10
 	case l.BinaryL1:
 		return 11
+	case l.BinaryL2:
+		return 12
 	default:
 		return -1
 	}
@@ -362,6 +355,10 @@ func (p *Parser) term() blky.Expr {
 		return p.list()
 	case l.OpenCurly:
 		return p.dictionary()
+	case l.OpenCurve:
+		e := p.parse()
+		p.expect(l.CloseCurve)
+		return e
 	case l.Not:
 		return &logic.Not{Expr: p.element()}
 	case l.Do:

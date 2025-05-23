@@ -32,7 +32,7 @@ func (f *FuncCall) Blockly() blockly.Block {
 		return f.minOrMax()
 	case "avgOf", "maxOf", "minOf", "geoMeanOf", "stdDevOf", "stdErrOf":
 		return f.mathOnList()
-	case "nodeOf":
+	case "modeOf":
 		return f.modeOf()
 	case "mod", "rem", "quot":
 		return f.mathDivide()
@@ -47,7 +47,7 @@ func (f *FuncCall) Blockly() blockly.Block {
 		return f.openScreen()
 	case "openScreenWithValue":
 		return f.openScreenWithValue()
-	case "controls_closeScreenWithValue":
+	case "closeScreenWithValue":
 		return f.closeScreenWithValue()
 	case "getStartValue":
 		return f.ctrlSimpleBlock("controls_getStartValue")
@@ -256,7 +256,7 @@ func (f *FuncCall) mathRadix() blockly.Block {
 	}
 	textExpr, ok := f.Args[0].(*text.Expr)
 	if !ok {
-		f.Where.Error("Expected a numeric string argument for %v()", f.Name)
+		f.Where.Error("Expected a numeric string argument for %()", f.Name)
 	}
 	return blockly.Block{
 		Type: "math_number_radix",

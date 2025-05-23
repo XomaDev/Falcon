@@ -1,4 +1,8 @@
-local name = "Kumaraswamy"
-local catName = "Mawo!"
+global numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-println("My name is " _ name _ " and my cat's name is " _ catName)
+local evenDoubled =
+  this.numbers
+     .filter { n -> rem(n, 2) == 0}
+     .map { n -> n * 2}
+
+println(evenDoubled())
