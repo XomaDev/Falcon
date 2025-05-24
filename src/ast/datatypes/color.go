@@ -6,7 +6,7 @@ import (
 )
 
 type Color struct {
-	Where lex.Token
+	Where *lex.Token
 	Name  string
 }
 

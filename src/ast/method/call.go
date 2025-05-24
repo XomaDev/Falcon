@@ -8,7 +8,7 @@ import (
 )
 
 type Call struct {
-	Where lex.Token
+	Where *lex.Token
 	On    blockly.Expr
 	Name  string
 	Args  []blockly.Expr

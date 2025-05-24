@@ -7,7 +7,7 @@ import (
 )
 
 type Question struct {
-	Where    lex.Token
+	Where    *lex.Token
 	On       blockly.Expr
 	Question string
 }

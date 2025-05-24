@@ -6,7 +6,7 @@ import (
 )
 
 type Get struct {
-	Where  lex.Token
+	Where  *lex.Token
 	Global bool
 	Name   string
 }

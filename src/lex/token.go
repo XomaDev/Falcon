@@ -48,7 +48,12 @@ func staticOf(t Type, flags ...Flag) StaticToken {
 	return StaticToken{t, flags}
 }
 
-func (s *StaticToken) normal(column int, row int, ctx context.CodeContext, optionalContent ...string) Token {
+func (s *StaticToken) normal(
+	column int,
+	row int,
+	ctx context.CodeContext,
+	optionalContent ...string,
+) *Token {
 	if len(optionalContent) > 1 {
 		panic("Too many contents...")
 	}
@@ -56,7 +61,7 @@ func (s *StaticToken) normal(column int, row int, ctx context.CodeContext, optio
 	if len(optionalContent) == 1 {
 		content = optionalContent[0]
 	}
-	return Token{
+	return &Token{
 		Column:  column,
 		Row:     row,
 		Context: ctx,

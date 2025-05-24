@@ -30,7 +30,7 @@ var Conversions = map[string][]string{
 }
 
 type Convert struct {
-	Where lex.Token
+	Where *lex.Token
 	On    blockly.Expr
 	Name  string
 }

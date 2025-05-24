@@ -9,7 +9,7 @@ import (
 )
 
 type Transformer struct {
-	Where       lex.Token
+	Where       *lex.Token
 	List        blky.Expr
 	Name        string
 	Args        []blky.Expr

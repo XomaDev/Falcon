@@ -13,13 +13,13 @@ import (
 import l "Falcon/lex"
 
 type Parser struct {
-	Tokens    []l.Token
+	Tokens    []*l.Token
 	currIndex int
 	tokenSize int
 	resolver  *NameResolver
 }
 
-func NewParser(tokens []l.Token) *Parser {
+func NewParser(tokens []*l.Token) *Parser {
 	return &Parser{
 		Tokens:    tokens,
 		tokenSize: len(tokens),
@@ -314,7 +314,7 @@ func (p *Parser) element() blky.Expr {
 	return left
 }
 
-func (p *Parser) objectCall(where l.Token, name string, object blky.Expr) blky.Expr {
+func (p *Parser) objectCall(where *l.Token, name string, object blky.Expr) blky.Expr {
 	var args []blky.Expr
 	if p.isNext(l.OpenCurve) {
 		args = p.arguments()
@@ -336,7 +336,8 @@ func (p *Parser) objectCall(where l.Token, name string, object blky.Expr) blky.E
 	}
 	transformer := p.parse()
 	p.consume(l.CloseCurly)
-	return &list.Transformer{Where: where,
+	return &list.Transformer{
+		Where:       where,
 		List:        object,
 		Name:        name,
 		Args:        args,
@@ -432,7 +433,7 @@ func (p *Parser) arguments() []blky.Expr {
 	return args
 }
 
-func (p *Parser) value(t l.Token) blky.Expr {
+func (p *Parser) value(t *l.Token) blky.Expr {
 	switch t.Type {
 	case l.True, l.False:
 		return &datatypes.Boolean{Value: t.Type == l.True}
@@ -466,7 +467,7 @@ func (p *Parser) consume(t l.Type) bool {
 	return false
 }
 
-func (p *Parser) expect(t l.Type) l.Token {
+func (p *Parser) expect(t l.Type) *l.Token {
 	if p.isEOF() {
 		panic("Early EOF! Was expecting type " + t.String())
 	}
@@ -487,11 +488,11 @@ func (p *Parser) isNext(checkTypes ...l.Type) bool {
 	return false
 }
 
-func (p *Parser) peek() l.Token {
+func (p *Parser) peek() *l.Token {
 	return p.Tokens[p.currIndex]
 }
 
-func (p *Parser) next() l.Token {
+func (p *Parser) next() *l.Token {
 	token := p.Tokens[p.currIndex]
 	p.currIndex++
 	return token

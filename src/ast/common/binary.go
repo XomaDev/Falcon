@@ -9,7 +9,7 @@ import (
 )
 
 type BinaryExpr struct {
-	Where    l.Token
+	Where    *l.Token
 	Operands []blockly.Expr
 	Operator l.Type
 }

@@ -14,7 +14,7 @@ type Lexer struct {
 	currIndex  int
 	currColumn int
 	currRow    int
-	Tokens     []Token
+	Tokens     []*Token
 }
 
 func NewLexer(ctx context.CodeContext) *Lexer {
@@ -25,11 +25,11 @@ func NewLexer(ctx context.CodeContext) *Lexer {
 		currIndex:  0,
 		currColumn: 1, // current line
 		currRow:    0, // nth character of current line
-		Tokens:     []Token{},
+		Tokens:     []*Token{},
 	}
 }
 
-func (l *Lexer) Lex() []Token {
+func (l *Lexer) Lex() []*Token {
 	for l.notEOF() {
 		l.parse()
 	}
@@ -164,7 +164,7 @@ func (l *Lexer) text() {
 	}
 	l.eat('"')
 	content := l.source[startIndex : l.currIndex-1]
-	l.appendToken(Token{Type: Text, Content: &content, Flags: []Flag{Value, ConstantValue}})
+	l.appendToken(&Token{Type: Text, Content: &content, Flags: []Flag{Value, ConstantValue}})
 }
 
 func (l *Lexer) alpha() {
@@ -178,7 +178,7 @@ func (l *Lexer) alpha() {
 	if ok {
 		l.appendToken(sToken.normal(l.currColumn, l.currRow, l.ctx))
 	} else {
-		l.appendToken(Token{Type: Name, Content: &content, Flags: []Flag{Value}})
+		l.appendToken(&Token{Type: Name, Content: &content, Flags: []Flag{Value}})
 	}
 }
 
@@ -191,10 +191,10 @@ func (l *Lexer) numeric() {
 		l.writeNumeric(&numb)
 	}
 	content := numb.String()
-	l.appendToken(Token{Type: Number, Content: &content, Flags: []Flag{Value, ConstantValue}})
+	l.appendToken(&Token{Type: Number, Content: &content, Flags: []Flag{Value, ConstantValue}})
 }
 
-func (l *Lexer) appendToken(token Token) {
+func (l *Lexer) appendToken(token *Token) {
 	l.Tokens = append(l.Tokens, token)
 }
 
