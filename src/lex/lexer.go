@@ -7,20 +7,22 @@ import (
 )
 
 type Lexer struct {
-	source    string
-	sourceLen int
-	currIndex int
-	currLine  int
-	Tokens    []Token
+	source     string
+	sourceLen  int
+	currIndex  int
+	currColumn int
+	currRow    int
+	Tokens     []Token
 }
 
 func NewLexer(source string) *Lexer {
 	return &Lexer{
-		source:    source,
-		sourceLen: len(source),
-		currIndex: 0,
-		currLine:  1,
-		Tokens:    []Token{},
+		source:     source,
+		sourceLen:  len(source),
+		currIndex:  0,
+		currColumn: 1, // current line
+		currRow:    0, // nth character of current line
+		Tokens:     []Token{},
 	}
 }
 
@@ -33,12 +35,13 @@ func (l *Lexer) Lex() []Token {
 
 func (l *Lexer) parse() {
 	c := l.next()
+	l.currRow++
 
-	switch c {
-	case '\n':
-		l.currLine++
+	if c == '\n' {
+		l.currColumn++
+		l.currRow = 0
 		return
-	case ' ', '\t':
+	} else if c == ' ' || c == '\t' {
 		return
 	}
 	switch c {
@@ -149,7 +152,7 @@ func (l *Lexer) createOp(op string) {
 	if !ok {
 		l.error("Bad createOp('%')", op)
 	} else {
-		l.appendToken(sToken.normal(l.currLine, op))
+		l.appendToken(sToken.normal(l.currColumn, l.currRow, op))
 	}
 }
 
@@ -172,7 +175,7 @@ func (l *Lexer) alpha() {
 	content := l.source[startIndex:l.currIndex]
 	sToken, ok := Keywords[content]
 	if ok {
-		l.appendToken(sToken.normal(l.currLine))
+		l.appendToken(sToken.normal(l.currColumn, l.currRow))
 	} else {
 		l.appendToken(Token{Type: Name, Content: &content, Flags: []Flag{Value}})
 	}
@@ -224,7 +227,7 @@ func (l *Lexer) eat(expect uint8) {
 }
 
 func (l *Lexer) error(message string, args ...string) {
-	panic("[line " + strconv.Itoa(l.currLine) + "] " + sugar.Format(message, args...))
+	panic("[line " + strconv.Itoa(l.currColumn) + "] " + sugar.Format(message, args...))
 }
 
 func (l *Lexer) consume(expect uint8) bool {
