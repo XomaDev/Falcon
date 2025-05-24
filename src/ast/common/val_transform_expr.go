@@ -2,7 +2,7 @@ package common
 
 import (
 	"Falcon/ast/blockly"
-	"Falcon/ast/text"
+	"Falcon/ast/datatypes"
 	"Falcon/lex"
 	"Falcon/sugar"
 )
@@ -20,7 +20,7 @@ func (t *Transform) String() string {
 func (t *Transform) Blockly() blockly.Block {
 	switch t.Name {
 	case "obfuscate":
-		textExpr, ok := t.On.(*text.Expr)
+		textExpr, ok := t.On.(*datatypes.Text)
 		if ok {
 			return blockly.Block{
 				Type:       "obfuscated_text",

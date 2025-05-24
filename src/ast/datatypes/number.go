@@ -1,18 +1,16 @@
-package math
+package datatypes
 
-import (
-	"Falcon/ast/blockly"
-)
+import "Falcon/ast/blockly"
 
-type Num struct {
+type Number struct {
 	Content string
 }
 
-func (n *Num) String() string {
+func (n *Number) String() string {
 	return n.Content
 }
 
-func (n *Num) Blockly() blockly.Block {
+func (n *Number) Blockly() blockly.Block {
 	return blockly.Block{
 		Type:       "math_number",
 		Fields:     blockly.FieldsFromMap(map[string]string{"NUM": n.Content}),

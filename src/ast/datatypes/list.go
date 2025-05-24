@@ -1,19 +1,19 @@
-package list
+package datatypes
 
 import (
 	"Falcon/ast/blockly"
 	"Falcon/sugar"
 )
 
-type Expr struct {
+type List struct {
 	Elements []blockly.Expr
 }
 
-func (l *Expr) String() string {
+func (l *List) String() string {
 	return sugar.Format("[%]", blockly.JoinExprs(", ", l.Elements))
 }
 
-func (l *Expr) Blockly() blockly.Block {
+func (l *List) Blockly() blockly.Block {
 	return blockly.Block{
 		Type:       "lists_create_with",
 		Mutation:   &blockly.Mutation{ItemCount: len(l.Elements)},

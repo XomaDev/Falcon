@@ -1,18 +1,16 @@
-package text
+package datatypes
 
-import (
-	"Falcon/ast/blockly"
-)
+import "Falcon/ast/blockly"
 
-type Expr struct {
+type Text struct {
 	Content string
 }
 
-func (t *Expr) String() string {
+func (t *Text) String() string {
 	return "\"" + t.Content + "\""
 }
 
-func (t *Expr) Blockly() blockly.Block {
+func (t *Text) Blockly() blockly.Block {
 	return blockly.Block{
 		Type:       "text",
 		Fields:     blockly.FieldsFromMap(map[string]string{"TEXT": t.Content}),

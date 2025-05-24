@@ -1,4 +1,4 @@
-package color
+package datatypes
 
 import (
 	"Falcon/ast/blockly"

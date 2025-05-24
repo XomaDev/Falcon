@@ -1,4 +1,4 @@
-package dictionary
+package datatypes
 
 import (
 	"Falcon/ast/blockly"
@@ -20,4 +20,15 @@ func (d *Dictionary) Blockly() blockly.Block {
 		Values:     blockly.ValuesByPrefix("ADD", d.Elements),
 		Consumable: true,
 	}
+}
+
+type WalkAll struct {
+}
+
+func (w *WalkAll) String() string {
+	return "walkAll"
+}
+
+func (w *WalkAll) Blockly() blockly.Block {
+	return blockly.Block{Type: "dictionaries_walk_all", Consumable: true}
 }

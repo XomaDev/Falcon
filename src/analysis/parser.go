@@ -2,16 +2,12 @@ package analysis
 
 import (
 	blky "Falcon/ast/blockly"
-	"Falcon/ast/color"
 	"Falcon/ast/common"
 	"Falcon/ast/control"
-	"Falcon/ast/dictionary"
+	"Falcon/ast/datatypes"
 	"Falcon/ast/list"
-	"Falcon/ast/logic"
-	"Falcon/ast/math"
 	"Falcon/ast/method"
 	"Falcon/ast/procedures"
-	"Falcon/ast/text"
 	"Falcon/ast/variables"
 )
 import l "Falcon/lex"
@@ -55,7 +51,7 @@ func (p *Parser) parse() blky.Expr {
 		return &control.Break{}
 	case l.WalkAll:
 		p.skip()
-		return &dictionary.WalkAll{}
+		return &datatypes.WalkAll{}
 	case l.Local:
 		return p.varExpr()
 	case l.Global:
@@ -360,7 +356,7 @@ func (p *Parser) term() blky.Expr {
 		p.expect(l.CloseCurve)
 		return e
 	case l.Not:
-		return &logic.Not{Expr: p.element()}
+		return &datatypes.Not{Expr: p.element()}
 	case l.Do:
 		return p.doExpr()
 	default:
@@ -392,7 +388,7 @@ func (p *Parser) doExpr() *control.Do {
 	return &control.Do{Body: body, Result: result}
 }
 
-func (p *Parser) dictionary() *dictionary.Dictionary {
+func (p *Parser) dictionary() *datatypes.Dictionary {
 	var elements []blky.Expr
 	if !p.consume(l.CloseCurly) {
 		for p.notEOF() {
@@ -403,10 +399,10 @@ func (p *Parser) dictionary() *dictionary.Dictionary {
 		}
 		p.expect(l.CloseCurly)
 	}
-	return &dictionary.Dictionary{Elements: elements}
+	return &datatypes.Dictionary{Elements: elements}
 }
 
-func (p *Parser) list() *list.Expr {
+func (p *Parser) list() *datatypes.List {
 	var elements []blky.Expr
 	if !p.consume(l.CloseSquare) {
 		for p.notEOF() {
@@ -417,7 +413,7 @@ func (p *Parser) list() *list.Expr {
 		}
 		p.expect(l.CloseSquare)
 	}
-	return &list.Expr{Elements: elements}
+	return &datatypes.List{Elements: elements}
 }
 
 func (p *Parser) arguments() []blky.Expr {
@@ -439,11 +435,11 @@ func (p *Parser) arguments() []blky.Expr {
 func (p *Parser) value(t l.Token) blky.Expr {
 	switch t.Type {
 	case l.True, l.False:
-		return &logic.Bool{Value: t.Type == l.True}
+		return &datatypes.Boolean{Value: t.Type == l.True}
 	case l.Number:
-		return &math.Num{Content: *t.Content}
+		return &datatypes.Number{Content: *t.Content}
 	case l.Text:
-		return &text.Expr{Content: *t.Content}
+		return &datatypes.Text{Content: *t.Content}
 	case l.Name:
 		return &variables.Get{Where: t, Global: false, Name: *t.Content}
 	case l.This:
@@ -451,7 +447,7 @@ func (p *Parser) value(t l.Token) blky.Expr {
 		return &variables.Get{Where: t, Global: true, Name: p.name()}
 	case l.Color:
 		p.expect(l.Colon)
-		return &color.Color{Where: t, Name: p.name()}
+		return &datatypes.Color{Where: t, Name: p.name()}
 	default:
 		t.Error("Unknown value type '%'", t.Type.String())
 		panic("") // unreachable

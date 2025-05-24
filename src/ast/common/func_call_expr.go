@@ -2,7 +2,7 @@ package common
 
 import (
 	"Falcon/ast/blockly"
-	"Falcon/ast/text"
+	"Falcon/ast/datatypes"
 	"Falcon/lex"
 	"Falcon/sugar"
 	"strconv"
@@ -270,7 +270,7 @@ func (f *FuncCall) mathRadix() blockly.Block {
 	case "hexa":
 		fieldOp = "HEX"
 	}
-	textExpr, ok := f.Args[0].(*text.Expr)
+	textExpr, ok := f.Args[0].(*datatypes.Text)
 	if !ok {
 		f.Where.Error("Expected a numeric string argument for %()", f.Name)
 	}
