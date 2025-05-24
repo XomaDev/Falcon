@@ -1,13 +1,15 @@
 package lex
 
 import (
+	"Falcon/context"
 	"Falcon/sugar"
-	"strconv"
 )
 
 type Token struct {
 	Column  int
 	Row     int
+	Context context.CodeContext
+
 	Type    Type
 	Flags   []Flag
 	Content *string
@@ -30,7 +32,11 @@ func (t *Token) HasFlag(flag Flag) bool {
 }
 
 func (t *Token) Error(message string, args ...string) {
-	panic(strconv.Itoa(t.Row) + ":" + strconv.Itoa(t.Column) + " " + t.String() + " " + sugar.Format(message, args...))
+	var wordSize = 6
+	if t.Content != nil {
+		wordSize = max(wordSize, len(*t.Content))
+	}
+	t.Context.ReportError(t.Column, t.Row, wordSize, message, args...)
 }
 
 type StaticToken struct {
@@ -42,7 +48,7 @@ func staticOf(t Type, flags ...Flag) StaticToken {
 	return StaticToken{t, flags}
 }
 
-func (s *StaticToken) normal(column int, row int, optionalContent ...string) Token {
+func (s *StaticToken) normal(column int, row int, ctx context.CodeContext, optionalContent ...string) Token {
 	if len(optionalContent) > 1 {
 		panic("Too many contents...")
 	}
@@ -50,5 +56,13 @@ func (s *StaticToken) normal(column int, row int, optionalContent ...string) Tok
 	if len(optionalContent) == 1 {
 		content = optionalContent[0]
 	}
-	return Token{Column: column, Row: row, Type: s.Type, Flags: s.Flags, Content: &content}
+	return Token{
+		Column:  column,
+		Row:     row,
+		Context: ctx,
+
+		Type:    s.Type,
+		Flags:   s.Flags,
+		Content: &content,
+	}
 }

@@ -1,12 +1,14 @@
 package lex
 
 import (
+	"Falcon/context"
 	"Falcon/sugar"
 	"strconv"
 	"strings"
 )
 
 type Lexer struct {
+	ctx        context.CodeContext
 	source     string
 	sourceLen  int
 	currIndex  int
@@ -15,10 +17,11 @@ type Lexer struct {
 	Tokens     []Token
 }
 
-func NewLexer(source string) *Lexer {
+func NewLexer(ctx context.CodeContext) *Lexer {
 	return &Lexer{
-		source:     source,
-		sourceLen:  len(source),
+		ctx:        ctx,
+		source:     *ctx.SourceCode,
+		sourceLen:  len(*ctx.SourceCode),
 		currIndex:  0,
 		currColumn: 1, // current line
 		currRow:    0, // nth character of current line
@@ -35,8 +38,6 @@ func (l *Lexer) Lex() []Token {
 
 func (l *Lexer) parse() {
 	c := l.next()
-	l.currRow++
-
 	if c == '\n' {
 		l.currColumn++
 		l.currRow = 0
@@ -136,7 +137,7 @@ func (l *Lexer) parse() {
 	case '"':
 		l.text()
 	default:
-		l.currIndex--
+		l.back()
 		if l.isAlpha() {
 			l.alpha()
 		} else if l.isDigit() {
@@ -152,14 +153,14 @@ func (l *Lexer) createOp(op string) {
 	if !ok {
 		l.error("Bad createOp('%')", op)
 	} else {
-		l.appendToken(sToken.normal(l.currColumn, l.currRow, op))
+		l.appendToken(sToken.normal(l.currColumn, l.currRow, l.ctx, op))
 	}
 }
 
 func (l *Lexer) text() {
 	startIndex := l.currIndex
 	for l.notEOF() && l.peek() != '"' {
-		l.currIndex++
+		l.skip()
 	}
 	l.eat('"')
 	content := l.source[startIndex : l.currIndex-1]
@@ -168,14 +169,14 @@ func (l *Lexer) text() {
 
 func (l *Lexer) alpha() {
 	startIndex := l.currIndex
-	l.currIndex++
+	l.skip()
 	for l.notEOF() && l.isAlphaNumeric() {
-		l.currIndex++
+		l.skip()
 	}
 	content := l.source[startIndex:l.currIndex]
 	sToken, ok := Keywords[content]
 	if ok {
-		l.appendToken(sToken.normal(l.currColumn, l.currRow))
+		l.appendToken(sToken.normal(l.currColumn, l.currRow, l.ctx))
 	} else {
 		l.appendToken(Token{Type: Name, Content: &content, Flags: []Flag{Value}})
 	}
@@ -185,7 +186,7 @@ func (l *Lexer) numeric() {
 	var numb strings.Builder
 	l.writeNumeric(&numb)
 	if l.notEOF() && l.peek() == '.' {
-		l.currIndex++
+		l.skip()
 		numb.WriteByte('.')
 		l.writeNumeric(&numb)
 	}
@@ -200,7 +201,7 @@ func (l *Lexer) appendToken(token Token) {
 func (l *Lexer) writeNumeric(builder *strings.Builder) {
 	startIndex := l.currIndex
 	for l.notEOF() && l.isDigit() {
-		l.currIndex++
+		l.skip()
 	}
 	builder.WriteString(l.source[startIndex:l.currIndex])
 }
@@ -238,6 +239,16 @@ func (l *Lexer) consume(expect uint8) bool {
 	return false
 }
 
+func (l *Lexer) back() {
+	l.currIndex--
+	l.currRow--
+}
+
+func (l *Lexer) skip() {
+	l.currIndex++
+	l.currRow++
+}
+
 func (l *Lexer) peek() uint8 {
 	return l.source[l.currIndex]
 }
@@ -245,6 +256,7 @@ func (l *Lexer) peek() uint8 {
 func (l *Lexer) next() uint8 {
 	c := l.source[l.currIndex]
 	l.currIndex++
+	l.currRow++
 	return c
 }
 
