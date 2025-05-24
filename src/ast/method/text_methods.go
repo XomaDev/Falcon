@@ -43,9 +43,10 @@ func (c *Call) textChangeCase() blockly.Block {
 		fieldOp = "DOWNCASE"
 	}
 	return blockly.Block{
-		Type:   "text_changeCase",
-		Fields: []blockly.Field{{Name: "OP", Value: fieldOp}},
-		Values: []blockly.Value{{Name: "TEXT", Block: c.On.Blockly()}},
+		Type:       "text_changeCase",
+		Fields:     []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Values:     []blockly.Value{{Name: "TEXT", Block: c.On.Blockly()}},
+		Consumable: true,
 	}
 }
 
@@ -63,6 +64,7 @@ func (c *Call) textReplaceFrom() blockly.Block {
 			{Name: "MAPPINGS", Block: c.Args[0].Blockly()},
 			{Name: "TEXT", Block: c.On.Blockly()},
 		},
+		Consumable: true,
 	}
 }
 
@@ -74,6 +76,7 @@ func (c *Call) textReplace() blockly.Block {
 			{Name: "SEGMENT", Block: c.Args[0].Blockly()},
 			{Name: "REPLACEMENT", Block: c.Args[1].Blockly()},
 		},
+		Consumable: true,
 	}
 }
 
@@ -85,6 +88,7 @@ func (c *Call) textSegment() blockly.Block {
 			{Name: "START", Block: c.Args[0].Blockly()},
 			{Name: "LENGTH", Block: c.Args[1].Blockly()},
 		},
+		Consumable: true,
 	}
 }
 
@@ -108,6 +112,7 @@ func (c *Call) textSplit() blockly.Block {
 			{Name: "TEXT", Block: c.On.Blockly()},
 			{Name: "AT", Block: c.Args[0].Blockly()},
 		},
+		Consumable: true,
 	}
 }
 
@@ -129,6 +134,7 @@ func (c *Call) textContains() blockly.Block {
 			{Name: "TEXT", Block: c.On.Blockly()},
 			{Name: "PIECE", Block: c.Args[0].Blockly()},
 		},
+		Consumable: true,
 	}
 }
 
@@ -139,5 +145,6 @@ func (c *Call) textStartsAt() blockly.Block {
 			{Name: "TEXT", Block: c.On.Blockly()},
 			{Name: "PIECE", Block: c.Args[0].Blockly()},
 		},
+		Consumable: true,
 	}
 }

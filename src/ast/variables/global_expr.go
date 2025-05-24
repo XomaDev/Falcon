@@ -13,8 +13,9 @@ func (g *Global) String() string {
 
 func (g *Global) Blockly() blky.Block {
 	return blky.Block{
-		Type:   "global_declaration",
-		Fields: []blky.Field{{Name: "NAME", Value: g.Name}},
-		Values: []blky.Value{{Name: "VALUE", Block: g.Value.Blockly()}},
+		Type:       "global_declaration",
+		Fields:     []blky.Field{{Name: "NAME", Value: g.Name}},
+		Values:     []blky.Value{{Name: "VALUE", Block: g.Value.Blockly()}},
+		Consumable: false,
 	}
 }

@@ -15,8 +15,9 @@ func (d *Dictionary) String() string {
 
 func (d *Dictionary) Blockly() blockly.Block {
 	return blockly.Block{
-		Type:     "dictionaries_create_with",
-		Mutation: &blockly.Mutation{ItemCount: len(d.Elements)},
-		Values:   blockly.ValuesByPrefix("ADD", d.Elements),
+		Type:       "dictionaries_create_with",
+		Mutation:   &blockly.Mutation{ItemCount: len(d.Elements)},
+		Values:     blockly.ValuesByPrefix("ADD", d.Elements),
+		Consumable: true,
 	}
 }

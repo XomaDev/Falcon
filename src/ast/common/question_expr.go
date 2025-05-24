@@ -38,36 +38,41 @@ func (q *Question) Blockly() blockly.Block {
 
 func (q *Question) listIsEmpty() blockly.Block {
 	return blockly.Block{
-		Type:   "lists_is_empty",
-		Values: []blockly.Value{{Name: "LIST", Block: q.On.Blockly()}},
+		Type:       "lists_is_empty",
+		Values:     []blockly.Value{{Name: "LIST", Block: q.On.Blockly()}},
+		Consumable: true,
 	}
 }
 
 func (q *Question) textIsEmpty() blockly.Block {
 	return blockly.Block{
-		Type:   "text_isEmpty",
-		Values: []blockly.Value{{Name: "VALUE", Block: q.On.Blockly()}},
+		Type:       "text_isEmpty",
+		Values:     []blockly.Value{{Name: "VALUE", Block: q.On.Blockly()}},
+		Consumable: true,
 	}
 }
 
 func (q *Question) dictQuestion() blockly.Block {
 	return blockly.Block{
-		Type:   "dictionaries_is_dict",
-		Values: []blockly.Value{{Name: "THING", Block: q.On.Blockly()}},
+		Type:       "dictionaries_is_dict",
+		Values:     []blockly.Value{{Name: "THING", Block: q.On.Blockly()}},
+		Consumable: true,
 	}
 }
 
 func (q *Question) listQuestion() blockly.Block {
 	return blockly.Block{
-		Type:   "lists_is_list",
-		Values: []blockly.Value{{Name: "ITEM", Block: q.On.Blockly()}},
+		Type:       "lists_is_list",
+		Values:     []blockly.Value{{Name: "ITEM", Block: q.On.Blockly()}},
+		Consumable: true,
 	}
 }
 
 func (q *Question) textQuestion() blockly.Block {
 	return blockly.Block{
-		Type:   "text_is_string",
-		Values: []blockly.Value{{Name: "ITEM", Block: q.On.Blockly()}},
+		Type:       "text_is_string",
+		Values:     []blockly.Value{{Name: "ITEM", Block: q.On.Blockly()}},
+		Consumable: true,
 	}
 }
 
@@ -84,8 +89,9 @@ func (q *Question) mathQuestion() blockly.Block {
 		fieldOp = "BINARY"
 	}
 	return blockly.Block{
-		Type:   "math_is_a_number",
-		Fields: []blockly.Field{{Name: "OP", Value: fieldOp}},
-		Values: []blockly.Value{{Name: "NUM", Block: q.On.Blockly()}},
+		Type:       "math_is_a_number",
+		Fields:     []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Values:     []blockly.Value{{Name: "NUM", Block: q.On.Blockly()}},
+		Consumable: true,
 	}
 }

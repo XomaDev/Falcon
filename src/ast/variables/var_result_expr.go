@@ -32,5 +32,6 @@ func (v *VarResult) Blockly() blky.Block {
 		Fields:   blky.ToFields("VAR", v.Names),
 		Values: append(blky.ValuesByPrefix("DECL", v.Values),
 			blky.Value{Name: "RETURN", Block: v.Result.Blockly()}),
+		Consumable: true,
 	}
 }

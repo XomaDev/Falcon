@@ -41,7 +41,8 @@ func (c *Color) Blockly() blockly.Block {
 		c.Where.Error("Unknown color name '%'", c.Name)
 	}
 	return blockly.Block{
-		Type:   signature.BlockType,
-		Fields: []blockly.Field{{Name: "COLOR", Value: signature.Code}},
+		Type:       signature.BlockType,
+		Fields:     []blockly.Field{{Name: "COLOR", Value: signature.Code}},
+		Consumable: true,
 	}
 }

@@ -71,11 +71,17 @@ func MakeValueArgs(on Expr, onName string, operands []Expr, names ...string) []V
 
 func CreateStatement(name string, body []Expr) Statement {
 	headBlock := body[0].Blockly()
+	if headBlock.Consumable {
+		panic("Cannot include a consumable call in a body")
+	}
 	bodyLen := len(body)
 	currI := 1
 
 	for currI < bodyLen {
 		aBlock := body[currI].Blockly()
+		if aBlock.Consumable {
+			panic("Cannot include a consumable call in a body")
+		}
 		headBlock.Next = &Next{Block: &aBlock}
 		currI++
 	}

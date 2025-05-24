@@ -23,9 +23,10 @@ func (t *Transform) Blockly() blockly.Block {
 		textExpr, ok := t.On.(*text.Expr)
 		if ok {
 			return blockly.Block{
-				Type:     "obfuscated_text",
-				Mutation: &blockly.Mutation{Cofounder: "Falcon"},
-				Fields:   []blockly.Field{{Name: "TEXT", Value: textExpr.Content}},
+				Type:       "obfuscated_text",
+				Mutation:   &blockly.Mutation{Cofounder: "Falcon"},
+				Fields:     []blockly.Field{{Name: "TEXT", Value: textExpr.Content}},
+				Consumable: true,
 			}
 		}
 		t.Where.Error("Cannot obfuscate a non string object!")

@@ -25,9 +25,10 @@ func (v *Call) Blockly() blky.Block {
 		blockType = "procedures_callnoreturn"
 	}
 	return blky.Block{
-		Type:     blockType,
-		Mutation: &blky.Mutation{Name: v.Name, Args: blky.ToArgs(v.Parameters)},
-		Fields:   []blky.Field{{Name: "PROCNAME", Value: v.Name}},
-		Values:   blky.ValuesByPrefix("ARG", v.Arguments),
+		Type:       blockType,
+		Mutation:   &blky.Mutation{Name: v.Name, Args: blky.ToArgs(v.Parameters)},
+		Fields:     []blky.Field{{Name: "PROCNAME", Value: v.Name}},
+		Values:     blky.ValuesByPrefix("ARG", v.Arguments),
+		Consumable: v.Returning,
 	}
 }

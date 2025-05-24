@@ -17,7 +17,8 @@ func (s *SimpleIf) String() string {
 
 func (s *SimpleIf) Blockly() blockly.Block {
 	return blockly.Block{
-		Type:   "controls_choose",
-		Values: blockly.MakeValues([]blockly.Expr{s.Condition, s.Then, s.Else}, "TEST", "THENRETURN", "ELSERETURN"),
+		Type:       "controls_choose",
+		Values:     blockly.MakeValues([]blockly.Expr{s.Condition, s.Then, s.Else}, "TEST", "THENRETURN", "ELSERETURN"),
+		Consumable: true,
 	}
 }

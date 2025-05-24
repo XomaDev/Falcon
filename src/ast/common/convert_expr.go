@@ -65,8 +65,9 @@ func (p *Convert) mathConversion(fieldOp string) blockly.Block {
 		blockType = "math_single"
 	}
 	return blockly.Block{
-		Type:   blockType,
-		Fields: []blockly.Field{{Name: "OP", Value: fieldOp}},
-		Values: []blockly.Value{{Name: "NUM", Block: p.On.Blockly()}},
+		Type:       blockType,
+		Fields:     []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Values:     []blockly.Value{{Name: "NUM", Block: p.On.Blockly()}},
+		Consumable: true,
 	}
 }

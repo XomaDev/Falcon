@@ -24,5 +24,6 @@ func (f *For) Blockly() blockly.Block {
 		Fields:     []blockly.Field{{Name: "VAR", Value: f.IName}},
 		Values:     blockly.MakeValues([]blockly.Expr{f.From, f.To, f.By}, "START", "END", "STEP"),
 		Statements: []blockly.Statement{blockly.CreateStatement("DO", f.Body)},
+		Consumable: false,
 	}
 }

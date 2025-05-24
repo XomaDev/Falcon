@@ -25,5 +25,6 @@ func (e *EachPair) Blockly() blockly.Block {
 		},
 		Values:     []blockly.Value{{Name: "DICT", Block: e.Iterable.Blockly()}},
 		Statements: []blockly.Statement{blockly.CreateStatement("DO", e.Body)},
+		Consumable: false,
 	}
 }

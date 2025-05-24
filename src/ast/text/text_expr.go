@@ -14,7 +14,8 @@ func (t *Expr) String() string {
 
 func (t *Expr) Blockly() blockly.Block {
 	return blockly.Block{
-		Type:   "text",
-		Fields: blockly.FieldsFromMap(map[string]string{"TEXT": t.Content}),
+		Type:       "text",
+		Fields:     blockly.FieldsFromMap(map[string]string{"TEXT": t.Content}),
+		Consumable: false,
 	}
 }

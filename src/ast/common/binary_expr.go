@@ -80,9 +80,10 @@ func (b *BinaryExpr) assignment() blockly.Block {
 			name = varGet.Name
 		}
 		return blockly.Block{
-			Type:   "lexical_variable_set",
-			Fields: []blockly.Field{{Name: "VAR", Value: name}},
-			Values: []blockly.Value{{Name: "VALUE", Block: newValue.Blockly()}},
+			Type:       "lexical_variable_set",
+			Fields:     []blockly.Field{{Name: "VAR", Value: name}},
+			Values:     []blockly.Value{{Name: "VALUE", Block: newValue.Blockly()}},
+			Consumable: false,
 		}
 	}
 	panic("Unimplemented!")
@@ -101,9 +102,10 @@ func (b *BinaryExpr) textCompare() blockly.Block {
 		fieldOp = "GT"
 	}
 	return blockly.Block{
-		Type:   "text_compare",
-		Fields: []blockly.Field{{Name: "OP", Value: fieldOp}},
-		Values: blockly.MakeValues(b.Operands, "TEXT1", "TEXT2"),
+		Type:       "text_compare",
+		Fields:     []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Values:     blockly.MakeValues(b.Operands, "TEXT1", "TEXT2"),
+		Consumable: true,
 	}
 }
 
@@ -120,17 +122,19 @@ func (b *BinaryExpr) relationalExpr() blockly.Block {
 		fieldOp = "GTE"
 	}
 	return blockly.Block{
-		Type:   "math_compare",
-		Fields: []blockly.Field{{Name: "OP", Value: fieldOp}},
-		Values: blockly.MakeValues(b.Operands, "A", "B"),
+		Type:       "math_compare",
+		Fields:     []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Values:     blockly.MakeValues(b.Operands, "A", "B"),
+		Consumable: true,
 	}
 }
 
 func (b *BinaryExpr) textJoin() blockly.Block {
 	return blockly.Block{
-		Type:     "text_join",
-		Mutation: &blockly.Mutation{ItemCount: len(b.Operands)},
-		Values:   blockly.ValuesByPrefix("ADD", b.Operands),
+		Type:       "text_join",
+		Mutation:   &blockly.Mutation{ItemCount: len(b.Operands)},
+		Values:     blockly.ValuesByPrefix("ADD", b.Operands),
+		Consumable: true,
 	}
 }
 
@@ -138,7 +142,11 @@ func (b *BinaryExpr) pairExpr() blockly.Block {
 	if len(b.Operands) != 2 {
 		b.Where.Error("Pair operator ':' received more than two operands")
 	}
-	return blockly.Block{Type: "pair", Values: blockly.MakeValues(b.Operands, "KEY", "VALUE")}
+	return blockly.Block{
+		Type:       "pair",
+		Values:     blockly.MakeValues(b.Operands, "KEY", "VALUE"),
+		Consumable: true,
+	}
 }
 
 func (b *BinaryExpr) boolExpr() blockly.Block {
@@ -159,10 +167,11 @@ func (b *BinaryExpr) boolExpr() blockly.Block {
 		}
 	}
 	return blockly.Block{
-		Type:     "logic_operation",
-		Mutation: &blockly.Mutation{ItemCount: lenOperands},
-		Values:   values,
-		Fields:   []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Type:       "logic_operation",
+		Mutation:   &blockly.Mutation{ItemCount: lenOperands},
+		Values:     values,
+		Fields:     []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Consumable: true,
 	}
 }
 
@@ -174,9 +183,10 @@ func (b *BinaryExpr) compareExpr() blockly.Block {
 		fieldOp = "NEQ"
 	}
 	return blockly.Block{
-		Type:   "logic_compare",
-		Values: blockly.MakeValues(b.Operands, "A", "B"),
-		Fields: []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Type:       "logic_compare",
+		Values:     blockly.MakeValues(b.Operands, "A", "B"),
+		Fields:     []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Consumable: true,
 	}
 }
 
@@ -191,10 +201,11 @@ func (b *BinaryExpr) bitwiseExpr() blockly.Block {
 		fieldOp = "BITXOR"
 	}
 	return blockly.Block{
-		Type:     "math_bitwise",
-		Values:   blockly.ValuesByPrefix("NUM", b.Operands),
-		Mutation: &blockly.Mutation{ItemCount: len(b.Operands)},
-		Fields:   []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Type:       "math_bitwise",
+		Values:     blockly.ValuesByPrefix("NUM", b.Operands),
+		Mutation:   &blockly.Mutation{ItemCount: len(b.Operands)},
+		Fields:     []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Consumable: true,
 	}
 }
 
@@ -208,7 +219,11 @@ func (b *BinaryExpr) simpleMathExpr() blockly.Block {
 	case l.Power:
 		blockType = "math_power"
 	}
-	return blockly.Block{Type: blockType, Values: blockly.MakeValues(b.Operands, "A", "B")}
+	return blockly.Block{
+		Type:       blockType,
+		Values:     blockly.MakeValues(b.Operands, "A", "B"),
+		Consumable: true,
+	}
 }
 
 func (b *BinaryExpr) addOrTimes() blockly.Block {
@@ -219,8 +234,9 @@ func (b *BinaryExpr) addOrTimes() blockly.Block {
 		blockType = "math_multiply"
 	}
 	return blockly.Block{
-		Type:     blockType,
-		Values:   blockly.ValuesByPrefix("NUM", b.Operands),
-		Mutation: &blockly.Mutation{ItemCount: len(b.Operands)},
+		Type:       blockType,
+		Values:     blockly.ValuesByPrefix("NUM", b.Operands),
+		Mutation:   &blockly.Mutation{ItemCount: len(b.Operands)},
+		Consumable: true,
 	}
 }

@@ -18,6 +18,8 @@ type Block struct {
 	Values     []Value     `xml:"value"`
 	Statements []Statement `xml:"statement"`
 	Next       *Next       `xml:"next"`
+
+	Consumable bool
 }
 
 type Field struct {

@@ -35,16 +35,18 @@ func (c *Call) dictGetters() blky.Block {
 		fieldOp = "KEYS"
 	}
 	return blky.Block{
-		Type:   "dictionaries_getters",
-		Fields: []blky.Field{{Name: "OP", Value: fieldOp}},
-		Values: []blky.Value{{Name: "DICT", Block: c.On.Blockly()}},
+		Type:       "dictionaries_getters",
+		Fields:     []blky.Field{{Name: "OP", Value: fieldOp}},
+		Values:     []blky.Value{{Name: "DICT", Block: c.On.Blockly()}},
+		Consumable: true,
 	}
 }
 
 func (c *Call) dictWalkTree() blky.Block {
 	return blky.Block{
-		Type:   "dictionaries_walk_tree",
-		Values: blky.MakeValueArgs(c.On, "DICT", c.Args, "PATH"),
+		Type:       "dictionaries_walk_tree",
+		Values:     blky.MakeValueArgs(c.On, "DICT", c.Args, "PATH"),
+		Consumable: true,
 	}
 }
 
@@ -55,47 +57,54 @@ func (c *Call) dictMergeInto() blky.Block {
 			{Name: "DICT1", Block: c.Args[0].Blockly()},
 			{Name: "DICT2", Block: c.On.Blockly()},
 		},
+		Consumable: true,
 	}
 }
 
 func (c *Call) dictContainsKey() blky.Block {
 	return blky.Block{
-		Type:   "dictionaries_is_key_in",
-		Values: blky.MakeValueArgs(c.On, "DICT", c.Args, "KEY"),
+		Type:       "dictionaries_is_key_in",
+		Values:     blky.MakeValueArgs(c.On, "DICT", c.Args, "KEY"),
+		Consumable: true,
 	}
 }
 
 func (c *Call) dictSetAtPath() blky.Block {
 	return blky.Block{
-		Type:   "dictionaries_recursive_set",
-		Values: blky.MakeValueArgs(c.On, "DICT", c.Args, "KEYS", "VALUE"),
+		Type:       "dictionaries_recursive_set",
+		Values:     blky.MakeValueArgs(c.On, "DICT", c.Args, "KEYS", "VALUE"),
+		Consumable: false,
 	}
 }
 
 func (c *Call) dictGetAtPath() blky.Block {
 	return blky.Block{
-		Type:   "dictionaries_recursive_lookup",
-		Values: blky.MakeValueArgs(c.On, "DICT", c.Args, "KEYS", "NOTFOUND"),
+		Type:       "dictionaries_recursive_lookup",
+		Values:     blky.MakeValueArgs(c.On, "DICT", c.Args, "KEYS", "NOTFOUND"),
+		Consumable: true,
 	}
 }
 
 func (c *Call) dictDelete() blky.Block {
 	return blky.Block{
-		Type:   "dictionaries_delete_pair",
-		Values: blky.MakeValueArgs(c.On, "DICT", c.Args, "KEY"),
+		Type:       "dictionaries_delete_pair",
+		Values:     blky.MakeValueArgs(c.On, "DICT", c.Args, "KEY"),
+		Consumable: false,
 	}
 }
 
 func (c *Call) dictSet() blky.Block {
 	return blky.Block{
-		Type:   "dictionaries_set_pair",
-		Values: blky.MakeValueArgs(c.On, "DICT", c.Args, "KEY", "VALUE"),
+		Type:       "dictionaries_set_pair",
+		Values:     blky.MakeValueArgs(c.On, "DICT", c.Args, "KEY", "VALUE"),
+		Consumable: false,
 	}
 }
 
 func (c *Call) dictGet() blky.Block {
 	return blky.Block{
-		Type:   "dictionaries_lookup",
-		Values: blky.MakeValueArgs(c.On, "DICT", c.Args, "KEY", "NOTFOUND"),
+		Type:       "dictionaries_lookup",
+		Values:     blky.MakeValueArgs(c.On, "DICT", c.Args, "KEY", "NOTFOUND"),
+		Consumable: true,
 	}
 }

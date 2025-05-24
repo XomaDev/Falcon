@@ -19,5 +19,6 @@ func (d *Do) Blockly() blky.Block {
 		Type:       "controls_do_then_return",
 		Statements: []blky.Statement{blky.CreateStatement("STM", d.Body)},
 		Values:     []blky.Value{{Name: "VALUE", Block: d.Result.Blockly()}},
+		Consumable: true,
 	}
 }

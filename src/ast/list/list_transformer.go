@@ -100,6 +100,7 @@ func (t *Transformer) max() blky.Block {
 			{Name: "LIST", Block: t.List.Blockly()},
 			{Name: "COMPARE", Block: t.Transformer.Blockly()},
 		},
+		Consumable: true,
 	}
 }
 
@@ -114,6 +115,7 @@ func (t *Transformer) min() blky.Block {
 			{Name: "LIST", Block: t.List.Blockly()},
 			{Name: "COMPARE", Block: t.Transformer.Blockly()},
 		},
+		Consumable: true,
 	}
 }
 
@@ -125,6 +127,7 @@ func (t *Transformer) listSortByKey() blky.Block {
 			{Name: "LIST", Block: t.List.Blockly()},
 			{Name: "KEY", Block: t.Transformer.Blockly()},
 		},
+		Consumable: true,
 	}
 }
 
@@ -139,6 +142,7 @@ func (t *Transformer) listSort() blky.Block {
 			{Name: "LIST", Block: t.List.Blockly()},
 			{Name: "COMPARE", Block: t.Transformer.Blockly()},
 		},
+		Consumable: true,
 	}
 }
 
@@ -154,6 +158,7 @@ func (t *Transformer) listReduce() blky.Block {
 			{Name: "INITANSWER", Block: t.Args[0].Blockly()},
 			{Name: "COMBINE", Block: t.Transformer.Blockly()},
 		},
+		Consumable: true,
 	}
 }
 
@@ -165,6 +170,7 @@ func (t *Transformer) listFilter() blky.Block {
 			{Name: "LIST", Block: t.List.Blockly()},
 			{Name: "TEST", Block: t.Transformer.Blockly()},
 		},
+		Consumable: true,
 	}
 }
 
@@ -176,5 +182,6 @@ func (t *Transformer) listMap() blky.Block {
 			{Name: "LIST", Block: t.List.Blockly()},
 			{Name: "TO", Block: t.Transformer.Blockly()},
 		},
+		Consumable: true,
 	}
 }

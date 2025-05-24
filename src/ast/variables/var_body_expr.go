@@ -33,5 +33,6 @@ func (v *Var) Blockly() blky.Block {
 		Fields:     blky.ToFields("VAR", v.Names),
 		Values:     blky.ValuesByPrefix("DECL", v.Values),
 		Statements: []blky.Statement{blky.CreateStatement("STACK", v.Body)},
+		Consumable: false,
 	}
 }

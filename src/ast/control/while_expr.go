@@ -19,5 +19,6 @@ func (w *While) Blockly() blockly.Block {
 		Type:       "controls_while",
 		Values:     []blockly.Value{{Name: "TEST", Block: w.Condition.Blockly()}},
 		Statements: []blockly.Statement{blockly.CreateStatement("DO", w.Body)},
+		Consumable: false,
 	}
 }

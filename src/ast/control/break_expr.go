@@ -11,5 +11,5 @@ func (b *Break) String() string {
 }
 
 func (b *Break) Blockly() blockly.Block {
-	return blockly.Block{Type: "controls_break"}
+	return blockly.Block{Type: "controls_break", Consumable: false}
 }

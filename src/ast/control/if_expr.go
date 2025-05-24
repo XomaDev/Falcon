@@ -56,5 +56,6 @@ func (i *If) Blockly() blockly.Block {
 		Mutation:   &blockly.Mutation{ElseIfCount: numbElifs, ElseCount: numbElse},
 		Values:     conditions,
 		Statements: bodies,
+		Consumable: false,
 	}
 }

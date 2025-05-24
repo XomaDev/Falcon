@@ -34,64 +34,73 @@ func (c *Call) listMethods(signature *Signature) blockly.Block {
 
 func (c *Call) listSlice() blockly.Block {
 	return blockly.Block{
-		Type:   "lists_slice",
-		Values: blockly.MakeValueArgs(c.On, "LIST", c.Args, "INDEX1", "INDEX2"),
+		Type:       "lists_slice",
+		Values:     blockly.MakeValueArgs(c.On, "LIST", c.Args, "INDEX1", "INDEX2"),
+		Consumable: true,
 	}
 }
 
 func (c *Call) listJoin() blockly.Block {
 	return blockly.Block{
-		Type:   "lists_join_with_separator",
-		Values: blockly.MakeValueArgs(c.On, "LIST", c.Args, "SEPARATOR"),
+		Type:       "lists_join_with_separator",
+		Values:     blockly.MakeValueArgs(c.On, "LIST", c.Args, "SEPARATOR"),
+		Consumable: true,
 	}
 }
 
 func (c *Call) listLookupInPairs() blockly.Block {
 	return blockly.Block{
-		Type:   "lists_lookup_in_pairs",
-		Values: blockly.MakeValueArgs(c.On, "LIST", c.Args, "KEY", "NOTFOUND"),
+		Type:       "lists_lookup_in_pairs",
+		Values:     blockly.MakeValueArgs(c.On, "LIST", c.Args, "KEY", "NOTFOUND"),
+		Consumable: true,
 	}
 }
 
 func (c *Call) listAppendList() blockly.Block {
 	return blockly.Block{
-		Type:   "lists_append_list",
-		Values: blockly.MakeValueArgs(c.On, "LIST0", c.Args, "LIST1"),
+		Type:       "lists_append_list",
+		Values:     blockly.MakeValueArgs(c.On, "LIST0", c.Args, "LIST1"),
+		Consumable: false,
 	}
 }
 
 func (c *Call) listRemoveAt() blockly.Block {
 	return blockly.Block{
-		Type:   "lists_remove_item",
-		Values: blockly.MakeValueArgs(c.On, "LIST", c.Args, "INDEX"),
+		Type:       "lists_remove_item",
+		Values:     blockly.MakeValueArgs(c.On, "LIST", c.Args, "INDEX"),
+		Consumable: false,
 	}
 }
 
 func (c *Call) listInsertItem() blockly.Block {
 	return blockly.Block{
-		Type:   "lists_insert_item",
-		Values: blockly.MakeValueArgs(c.On, "LIST", c.Args, "INDEX", "ITEM"),
+		Type:       "lists_insert_item",
+		Values:     blockly.MakeValueArgs(c.On, "LIST", c.Args, "INDEX", "ITEM"),
+		Consumable: false,
 	}
 }
 
 func (c *Call) listIndexOf() blockly.Block {
 	return blockly.Block{
-		Type:   "lists_position_in",
-		Values: blockly.MakeValueArgs(c.On, "LIST", c.Args, "ITEM"),
+		Type:       "lists_position_in",
+		Values:     blockly.MakeValueArgs(c.On, "LIST", c.Args, "ITEM"),
+		Consumable: true,
 	}
 }
 
 func (c *Call) listContainsItem() blockly.Block {
 	return blockly.Block{
-		Type:   "lists_is_in",
-		Values: blockly.MakeValueArgs(c.On, "LIST", c.Args, "ITEM"),
+		Type:       "lists_is_in",
+		Values:     blockly.MakeValueArgs(c.On, "LIST", c.Args, "ITEM"),
+		Consumable: true,
 	}
 }
 
 func (c *Call) listAdd() blockly.Block {
 	return blockly.Block{
-		Type:     "lists_add_items",
-		Mutation: &blockly.Mutation{ItemCount: len(c.Args)},
-		Values:   blockly.ValueArgsByPrefix(c.On, "LIST", "ITEM", c.Args),
+		Type:       "lists_add_items",
+		Mutation:   &blockly.Mutation{ItemCount: len(c.Args)},
+		Values:     blockly.ValueArgsByPrefix(c.On, "LIST", "ITEM", c.Args),
+		Consumable: false,
 	}
 }

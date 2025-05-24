@@ -15,7 +15,8 @@ func (n *Not) String() string {
 
 func (n *Not) Blockly() blockly.Block {
 	return blockly.Block{
-		Type:   "logic_negate",
-		Values: []blockly.Value{{Name: "BOOL", Block: n.Expr.Blockly()}},
+		Type:       "logic_negate",
+		Values:     []blockly.Value{{Name: "BOOL", Block: n.Expr.Blockly()}},
+		Consumable: true,
 	}
 }

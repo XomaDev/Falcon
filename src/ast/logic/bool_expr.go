@@ -23,7 +23,8 @@ func (b *Bool) Blockly() blockly.Block {
 		bText = "FALSE"
 	}
 	return blockly.Block{
-		Type:   "logic_boolean",
-		Fields: blockly.FieldsFromMap(map[string]string{"BOOL": bText}),
+		Type:       "logic_boolean",
+		Fields:     blockly.FieldsFromMap(map[string]string{"BOOL": bText}),
+		Consumable: true,
 	}
 }
