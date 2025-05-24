@@ -291,7 +291,7 @@ func (p *Parser) element() blky.Expr {
 		pe := p.peek()
 		switch pe.Type {
 		case l.Dot:
-			left = p.objectCall(p.next(), p.name(), left)
+			left = p.objectCall(left)
 			continue
 		case l.RightArrow:
 			left = &common.Convert{Where: p.next(), On: left, Name: p.name()}
@@ -314,7 +314,11 @@ func (p *Parser) element() blky.Expr {
 	return left
 }
 
-func (p *Parser) objectCall(where *l.Token, name string, object blky.Expr) blky.Expr {
+func (p *Parser) objectCall(object blky.Expr) blky.Expr {
+	p.skip()
+	where := p.next()
+	name := *where.Content
+
 	var args []blky.Expr
 	if p.isNext(l.OpenCurve) {
 		args = p.arguments()

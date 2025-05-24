@@ -21,13 +21,15 @@ func main() {
 		panic(err)
 	}
 	sourceCode := string(codeBytes)
-	codeContext := context.CodeContext{SourceCode: &sourceCode, FileName: fileName}
+	codeContext := &context.CodeContext{SourceCode: &sourceCode, FileName: fileName}
 
 	tokens := lex.NewLexer(codeContext).Lex()
 	for _, token := range tokens {
 		println(token.String())
 	}
 
+	println(codeContext)
+	println(codeContext.FileName)
 	println("\n=== AST ===\n")
 
 	expressions := analysis.NewParser(tokens).ParseAll()

@@ -8,7 +8,7 @@ import (
 type Token struct {
 	Column  int
 	Row     int
-	Context context.CodeContext
+	Context *context.CodeContext
 
 	Type    Type
 	Flags   []Flag
@@ -51,7 +51,7 @@ func staticOf(t Type, flags ...Flag) StaticToken {
 func (s *StaticToken) normal(
 	column int,
 	row int,
-	ctx context.CodeContext,
+	ctx *context.CodeContext,
 	optionalContent ...string,
 ) *Token {
 	if len(optionalContent) > 1 {
