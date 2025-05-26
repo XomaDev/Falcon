@@ -8,7 +8,7 @@ type Global struct {
 }
 
 func (g *Global) String() string {
-	return "glob " + g.Name + " = " + g.Value.String()
+	return "global " + g.Name + " = " + g.Value.String()
 }
 
 func (g *Global) Blockly() blky.Block {

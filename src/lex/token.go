@@ -3,6 +3,7 @@ package lex
 import (
 	"Falcon/context"
 	"Falcon/sugar"
+	"strconv"
 )
 
 type Token struct {
@@ -20,6 +21,13 @@ func (t *Token) String() string {
 		return sugar.Format("(%)", t.Type.String())
 	}
 	return sugar.Format("(% %)", t.Type.String(), *t.Content)
+}
+
+func (t *Token) Debug() string {
+	if t.Content == nil {
+		return sugar.Format("(%:% %)", strconv.Itoa(t.Row), strconv.Itoa(t.Column), t.Type.String())
+	}
+	return sugar.Format("(%:% % %)", strconv.Itoa(t.Row), strconv.Itoa(t.Column), t.Type.String(), *t.Content)
 }
 
 func (t *Token) HasFlag(flag Flag) bool {

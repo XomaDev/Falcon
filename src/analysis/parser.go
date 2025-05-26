@@ -124,7 +124,7 @@ func (p *Parser) varExpr() blky.Expr {
 		p.expect(l.Assign)
 		value := p.parse()
 		// we gotta parse rest of the body here
-		return &variables.Var{Names: []string{name}, Values: []blky.Expr{value}, Body: p.bodyUntilCurly()}
+		return &variables.SimpleVar{Name: name, Value: value, Body: p.bodyUntilCurly()}
 	}
 }
 

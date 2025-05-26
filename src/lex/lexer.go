@@ -164,7 +164,15 @@ func (l *Lexer) text() {
 	}
 	l.eat('"')
 	content := l.source[startIndex : l.currIndex-1]
-	l.appendToken(&Token{Type: Text, Content: &content, Flags: []Flag{Value, ConstantValue}, Context: l.ctx})
+	l.appendToken(&Token{
+		Context: l.ctx,
+		Row:     l.currRow,
+		Column:  l.currColumn,
+
+		Type:    Text,
+		Content: &content,
+		Flags:   []Flag{Value, ConstantValue},
+	})
 }
 
 func (l *Lexer) alpha() {
@@ -178,7 +186,15 @@ func (l *Lexer) alpha() {
 	if ok {
 		l.appendToken(sToken.normal(l.currColumn, l.currRow, l.ctx))
 	} else {
-		l.appendToken(&Token{Type: Name, Content: &content, Flags: []Flag{Value}, Context: l.ctx})
+		l.appendToken(&Token{
+			Context: l.ctx,
+			Row:     l.currRow,
+			Column:  l.currColumn,
+
+			Type:    Name,
+			Content: &content,
+			Flags:   []Flag{Value},
+		})
 	}
 }
 
@@ -191,7 +207,15 @@ func (l *Lexer) numeric() {
 		l.writeNumeric(&numb)
 	}
 	content := numb.String()
-	l.appendToken(&Token{Type: Number, Content: &content, Flags: []Flag{Value, ConstantValue}, Context: l.ctx})
+	l.appendToken(&Token{
+		Context: l.ctx,
+		Row:     l.currRow,
+		Column:  l.currColumn,
+
+		Type:    Number,
+		Content: &content,
+		Flags:   []Flag{Value, ConstantValue},
+	})
 }
 
 func (l *Lexer) appendToken(token *Token) {

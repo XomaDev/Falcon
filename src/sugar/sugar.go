@@ -10,12 +10,9 @@ func Format(format string, args ...string) string {
 	argsLen := len(args)
 	argIndex := 0
 	for i := 0; i < formatLen; i++ {
-		if format[i] == '%' {
+		if format[i] == '%' && argIndex < argsLen {
 			builder.WriteString(args[argIndex])
 			argIndex++
-			if argIndex == argsLen {
-				break
-			}
 		} else {
 			builder.WriteByte(format[i])
 		}

@@ -44,7 +44,7 @@ func (t *Transformer) String() string {
 			strings.Join(t.Names, ", "),
 			blky.Pad(t.Transformer))
 	} else {
-		return sugar.Format("%.% { % ->\n%}",
+		return sugar.Format("%.%(%) { % ->\n%}",
 			t.List.String(),
 			t.Name,
 			blky.JoinExprs(", ", t.Args),

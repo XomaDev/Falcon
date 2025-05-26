@@ -25,11 +25,9 @@ func main() {
 
 	tokens := lex.NewLexer(codeContext).Lex()
 	for _, token := range tokens {
-		println(token.String())
+		println(token.Debug())
 	}
 
-	println(codeContext)
-	println(codeContext.FileName)
 	println("\n=== AST ===\n")
 
 	expressions := analysis.NewParser(tokens).ParseAll()

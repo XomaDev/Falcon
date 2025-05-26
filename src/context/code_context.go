@@ -31,7 +31,7 @@ func (c *CodeContext) ReportError(
 	builder.WriteByte('\n')
 	builder.WriteString(line)
 	builder.WriteByte('\n')
-	builder.WriteString(strings.Repeat(" ", row))
+	builder.WriteString(strings.Repeat(" ", row-highlightWordSize))
 	builder.WriteString(strings.Repeat("^", highlightWordSize))
 	builder.WriteByte('\n')
 	builder.WriteString(sugar.Format(message, args...))
