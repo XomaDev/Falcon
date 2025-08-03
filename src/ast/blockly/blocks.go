@@ -76,6 +76,7 @@ type Arg struct {
 type Expr interface {
 	String() string
 	Blockly() Block
+	Continuous() bool
 }
 
 func (b *Block) String() string {
@@ -86,7 +87,7 @@ func (b *Block) GetType() string {
 	return b.Type
 }
 
-func (b *Block) SingleTerm() bool {
+func (b *Block) Continuous() bool {
 	return true
 }
 

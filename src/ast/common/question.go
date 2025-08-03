@@ -13,7 +13,11 @@ type Question struct {
 }
 
 func (q *Question) String() string {
-	return sugar.Format("% ? %", q.On.String(), q.Question)
+	pFormat := "% ? %"
+	if !q.On.Continuous() {
+		pFormat = "(%) ? %"
+	}
+	return sugar.Format(pFormat, q.On.String(), q.Question)
 }
 
 func (q *Question) Blockly() blockly.Block {
@@ -34,6 +38,10 @@ func (q *Question) Blockly() blockly.Block {
 		q.Where.Error("Unknown question ? %", q.Question)
 	}
 	panic("Unreachable")
+}
+
+func (q *Question) Continuous() bool {
+	return false
 }
 
 func (q *Question) listIsEmpty() blockly.Block {

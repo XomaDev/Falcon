@@ -31,3 +31,7 @@ func (g *Get) Blockly() blky.Block {
 		Consumable: true,
 	}
 }
+
+func (g *Get) Continuous() bool {
+	return true
+}

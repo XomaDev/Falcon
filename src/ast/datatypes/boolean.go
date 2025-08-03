@@ -30,6 +30,10 @@ func (b *Boolean) Blockly() blockly.Block {
 	}
 }
 
+func (b *Boolean) Continuous() bool {
+	return true
+}
+
 type Not struct {
 	Expr blockly.Expr
 }
@@ -44,4 +48,8 @@ func (n *Not) Blockly() blockly.Block {
 		Values:     []blockly.Value{{Name: "BOOL", Block: n.Expr.Blockly()}},
 		Consumable: true,
 	}
+}
+
+func (n *Not) Continuous() bool {
+	return false
 }

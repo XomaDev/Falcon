@@ -24,3 +24,7 @@ func (e *Each) Blockly() blockly.Block {
 		Consumable: false,
 	}
 }
+
+func (e *Each) Continuous() bool {
+	return false
+}

@@ -17,3 +17,7 @@ func (t *Text) Blockly() blockly.Block {
 		Consumable: false,
 	}
 }
+
+func (t *Text) Continuous() bool {
+	return true
+}

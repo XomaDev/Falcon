@@ -19,3 +19,7 @@ func (g *Global) Blockly() blky.Block {
 		Consumable: false,
 	}
 }
+
+func (g *Global) Continuous() bool {
+	return false
+}

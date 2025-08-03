@@ -46,3 +46,7 @@ func (c *Color) Blockly() blockly.Block {
 		Consumable: true,
 	}
 }
+
+func (c *Color) Continuous() bool {
+	return true
+}

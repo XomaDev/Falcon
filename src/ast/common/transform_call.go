@@ -35,3 +35,7 @@ func (t *Transform) Blockly() blockly.Block {
 	}
 	panic("")
 }
+
+func (t *Transform) Continuous() bool {
+	return true
+}

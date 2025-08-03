@@ -17,3 +17,7 @@ func (n *Number) Blockly() blockly.Block {
 		Consumable: true,
 	}
 }
+
+func (n *Number) Continuous() bool {
+	return true
+}

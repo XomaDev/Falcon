@@ -27,3 +27,7 @@ func (f *For) Blockly() blockly.Block {
 		Consumable: false,
 	}
 }
+
+func (f *For) Continuous() bool {
+	return false
+}

@@ -32,3 +32,7 @@ func (v *SimpleVar) Blockly() blky.Block {
 		Consumable: false,
 	}
 }
+
+func (v *SimpleVar) Continuous() bool {
+	return false
+}

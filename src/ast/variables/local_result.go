@@ -35,3 +35,7 @@ func (v *VarResult) Blockly() blky.Block {
 		Consumable: true,
 	}
 }
+
+func (v *VarResult) Continuous() bool {
+	return true
+}

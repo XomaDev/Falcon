@@ -25,3 +25,7 @@ func (v *VoidProcedure) Blockly() blky.Block {
 		Consumable: false,
 	}
 }
+
+func (v *VoidProcedure) Continuous() bool {
+	return false
+}

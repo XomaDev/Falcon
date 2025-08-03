@@ -59,3 +59,7 @@ func (i *If) Blockly() blockly.Block {
 		Consumable: false,
 	}
 }
+
+func (i *If) Continuous() bool {
+	return false
+}

@@ -72,6 +72,10 @@ func (f *FuncCall) Blockly() blockly.Block {
 	}
 }
 
+func (f *FuncCall) Continuous() bool {
+	return true
+}
+
 func (f *FuncCall) splitColor() blockly.Block {
 	return blockly.Block{
 		Type:       "color_make_color",

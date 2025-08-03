@@ -25,3 +25,7 @@ func (v *RetProcedure) Blockly() blky.Block {
 		Consumable: false,
 	}
 }
+
+func (v *RetProcedure) Continuous() bool {
+	return false
+}

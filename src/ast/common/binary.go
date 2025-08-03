@@ -62,6 +62,10 @@ func (b *BinaryExpr) Blockly() blockly.Block {
 	}
 }
 
+func (b *BinaryExpr) Continuous() bool {
+	return false
+}
+
 func (b *BinaryExpr) assignment() blockly.Block {
 	if len(b.Operands) != 2 {
 		b.Where.Error("Assignment '=' received more than two operands")

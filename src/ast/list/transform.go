@@ -38,13 +38,21 @@ var transformers = map[string]*Signature{
 
 func (t *Transformer) String() string {
 	if len(t.Args) == 0 {
-		return sugar.Format("%.% { % ->\n%}",
+		pFormat := "%.% { % ->\n%}"
+		if !t.List.Continuous() {
+			pFormat = "(%).% { % ->\n%}"
+		}
+		return sugar.Format(pFormat,
 			t.List.String(),
 			t.Name,
 			strings.Join(t.Names, ", "),
 			blky.Pad(t.Transformer))
 	} else {
-		return sugar.Format("%.%(%) { % ->\n%}",
+		pFormat := "%.%(%) { % ->\n%}"
+		if !t.List.Continuous() {
+			pFormat = "(%).%(%) { % ->\n%}"
+		}
+		return sugar.Format(pFormat,
 			t.List.String(),
 			t.Name,
 			blky.JoinExprs(", ", t.Args),
@@ -87,6 +95,10 @@ func (t *Transformer) Blockly() blky.Block {
 	default:
 		panic("Unimplemented list transformer! " + t.Name)
 	}
+}
+
+func (t *Transformer) Continuous() bool {
+	return false
 }
 
 func (t *Transformer) max() blky.Block {

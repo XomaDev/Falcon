@@ -21,3 +21,7 @@ func (l *List) Blockly() blockly.Block {
 		Consumable: true,
 	}
 }
+
+func (l *List) Continuous() bool {
+	return true
+}

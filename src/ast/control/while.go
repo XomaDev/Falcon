@@ -22,3 +22,7 @@ func (w *While) Blockly() blockly.Block {
 		Consumable: false,
 	}
 }
+
+func (w *While) Continuous() bool {
+	return false
+}

@@ -36,7 +36,11 @@ type Convert struct {
 }
 
 func (p *Convert) String() string {
-	return sugar.Format("%->%", p.On.String(), p.Name)
+	pFormat := "%->%"
+	if !p.On.Continuous() {
+		pFormat = "(%)->%"
+	}
+	return sugar.Format(pFormat, p.On.String(), p.Name)
 }
 
 func (p *Convert) Blockly() blockly.Block {
@@ -50,6 +54,10 @@ func (p *Convert) Blockly() blockly.Block {
 	default:
 		panic("Unknown undefined module " + tags[0])
 	}
+}
+
+func (p *Convert) Continuous() bool {
+	return true
 }
 
 func (p *Convert) mathConversion(fieldOp string) blockly.Block {
