@@ -29,7 +29,7 @@ func mistToXml(this js.Value, p []js.Value) any {
 		sourceCode := p[0].String()
 
 		tokens := lex.NewLexer(sourceCode).Lex()
-		expressions := analysis.NewParser(tokens).ParseAll()
+		expressions := analysis.NewLangParser(tokens).ParseAll()
 
 		var xmlCode strings.Builder
 

@@ -1,3 +1,1 @@
-local numbers = [1, 2, 3, 4, 5, 6]
-local result = numbers.reduce(0, 2) { x, soFar -> x + soFar }
-println(result)
+1 > 2
