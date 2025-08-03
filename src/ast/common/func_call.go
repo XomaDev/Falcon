@@ -20,7 +20,7 @@ func (f *FuncCall) String() string {
 
 func (f *FuncCall) Blockly() blockly.Block {
 	switch f.Name {
-	case "bin", "octal", "hexa":
+	case "dec", "bin", "octal", "hexa":
 		return f.mathRadix()
 	case "randInt":
 		return f.randInt()
@@ -263,6 +263,8 @@ func (f *FuncCall) mathRadix() blockly.Block {
 	f.assertArgLen(1)
 	var fieldOp string
 	switch f.Name {
+	case "dec":
+		fieldOp = "DEC"
 	case "bin":
 		fieldOp = "BIN"
 	case "octal":

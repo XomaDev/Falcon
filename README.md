@@ -245,14 +245,14 @@ In-Built math converters:
 - `radians`
 - `hex`
 - `bin`
-- `parseHex`
-- `parseBin`
+- `fromHex`
+- `fromBin`
 
 ## Functions
 
 ### Math
 
-- `bin(string)`, `octal(string)`, `hexa(string)` parses string from respective base. The string provided must be a static constant i.e. no variables or function calls.
+-  `dec(string)`, `bin(string)`, `octal(string)`, `hexa(string)` parses string from respective base. The string provided must be a static constant i.e. no variables or function calls.
 
 - `randInt(from, to)`
 - `randFloat()`

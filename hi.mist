@@ -1,1 +1,1 @@
-1 > 2
+(rem(1, 2) * quot(5, mod(3, 4)) ? hexa)->bin

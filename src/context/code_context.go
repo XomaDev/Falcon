@@ -20,7 +20,9 @@ func (c *CodeContext) ReportError(
 	code := *c.SourceCode
 	beginOfLine := indexAfterNthOccurrence(code, column-1, '\n') + 1
 	endOfLine := strings.Index(code[beginOfLine:], "\n")
-
+	if endOfLine == -1 {
+		endOfLine = len(code)
+	}
 	line := code[beginOfLine : beginOfLine+endOfLine]
 
 	var builder strings.Builder
