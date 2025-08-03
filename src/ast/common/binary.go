@@ -19,9 +19,9 @@ func (b *BinaryExpr) String() string {
 }
 
 // CanRepeat: return true if the binary expr can be optimized into one struct
-//
 //	without the need to create additional BinaryExpr struct for the same Operator.
 //	This factor also depends on the type of Operator being used. (Some support, some don't)
+
 func (b *BinaryExpr) CanRepeat(testOperator l.Type) bool {
 	if b.Operator != testOperator {
 		return false

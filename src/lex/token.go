@@ -44,7 +44,11 @@ func (t *Token) Error(message string, args ...string) {
 	if t.Content != nil {
 		wordSize = max(wordSize, len(*t.Content))
 	}
-	t.Context.ReportError(t.Column, t.Row, wordSize, message, args...)
+	if t.Context != nil {
+		(*t.Context).ReportError(t.Column, t.Row, wordSize, message, args...)
+	} else {
+		panic(sugar.Format(message, args...))
+	}
 }
 
 type StaticToken struct {
@@ -56,7 +60,7 @@ func staticOf(t Type, flags ...Flag) StaticToken {
 	return StaticToken{t, flags}
 }
 
-func (s *StaticToken) normal(
+func (s *StaticToken) Normal(
 	column int,
 	row int,
 	ctx *context.CodeContext,

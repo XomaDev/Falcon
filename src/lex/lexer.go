@@ -153,7 +153,7 @@ func (l *Lexer) createOp(op string) {
 	if !ok {
 		l.error("Bad createOp('%')", op)
 	} else {
-		l.appendToken(sToken.normal(l.currColumn, l.currRow, l.ctx, op))
+		l.appendToken(sToken.Normal(l.currColumn, l.currRow, l.ctx, op))
 	}
 }
 
@@ -184,7 +184,7 @@ func (l *Lexer) alpha() {
 	content := l.source[startIndex:l.currIndex]
 	sToken, ok := Keywords[content]
 	if ok {
-		l.appendToken(sToken.normal(l.currColumn, l.currRow, l.ctx))
+		l.appendToken(sToken.Normal(l.currColumn, l.currRow, l.ctx))
 	} else {
 		l.appendToken(&Token{
 			Context: l.ctx,

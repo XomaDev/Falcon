@@ -77,3 +77,31 @@ type Expr interface {
 	String() string
 	Blockly() Block
 }
+
+func (b *Block) String() string {
+	return "<" + b.Type + ">"
+}
+
+func (b *Block) GetType() string {
+	return b.Type
+}
+
+func (b *Block) SingleTerm() bool {
+	return true
+}
+
+func (b *Block) Order() int {
+	return 100
+}
+
+func (b *Block) SingleValue() Block {
+	return b.Values[0].Block
+}
+
+func (b *Block) SingleField() string {
+	return b.Fields[0].Value
+}
+
+func (b *Block) Statement() Statement {
+	return b.Statements[0]
+}
