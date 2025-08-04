@@ -35,7 +35,7 @@ var signatures = map[string]*Signature{
 	"containsAll":             makeSignature("text", "text_contains", 1),
 	"split":                   makeSignature("text", "text_split", 1),
 	"splitAtFirst":            makeSignature("text", "text_split", 1),
-	"splitAtAny":              makeSignature("text(", "text_split", 1),
+	"splitAtAny":              makeSignature("text", "text_split", 1),
 	"splitAtFirstOfAny":       makeSignature("text", "text_split", 1),
 	"splitAtSpaces":           makeSignature("text", "text_split_at_spaces", 0),
 	"reverse":                 makeSignature("text", "text_reverse", 0),

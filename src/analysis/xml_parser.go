@@ -4,6 +4,7 @@ import (
 	blky "Falcon/ast/blockly"
 	"Falcon/ast/common"
 	dtypes "Falcon/ast/datatypes"
+	"Falcon/ast/method"
 	l "Falcon/lex"
 	"encoding/xml"
 	"strings"
@@ -43,23 +44,55 @@ func (p *XMLParser) parseAllBlocks(allBlocks []blky.Block) []blky.Expr {
 
 func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 	switch block.Type {
-	case "lists_create_with":
-		return &dtypes.List{Elements: p.fromMinVals(block.Values, 1)}
+	case "text":
+		return &dtypes.Text{Content: block.SingleField()}
+	case "text_join":
+		return p.makeBinary("_", p.fromMinVals(block.Values, 1))
+	case "text_length":
+		return p.makePropCall("textLen", p.parseBlock(block.SingleValue()))
+	case "text_isEmpty":
+		return p.makeQuestion(l.Text, block.SingleValue(), "emptyText")
+	case "text_trim":
+		return p.makePropCall("trim", p.parseBlock(block.SingleValue()))
+	case "text_reverse":
+		return p.makePropCall("reverse", p.parseBlock(block.SingleValue()))
+	case "text_split_at_spaces":
+		return p.makePropCall("splitAtSpaces", p.parseBlock(block.SingleValue()))
+	case "text_compare":
+		return p.textCompare(block)
+	case "text_changeCase":
+		return p.textChangeCase(block)
+	case "text_starts_at":
+		return p.textStartsWith(block)
+	case "text_contains":
+		return p.textContains(block)
+	case "text_split":
+		return p.textSplit(block)
+	case "text_segment":
+		return p.textSegment(block)
+	case "text_replace_all":
+		return p.textReplace(block)
+	case "obfuscated_text":
+		return p.textObfuscate(block)
+	case "text_replace_mappings":
+		return p.textReplaceMap(block)
+	case "text_is_string":
+		return p.makeQuestion(l.Text, block.SingleValue(), "text")
 
 	case "math_number":
 		return &dtypes.Number{Content: block.SingleField()}
 	case "math_compare", "math_bitwise":
 		return p.mathExpr(block)
 	case "math_add":
-		return makeBinary("+", p.fromMinVals(block.Values, 2))
+		return p.makeBinary("+", p.fromMinVals(block.Values, 2))
 	case "math_subtract":
-		return makeBinary("-", p.fromMinVals(block.Values, 2))
+		return p.makeBinary("-", p.fromMinVals(block.Values, 2))
 	case "math_multiply":
-		return makeBinary("*", p.fromMinVals(block.Values, 2))
+		return p.makeBinary("*", p.fromMinVals(block.Values, 2))
 	case "math_division":
-		return makeBinary("/", p.fromMinVals(block.Values, 2))
+		return p.makeBinary("/", p.fromMinVals(block.Values, 2))
 	case "math_power":
-		return makeBinary("^", p.fromMinVals(block.Values, 2))
+		return p.makeBinary("^", p.fromMinVals(block.Values, 2))
 	case "math_random_int":
 		return p.mathRandom(block)
 	case "math_random_float":
@@ -88,9 +121,115 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 		return p.mathIsNumber(block)
 	case "math_convert_number":
 		return p.mathConvertNumber(block)
+
+	case "lists_create_with":
+		return &dtypes.List{Elements: p.fromMinVals(block.Values, 1)}
+
+	case "dictionaries_create_with":
+		return &dtypes.Dictionary{Elements: p.fromMinVals(block.Values, 1)}
 	default:
 		panic("Unsupported block type: " + block.Type)
 	}
+}
+
+func (p *XMLParser) textReplaceMap(block blky.Block) blky.Expr {
+	var pOperation string
+	switch block.SingleField() {
+	case "LONGEST_STRING_FIRST":
+		pOperation = "replaceFromLongestFirst"
+	case "DICTIONARY_ORDER":
+		pOperation = "replaceFrom"
+	default:
+		panic("Unknown Text Replace Map operation: " + block.SingleField())
+	}
+	pVals := p.makeValueMap(block.Values)
+	return p.makePropCall(pOperation, pVals["TEXT"], pVals["MAPPINGS"])
+}
+
+func (p *XMLParser) textObfuscate(block blky.Block) blky.Expr {
+	return &common.Transform{
+		Where: makeFakeToken(l.Text),
+		On:    &dtypes.Text{Content: block.SingleField()},
+		Name:  "obfuscate"}
+}
+
+func (p *XMLParser) textSegment(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return p.makePropCall("segment", pVals["TEXT"], pVals["START"], pVals["LENGTH"])
+}
+
+func (p *XMLParser) textReplace(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return p.makePropCall("replace", pVals["TEXT"], pVals["SEGMENT"], pVals["REPLACEMENT"])
+}
+
+func (p *XMLParser) textSplit(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	var pOperation string
+	switch block.SingleField() {
+	case "SPLIT":
+		pOperation = "split"
+	case "SPLITATFIRST":
+		pOperation = "splitAtFirst"
+	case "SPLITATANY":
+		pOperation = "splitAtAny"
+	case "SPLITATFIRSTOFANY":
+		pOperation = "splitAtFirstOfAny"
+	default:
+		panic("Unsupported Text Split operation: " + block.SingleField())
+	}
+	return p.makePropCall(pOperation, pVals["TEXT"], pVals["AT"])
+}
+
+func (p *XMLParser) textContains(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	var pOperation string
+	switch block.SingleField() {
+	case "CONTAINS":
+		pOperation = "contains"
+	case "CONTAINS_ANY":
+		pOperation = "containsAny"
+	case "CONTAINS_ALL":
+		pOperation = "containsAll"
+	default:
+		panic("Unsupported Text Contains operation: " + block.SingleField())
+	}
+	return p.makePropCall(pOperation, pVals["TEXT"], pVals["PIECE"])
+}
+
+func (p *XMLParser) textStartsWith(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return p.makePropCall("startsWith", pVals["TEXT"], pVals["PIECE"])
+}
+
+func (p *XMLParser) textChangeCase(block blky.Block) blky.Expr {
+	var pOperation string
+	switch block.SingleField() {
+	case "UPCASE":
+		pOperation = "uppercase"
+	case "DOWNCASE":
+		pOperation = "lowercase"
+	default:
+		panic("Unsupported Text Change Case operation type: " + block.SingleField())
+	}
+	return p.makePropCall(pOperation, p.parseBlock(block.SingleValue()))
+}
+
+func (p *XMLParser) textCompare(block blky.Block) blky.Expr {
+	var pOperation string
+	switch block.SingleField() {
+	case "EQ":
+		pOperation = "==="
+	case "NEQ":
+		pOperation = "!=="
+	case "LT":
+		pOperation = "<<"
+	case "GT":
+		pOperation = ">>"
+	default:
+		panic("Unknown Text Compare operation: " + block.SingleField())
+	}
+	return p.makeBinary(pOperation, p.fromMinVals(block.Values, 2))
 }
 
 func (p *XMLParser) mathConvertNumber(block blky.Block) blky.Expr {
@@ -131,7 +270,7 @@ func (p *XMLParser) mathIsNumber(block blky.Block) blky.Expr {
 	default:
 		panic("Unknown MathIsNumber type: " + block.SingleField())
 	}
-	return &common.Question{Where: makeFakeToken(l.Number), Question: question, On: p.parseBlock(block.SingleValue())}
+	return p.makeQuestion(l.Number, block.SingleValue(), question)
 }
 
 func (p *XMLParser) mathDivide(block blky.Block) blky.Expr {
@@ -193,6 +332,8 @@ func (p *XMLParser) mathRadix(block blky.Block) blky.Expr {
 		funcName = "hexa"
 	case "OCT":
 		funcName = "octal"
+	default:
+		panic("Unknown Math Radix Type: " + pFields["OP"])
 	}
 	return makeFuncCall(funcName, &dtypes.Text{Content: pFields["NUM"]})
 }
@@ -226,10 +367,23 @@ func (p *XMLParser) mathExpr(block blky.Block) blky.Expr {
 	default:
 		panic("Unsupported math expression operation: " + block.SingleField())
 	}
-	return makeBinary(mathOp, p.fromMinVals(block.Values, 2))
+	return p.makeBinary(mathOp, p.fromMinVals(block.Values, 2))
 }
 
-func makeBinary(operator string, operands []blky.Expr) blky.Expr {
+func (p *XMLParser) makeQuestion(t l.Type, on blky.Block, name string) blky.Expr {
+	return &common.Question{Where: makeFakeToken(t), On: p.parseBlock(on), Question: name}
+}
+
+func (p *XMLParser) makePropCall(name string, on blky.Expr, args ...blky.Expr) blky.Expr {
+	return &method.Call{
+		Where: makeFakeToken(l.Text),
+		Name:  name,
+		On:    on,
+		Args:  args,
+	}
+}
+
+func (p *XMLParser) makeBinary(operator string, operands []blky.Expr) blky.Expr {
 	token := makeToken(operator)
 	return &common.BinaryExpr{
 		Where:    token,
