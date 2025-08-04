@@ -4,9 +4,11 @@ import (
 	blky "Falcon/ast/blockly"
 	"Falcon/ast/common"
 	dtypes "Falcon/ast/datatypes"
+	"Falcon/ast/list"
 	"Falcon/ast/method"
 	l "Falcon/lex"
 	"encoding/xml"
+	"strconv"
 	"strings"
 )
 
@@ -123,13 +125,216 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 		return p.mathConvertNumber(block)
 
 	case "lists_create_with":
-		return &dtypes.List{Elements: p.fromMinVals(block.Values, 1)}
+		return &dtypes.List{Elements: p.fromMinVals(block.Values, 0)}
+	case "lists_add_items":
+		return p.listAddItem(block)
+	case "lists_is_in":
+		return p.listContainsItem(block)
+	case "lists_length":
+		return p.makePropCall("listLength", p.parseBlock(block.SingleValue()))
+	case "lists_is_empty":
+		return p.makeQuestion(l.OpenSquare, block.SingleValue(), "emptyList")
+	case "lists_pick_random_item":
+		return p.makePropCall("random", p.parseBlock(block.SingleValue()))
+	case "lists_position_in":
+		return p.listIndexOf(block)
+	case "lists_select_item":
+		return p.listSelectItem(block)
+	case "lists_insert_item":
+		return p.listInsertItem(block)
+	case "lists_replace_item":
+		return p.listReplaceItem(block)
+	case "lists_remove_item":
+		return p.listRemoveItem(block)
+	case "lists_copy":
+		return makeFuncCall("copyList", p.parseBlock(block.SingleValue()))
+	case "lists_reverse":
+		return p.makePropCall("reverseList", p.parseBlock(block.SingleValue()))
+	case "lists_to_csv_row":
+		return p.makePropCall("toCsvRow", p.parseBlock(block.SingleValue()))
+	case "lists_to_csv_table":
+		return p.makePropCall("toCsvTable", p.parseBlock(block.SingleValue()))
+	case "lists_sort":
+		return p.makePropCall("sort", p.parseBlock(block.SingleValue()))
+	case "lists_is_list":
+		return p.makeQuestion(l.OpenSquare, block.SingleValue(), "list")
+	case "lists_from_csv_row":
+		return p.makePropCall("csvRowToList", p.parseBlock(block.SingleValue()))
+	case "lists_from_csv_table":
+		return p.makePropCall("csvTableToList", p.parseBlock(block.SingleValue()))
+	case "lists_but_first":
+		return p.makePropCall("allButFirst", p.parseBlock(block.SingleValue()))
+	case "lists_but_last":
+		return p.makePropCall("allButLast", p.parseBlock(block.SingleValue()))
+	case "lists_lookup_in_pairs":
+		return p.listLookupPairs(block)
+	case "lists_join_with_separator":
+		return p.listJoin(block)
+	case "lists_slice":
+		return p.listSlice(block)
+	case "lists_map":
+		return p.listMap(block)
+	case "lists_filter":
+		return p.listFilter(block)
+	case "lists_reduce":
+		return p.listReduce(block)
+	case "lists_sort_comparator":
+		return p.listSortComparator(block)
+	case "lists_sort_key":
+		return p.listSortKeyComparator(block)
+	case "lists_minimum_value":
+		return p.listTransMin(block)
+	case "lists_maximum_value":
+		return p.listTransMax(block)
 
 	case "dictionaries_create_with":
 		return &dtypes.Dictionary{Elements: p.fromMinVals(block.Values, 1)}
 	default:
 		panic("Unsupported block type: " + block.Type)
 	}
+}
+
+func (p *XMLParser) listTransMax(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	pFields := p.makeFieldMap(block.Fields)
+	return &list.Transformer{
+		Where:       makeFakeToken(l.OpenSquare),
+		List:        pVals["LIST"],
+		Name:        "max",
+		Args:        []blky.Expr{},
+		Names:       []string{pFields["VAR1"], pFields["VAR2"]},
+		Transformer: pVals["COMPARE"],
+	}
+}
+
+func (p *XMLParser) listTransMin(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	pFields := p.makeFieldMap(block.Fields)
+	return &list.Transformer{
+		Where:       makeFakeToken(l.OpenSquare),
+		List:        pVals["LIST"],
+		Name:        "min",
+		Args:        []blky.Expr{},
+		Names:       []string{pFields["VAR1"], pFields["VAR2"]},
+		Transformer: pVals["COMPARE"],
+	}
+}
+
+func (p *XMLParser) listSortKeyComparator(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return &list.Transformer{
+		Where:       makeFakeToken(l.OpenSquare),
+		List:        pVals["LIST"],
+		Name:        "sortByKey",
+		Args:        []blky.Expr{},
+		Names:       []string{block.SingleField()},
+		Transformer: pVals["KEY"],
+	}
+}
+
+func (p *XMLParser) listSortComparator(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	pFields := p.makeFieldMap(block.Fields)
+	return &list.Transformer{
+		Where:       makeFakeToken(l.OpenSquare),
+		List:        pVals["LIST"],
+		Name:        "sort",
+		Args:        []blky.Expr{},
+		Names:       []string{pFields["VAR1"], pFields["VAR2"]},
+		Transformer: pVals["COMPARE"],
+	}
+}
+
+func (p *XMLParser) listReduce(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	pFields := p.makeFieldMap(block.Fields)
+	return &list.Transformer{
+		Where:       makeFakeToken(l.OpenSquare),
+		List:        pVals["LIST"],
+		Name:        "reduce",
+		Args:        []blky.Expr{pVals["INITANSWER"]},
+		Names:       []string{pFields["VAR1"], pFields["VAR2"]},
+		Transformer: pVals["COMBINE"],
+	}
+}
+
+func (p *XMLParser) listFilter(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return &list.Transformer{
+		Where:       makeFakeToken(l.OpenSquare),
+		List:        pVals["LIST"],
+		Name:        "filter",
+		Args:        []blky.Expr{},
+		Names:       []string{block.SingleField()},
+		Transformer: pVals["TEST"],
+	}
+}
+
+func (p *XMLParser) listMap(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return &list.Transformer{
+		Where:       makeFakeToken(l.OpenSquare),
+		List:        pVals["LIST"],
+		Name:        "map",
+		Args:        []blky.Expr{},
+		Names:       []string{block.SingleField()},
+		Transformer: pVals["TO"],
+	}
+}
+
+func (p *XMLParser) listSlice(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return p.makePropCall("slice", pVals["LIST"], pVals["INDEX1"], pVals["INDEX2"])
+}
+
+func (p *XMLParser) listJoin(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return p.makePropCall("join", pVals["LIST"], pVals["SEPARATOR"])
+}
+
+func (p *XMLParser) listLookupPairs(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return p.makePropCall("lookupInPairs", pVals["LIST"], pVals["KEY"], pVals["NOTFOUND"])
+}
+
+func (p *XMLParser) listRemoveItem(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return p.makePropCall("remove", pVals["LIST"], pVals["INDEX"])
+}
+
+func (p *XMLParser) listReplaceItem(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return &list.Set{List: pVals["LIST"], Index: pVals["NUM"], Value: pVals["ITEM"]}
+}
+
+func (p *XMLParser) listInsertItem(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return p.makePropCall("insert", pVals["LIST"], pVals["INDEX"], pVals["ITEM"])
+}
+
+func (p *XMLParser) listSelectItem(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return &list.Get{List: pVals["LIST"], Index: pVals["NUM"]}
+}
+
+func (p *XMLParser) listIndexOf(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return p.makePropCall("indexOf", pVals["LIST"], pVals["ITEM"])
+}
+
+func (p *XMLParser) listContainsItem(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return p.makePropCall("containsItem", pVals["LIST"], pVals["ITEM"])
+}
+
+func (p *XMLParser) listAddItem(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	numElements := block.Mutation.ItemCount
+	arrElements := make([]blky.Expr, numElements)
+	for i := 0; i < numElements; i++ {
+		arrElements[i] = pVals["ITEM"+strconv.Itoa(i)]
+	}
+	return p.makePropCall("add", pVals["LIST"], arrElements...)
 }
 
 func (p *XMLParser) textReplaceMap(block blky.Block) blky.Expr {
