@@ -187,11 +187,101 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 	case "lists_maximum_value":
 		return p.listTransMax(block)
 
+	case "pair":
+		return p.dictPair(block)
 	case "dictionaries_create_with":
-		return &dtypes.Dictionary{Elements: p.fromMinVals(block.Values, 1)}
+		return &dtypes.Dictionary{Elements: p.fromMinVals(block.Values, 0)}
+	case "dictionaries_lookup":
+		return p.dictLookup(block)
+	case "dictionaries_set_pair":
+		return p.dictSet(block)
+	case "dictionaries_delete_pair":
+		return p.dictRemove(block)
+	case "dictionaries_recursive_lookup":
+		return p.dictLookupPath(block)
+	case "dictionaries_recursive_set":
+		return p.dictSetPath(block)
+	case "dictionaries_getters":
+		return p.dictGetters(block)
+	case "dictionaries_is_key_in":
+		return p.dictHasKey(block)
+	case "dictionaries_length":
+		return p.makePropCall("dictLen", p.parseBlock(block.SingleValue()))
+	case "dictionaries_alist_to_dict":
+		return p.makePropCall("pairsToDict", p.parseBlock(block.SingleValue()))
+	case "dictionaries_dict_to_alist":
+		return p.makePropCall("toPairs", p.parseBlock(block.SingleValue()))
+	case "dictionaries_copy":
+		return makeFuncCall("copyDict", p.parseBlock(block.SingleValue()))
+	case "dictionaries_combine_dicts":
+		return p.dictCombine(block)
+	case "dictionaries_walk_tree":
+		return p.dictWalkTree(block)
+	case "dictionaries_walk_all":
+		return &dtypes.WalkAll{}
+	case "dictionaries_is_dict":
+		return p.makeQuestion(l.OpenCurly, block.SingleValue(), "dict")
 	default:
 		panic("Unsupported block type: " + block.Type)
 	}
+}
+
+func (p *XMLParser) dictWalkTree(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return p.makePropCall("walkTree", pVals["DICT"], pVals["PATH"])
+}
+
+func (p *XMLParser) dictCombine(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return p.makePropCall("mergeInto", pVals["DICT2"], pVals["DICT1"])
+}
+
+func (p *XMLParser) dictHasKey(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return p.makePropCall("containsKey", pVals["DICT"], pVals["KEY"])
+}
+
+func (p *XMLParser) dictGetters(block blky.Block) blky.Expr {
+	var pOperation string
+	switch block.SingleField() {
+	case "KEYS":
+		pOperation = "keys"
+	case "VALUES":
+		pOperation = "values"
+	default:
+		panic("Unknown DictGetters operation: " + block.SingleField())
+	}
+	return p.makePropCall(pOperation, p.parseBlock(block.SingleValue()))
+}
+
+func (p *XMLParser) dictSetPath(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return p.makePropCall("setAtPath", pVals["DICT"], pVals["KEYS"], pVals["VALUE"])
+}
+
+func (p *XMLParser) dictLookupPath(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return p.makePropCall("getAtPath", pVals["DICT"], pVals["KEYS"], pVals["NOTFOUND"])
+}
+
+func (p *XMLParser) dictRemove(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return p.makePropCall("remove", pVals["DICT"], pVals["KEY"])
+}
+
+func (p *XMLParser) dictSet(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return p.makePropCall("set", pVals["KEY"], pVals["VALUE"])
+}
+
+func (p *XMLParser) dictLookup(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return p.makePropCall("get", pVals["DICT"], pVals["KEY"], pVals["NOTFOUND"])
+}
+
+func (p *XMLParser) dictPair(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return p.makeBinary(":", []blky.Expr{pVals["KEY"], pVals["VALUE"]})
 }
 
 func (p *XMLParser) listTransMax(block blky.Block) blky.Expr {

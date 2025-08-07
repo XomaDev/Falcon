@@ -1,1 +1,1 @@
-[1, 2, 3, 4, 5].max { x, y -> 1 }
+{"cat": "meow", "dog": "boww"} ? dict

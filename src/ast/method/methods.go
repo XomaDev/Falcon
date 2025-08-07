@@ -22,6 +22,8 @@ func (c *Call) dictMethods(signature *Signature) blky.Block {
 		return c.dictMergeInto()
 	case "dictionaries_walk_tree":
 		return c.dictWalkTree()
+	case "dictionaries_getters":
+		return c.dictGetters()
 	default:
 		panic("Unknown text method " + signature.Name)
 	}
