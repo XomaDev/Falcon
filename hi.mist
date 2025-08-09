@@ -1,1 +1,3 @@
-{"cat": "meow", "dog": "boww"} ? dict
+println(color:red)
+println(makeColor([1, 2, 3]))
+println(splitColor(color:blue))

@@ -46,6 +46,9 @@ func (p *XMLParser) parseAllBlocks(allBlocks []blky.Block) []blky.Expr {
 
 func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 	switch block.Type {
+	case "controls_eval_but_ignore":
+		return makeFuncCall("println", p.parseBlock(block.SingleValue()))
+
 	case "text":
 		return &dtypes.Text{Content: block.SingleField()}
 	case "text_join":
@@ -221,6 +224,36 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 		return &dtypes.WalkAll{}
 	case "dictionaries_is_dict":
 		return p.makeQuestion(l.OpenCurly, block.SingleValue(), "dict")
+
+	case "color_black":
+		return p.makeColor("black")
+	case "color_white":
+		return p.makeColor("white")
+	case "color_red":
+		return p.makeColor("red")
+	case "color_pink":
+		return p.makeColor("pink")
+	case "color_orange":
+		return p.makeColor("orange")
+	case "color_yellow":
+		return p.makeColor("yellow")
+	case "color_green":
+		return p.makeColor("green")
+	case "color_cyan":
+		return p.makeColor("cyan")
+	case "color_blue":
+		return p.makeColor("blue")
+	case "color_magenta":
+		return p.makeColor("magenta")
+	case "color_light_gray":
+		return p.makeColor("light_gray")
+	case "color_dark_gray":
+		return p.makeColor("dark_gray")
+	case "color_make_color":
+		return makeFuncCall("makeColor", p.parseBlock(block.SingleValue()))
+	case "color_split_color":
+		return makeFuncCall("splitColor", p.parseBlock(block.SingleValue()))
+
 	default:
 		panic("Unsupported block type: " + block.Type)
 	}
@@ -663,6 +696,10 @@ func (p *XMLParser) mathExpr(block blky.Block) blky.Expr {
 		panic("Unsupported math expression operation: " + block.SingleField())
 	}
 	return p.makeBinary(mathOp, p.fromMinVals(block.Values, 2))
+}
+
+func (p *XMLParser) makeColor(name string) blky.Expr {
+	return &dtypes.Color{Where: makeFakeToken(l.Color), Name: name}
 }
 
 func (p *XMLParser) makeQuestion(t l.Type, on blky.Block, name string) blky.Expr {
