@@ -2,6 +2,7 @@
   <dictionary name="project">
     <words>
       <w>exprs</w>
+      <w>smts</w>
     </words>
   </dictionary>
 </component>

@@ -1,3 +1,4 @@
-println(color:red)
-println(makeColor([1, 2, 3]))
-println(splitColor(color:blue))
+local(
+    a = 1,
+    b = 2
+) -> a * b

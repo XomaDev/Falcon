@@ -19,7 +19,7 @@ func (v *Var) String() string {
 	for i, name := range v.Names {
 		varLines = append(varLines, blky.PadDirect(name+" = "+v.Values[i].String()))
 	}
-	builder.WriteString(strings.Join(varLines, "\n"))
+	builder.WriteString(strings.Join(varLines, ",\n"))
 	builder.WriteString("\n) {\n")
 	builder.WriteString(blky.PadBody(v.Body))
 	builder.WriteString("}")

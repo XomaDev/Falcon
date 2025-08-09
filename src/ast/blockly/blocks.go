@@ -103,6 +103,10 @@ func (b *Block) SingleField() string {
 	return b.Fields[0].Value
 }
 
+func (b *Block) SingleStatement() Statement {
+	return b.Statements[0]
+}
+
 func (b *Block) Statement() Statement {
 	return b.Statements[0]
 }

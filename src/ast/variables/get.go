@@ -13,7 +13,7 @@ type Get struct {
 
 func (g *Get) String() string {
 	if g.Global {
-		return "glob." + g.Name
+		return "this." + g.Name
 	}
 	return g.Name
 }

@@ -6,6 +6,7 @@ import (
 	dtypes "Falcon/ast/datatypes"
 	"Falcon/ast/list"
 	"Falcon/ast/method"
+	"Falcon/ast/variables"
 	l "Falcon/lex"
 	"encoding/xml"
 	"strconv"
@@ -254,9 +255,70 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 	case "color_split_color":
 		return makeFuncCall("splitColor", p.parseBlock(block.SingleValue()))
 
+	case "global_declaration":
+		return &variables.Global{Name: block.SingleField(), Value: p.parseBlock(block.SingleValue())}
+	case "lexical_variable_get":
+		return p.variableGet(block)
+	case "lexical_variable_set":
+		return p.variableSet(block)
+	case "local_declaration_statement", "local_declaration_expression":
+		return p.variableSmts(block)
+
 	default:
 		panic("Unsupported block type: " + block.Type)
 	}
+}
+
+func (p *XMLParser) variableSmts(block blky.Block) blky.Expr {
+	numOfVars := len(block.Mutation.LocalNames)
+	fieldMap := p.makeFieldMap(block.Fields)
+	valueMap := p.makeValueMap(block.Values)
+
+	varNames := make([]string, numOfVars)
+	varValues := make([]blky.Expr, numOfVars)
+
+	for i := 0; i < numOfVars; i++ {
+		varNames[i] = fieldMap["VAR"+strconv.Itoa(i)]
+		varValues[i] = valueMap["DECL"+strconv.Itoa(i)]
+	}
+	if block.GetType() == "local_declaration_statement" {
+		return &variables.Var{
+			Names:  varNames,
+			Values: varValues,
+			Body:   p.recursiveParse(*block.SingleStatement().Block),
+		}
+	}
+	return &variables.VarResult{Names: varNames, Values: varValues, Result: valueMap["RETURN"]}
+}
+
+func (p *XMLParser) variableSet(block blky.Block) blky.Expr {
+	varName := block.SingleField()
+	isGlobal := strings.HasPrefix(varName, "global ")
+	if isGlobal {
+		varName = varName[len("global "):]
+	}
+	return p.makeBinary("=",
+		[]blky.Expr{
+			&variables.Get{
+				Where:  makeFakeToken(l.Global),
+				Global: isGlobal,
+				Name:   varName,
+			},
+			p.parseBlock(block.SingleValue()),
+		},
+	)
+}
+
+func (p *XMLParser) variableGet(block blky.Block) blky.Expr {
+	varName := block.Fields[0].Name
+	if varName == "VAR" {
+		varName = block.SingleField()
+	}
+	isGlobal := strings.HasPrefix(varName, "global ")
+	if isGlobal {
+		varName = varName[len("global "):]
+	}
+	return &variables.Get{Where: makeFakeToken(l.Global), Global: isGlobal, Name: varName}
 }
 
 func (p *XMLParser) dictWalkTree(block blky.Block) blky.Expr {
@@ -747,6 +809,18 @@ func makeFakeToken(t l.Type) *l.Token {
 func makeToken(symbol string) *l.Token {
 	sToken := l.Symbols[symbol]
 	return sToken.Normal(-1, -1, nil, symbol)
+}
+
+func (p *XMLParser) recursiveParse(currBlock blky.Block) []blky.Expr {
+	var pParsed []blky.Expr
+	for {
+		pParsed = append(pParsed, p.parseBlock(currBlock))
+		if currBlock.Next == nil {
+			break
+		}
+		currBlock = *currBlock.Next.Block
+	}
+	return pParsed
 }
 
 func (p *XMLParser) makeFieldMap(allFields []blky.Field) map[string]string {
