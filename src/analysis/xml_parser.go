@@ -6,6 +6,7 @@ import (
 	dtypes "Falcon/ast/datatypes"
 	"Falcon/ast/list"
 	"Falcon/ast/method"
+	"Falcon/ast/procedures"
 	"Falcon/ast/variables"
 	l "Falcon/lex"
 	"encoding/xml"
@@ -264,8 +265,59 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 	case "local_declaration_statement", "local_declaration_expression":
 		return p.variableSmts(block)
 
+	case "procedures_defnoreturn":
+		return p.voidProcedure(block)
+	case "procedures_defreturn":
+		return p.returnProcedure(block)
+	case "procedures_callnoreturn", "procedures_callreturn":
+		return p.procedureCall(block)
+
 	default:
 		panic("Unsupported block type: " + block.Type)
+	}
+}
+
+func (p *XMLParser) procedureCall(block blky.Block) blky.Expr {
+	mutArgsNames := block.Mutation.Args
+	paramNames := make([]string, len(mutArgsNames))
+	for i := range mutArgsNames {
+		paramNames[i] = mutArgsNames[i].Name
+	}
+	procedureName := block.SingleField()
+	args := p.fromVals(block.Values)
+	return &procedures.Call{
+		Name:       procedureName,
+		Parameters: paramNames,
+		Arguments:  args,
+		Returning:  block.Type == "procedures_callreturn",
+	}
+}
+
+func (p *XMLParser) returnProcedure(block blky.Block) blky.Expr {
+	procedureName := p.makeFieldMap(block.Fields)["NAME"]
+	mutArgs := block.Mutation.Args
+	paramNames := make([]string, len(mutArgs))
+	for i := range mutArgs {
+		paramNames[i] = mutArgs[i].Name
+	}
+	return &procedures.RetProcedure{
+		Name:       procedureName,
+		Parameters: paramNames,
+		Result:     p.parseBlock(block.SingleValue()),
+	}
+}
+
+func (p *XMLParser) voidProcedure(block blky.Block) blky.Expr {
+	procedureName := p.makeFieldMap(block.Fields)["NAME"]
+	mutArgs := block.Mutation.Args
+	paramNames := make([]string, len(mutArgs))
+	for i := range mutArgs {
+		paramNames[i] = mutArgs[i].Name
+	}
+	return &procedures.VoidProcedure{
+		Name:       procedureName,
+		Parameters: paramNames,
+		Body:       p.recursiveParse(*block.SingleStatement().Block),
 	}
 }
 
