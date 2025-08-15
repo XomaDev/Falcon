@@ -4,7 +4,7 @@ import (
 	blky "Falcon/ast/blockly"
 	"Falcon/ast/common"
 	"Falcon/ast/control"
-	dtypes "Falcon/ast/datatypes"
+	dtypes "Falcon/ast/fundamentals"
 	"Falcon/ast/list"
 	"Falcon/ast/method"
 	"Falcon/ast/procedures"
@@ -319,10 +319,10 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 
 	case "helpers_assets":
 		return &dtypes.Text{Content: block.SingleField()}
-	//case "helpers_dropdown":
-	//	return TODO!
-	// case "component_component_block":
+	case "helpers_dropdown":
+		return &dtypes.HelperDropdown{Key: block.Mutation.Key, Option: block.SingleField()}
 
+	// TODO: impl component blocks
 	default:
 		panic("Unsupported block type: " + block.Type)
 	}

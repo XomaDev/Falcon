@@ -134,6 +134,8 @@ func (l *Lexer) parse() {
 		}
 	case '_':
 		l.createOp("_")
+	case '@':
+		l.createOp("@")
 	case '"':
 		l.text()
 	default:

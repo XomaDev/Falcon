@@ -43,33 +43,34 @@ func _() {
 	_ = x[DoubleColon-32]
 	_ = x[RightArrow-33]
 	_ = x[Underscore-34]
-	_ = x[True-35]
-	_ = x[False-36]
-	_ = x[Text-37]
-	_ = x[Number-38]
-	_ = x[Name-39]
-	_ = x[Color-40]
-	_ = x[If-41]
-	_ = x[Elif-42]
-	_ = x[Else-43]
-	_ = x[For-44]
-	_ = x[To-45]
-	_ = x[By-46]
-	_ = x[Each-47]
-	_ = x[In-48]
-	_ = x[While-49]
-	_ = x[Do-50]
-	_ = x[Break-51]
-	_ = x[WalkAll-52]
-	_ = x[Global-53]
-	_ = x[Local-54]
-	_ = x[This-55]
-	_ = x[Func-56]
+	_ = x[At-35]
+	_ = x[True-36]
+	_ = x[False-37]
+	_ = x[Text-38]
+	_ = x[Number-39]
+	_ = x[Name-40]
+	_ = x[Color-41]
+	_ = x[If-42]
+	_ = x[Elif-43]
+	_ = x[Else-44]
+	_ = x[For-45]
+	_ = x[To-46]
+	_ = x[By-47]
+	_ = x[Each-48]
+	_ = x[In-49]
+	_ = x[While-50]
+	_ = x[Do-51]
+	_ = x[Break-52]
+	_ = x[WalkAll-53]
+	_ = x[Global-54]
+	_ = x[Local-55]
+	_ = x[This-56]
+	_ = x[Func-57]
 }
 
-const _Type_name = "PlusDashTimesSlashPowerLogicOrLogicAndBitwiseOrBitwiseAndBitwiseXorEqualsNotEqualsLessThanLessThanEqualGreatThanGreaterThanEqualTextEqualsTextNotEqualsTextLessThanTextGreaterThanOpenCurveCloseCurveOpenSquareCloseSquareOpenCurlyCloseCurlyAssignDotCommaQuestionNotColonDoubleColonRightArrowUnderscoreTrueFalseTextNumberNameColorIfElifElseForToByEachInWhileDoBreakWalkAllGlobalLocalThisFunc"
+const _Type_name = "PlusDashTimesSlashPowerLogicOrLogicAndBitwiseOrBitwiseAndBitwiseXorEqualsNotEqualsLessThanLessThanEqualGreatThanGreaterThanEqualTextEqualsTextNotEqualsTextLessThanTextGreaterThanOpenCurveCloseCurveOpenSquareCloseSquareOpenCurlyCloseCurlyAssignDotCommaQuestionNotColonDoubleColonRightArrowUnderscoreAtTrueFalseTextNumberNameColorIfElifElseForToByEachInWhileDoBreakWalkAllGlobalLocalThisFunc"
 
-var _Type_index = [...]uint16{0, 4, 8, 13, 18, 23, 30, 38, 47, 57, 67, 73, 82, 90, 103, 112, 128, 138, 151, 163, 178, 187, 197, 207, 218, 227, 237, 243, 246, 251, 259, 262, 267, 278, 288, 298, 302, 307, 311, 317, 321, 326, 328, 332, 336, 339, 341, 343, 347, 349, 354, 356, 361, 368, 374, 379, 383, 387}
+var _Type_index = [...]uint16{0, 4, 8, 13, 18, 23, 30, 38, 47, 57, 67, 73, 82, 90, 103, 112, 128, 138, 151, 163, 178, 187, 197, 207, 218, 227, 237, 243, 246, 251, 259, 262, 267, 278, 288, 298, 300, 304, 309, 313, 319, 323, 328, 330, 334, 338, 341, 343, 345, 349, 351, 356, 358, 363, 370, 376, 381, 385, 389}
 
 func (i Type) String() string {
 	if i < 0 || i >= Type(len(_Type_index)-1) {

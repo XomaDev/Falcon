@@ -4,7 +4,7 @@ import (
 	blky "Falcon/ast/blockly"
 	"Falcon/ast/common"
 	"Falcon/ast/control"
-	"Falcon/ast/datatypes"
+	"Falcon/ast/fundamentals"
 	"Falcon/ast/list"
 	"Falcon/ast/method"
 	"Falcon/ast/procedures"
@@ -51,7 +51,7 @@ func (p *LangParser) parse() blky.Expr {
 		return &control.Break{}
 	case l.WalkAll:
 		p.skip()
-		return &datatypes.WalkAll{}
+		return &fundamentals.WalkAll{}
 	case l.Local:
 		return p.varExpr()
 	case l.Global:
@@ -290,6 +290,8 @@ func (p *LangParser) element() blky.Expr {
 	for p.notEOF() {
 		pe := p.peek()
 		switch pe.Type {
+		case l.At:
+			left = p.helperDropdown(left)
 		case l.Dot:
 			left = p.objectCall(left)
 			continue
@@ -312,6 +314,15 @@ func (p *LangParser) element() blky.Expr {
 		break
 	}
 	return left
+}
+
+func (p *LangParser) helperDropdown(keyExpr blky.Expr) blky.Expr {
+	where := p.next()
+	if key, ok := keyExpr.(*variables.Get); ok {
+		return &fundamentals.HelperDropdown{Key: key.Name, Option: p.name()}
+	}
+	where.Error("Invalid Helper Access operation ")
+	panic("")
 }
 
 func (p *LangParser) objectCall(object blky.Expr) blky.Expr {
@@ -361,7 +372,7 @@ func (p *LangParser) term() blky.Expr {
 		p.expect(l.CloseCurve)
 		return e
 	case l.Not:
-		return &datatypes.Not{Expr: p.element()}
+		return &fundamentals.Not{Expr: p.element()}
 	case l.Do:
 		return p.doExpr()
 	case l.If:
@@ -395,7 +406,7 @@ func (p *LangParser) doExpr() *control.Do {
 	return &control.Do{Body: body, Result: result}
 }
 
-func (p *LangParser) dictionary() *datatypes.Dictionary {
+func (p *LangParser) dictionary() *fundamentals.Dictionary {
 	var elements []blky.Expr
 	if !p.consume(l.CloseCurly) {
 		for p.notEOF() {
@@ -406,10 +417,10 @@ func (p *LangParser) dictionary() *datatypes.Dictionary {
 		}
 		p.expect(l.CloseCurly)
 	}
-	return &datatypes.Dictionary{Elements: elements}
+	return &fundamentals.Dictionary{Elements: elements}
 }
 
-func (p *LangParser) list() *datatypes.List {
+func (p *LangParser) list() *fundamentals.List {
 	var elements []blky.Expr
 	if !p.consume(l.CloseSquare) {
 		for p.notEOF() {
@@ -420,7 +431,7 @@ func (p *LangParser) list() *datatypes.List {
 		}
 		p.expect(l.CloseSquare)
 	}
-	return &datatypes.List{Elements: elements}
+	return &fundamentals.List{Elements: elements}
 }
 
 func (p *LangParser) arguments() []blky.Expr {
@@ -442,11 +453,11 @@ func (p *LangParser) arguments() []blky.Expr {
 func (p *LangParser) value(t *l.Token) blky.Expr {
 	switch t.Type {
 	case l.True, l.False:
-		return &datatypes.Boolean{Value: t.Type == l.True}
+		return &fundamentals.Boolean{Value: t.Type == l.True}
 	case l.Number:
-		return &datatypes.Number{Content: *t.Content}
+		return &fundamentals.Number{Content: *t.Content}
 	case l.Text:
-		return &datatypes.Text{Content: *t.Content}
+		return &fundamentals.Text{Content: *t.Content}
 	case l.Name:
 		return &variables.Get{Where: t, Global: false, Name: *t.Content}
 	case l.This:
@@ -454,7 +465,7 @@ func (p *LangParser) value(t *l.Token) blky.Expr {
 		return &variables.Get{Where: t, Global: true, Name: p.name()}
 	case l.Color:
 		p.expect(l.Colon)
-		return &datatypes.Color{Where: t, Name: p.name()}
+		return &fundamentals.Color{Where: t, Name: p.name()}
 	default:
 		t.Error("Unknown value type '%'", t.Type.String())
 		panic("") // unreachable

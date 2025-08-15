@@ -1,4 +1,4 @@
-package datatypes
+package fundamentals
 
 import (
 	"Falcon/ast/blockly"
