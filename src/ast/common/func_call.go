@@ -57,7 +57,8 @@ func (f *FuncCall) Blockly() blockly.Block {
 		return f.ctrlSimpleBlock("controls_closeApplication", false)
 	case "getPlainStartText":
 		return f.ctrlSimpleBlock("controls_getPlainStartText", true)
-
+	case "closeScreenWithPlainText":
+		return f.closeScreenWithPlainText()
 	case "copyList":
 		return f.copyList()
 	case "copyDict":
@@ -110,6 +111,15 @@ func (f *FuncCall) copyList() blockly.Block {
 
 func (f *FuncCall) ctrlSimpleBlock(blockType string, consumable bool) blockly.Block {
 	return blockly.Block{Type: blockType, Consumable: consumable}
+}
+
+func (f *FuncCall) closeScreenWithPlainText() blockly.Block {
+	f.assertArgLen(1)
+	return blockly.Block{
+		Type:       "controls_closeScreenWithPlainText",
+		Values:     blockly.MakeValues(f.Args, "TEXT"),
+		Consumable: false,
+	}
 }
 
 func (f *FuncCall) closeScreenWithValue() blockly.Block {

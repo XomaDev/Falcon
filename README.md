@@ -134,10 +134,12 @@ Ternary like expression for returning values.
 Unlike If statement, use `()` between your condition.
 
 ```go
-local a = 8
-local b = 2
-
-local max = if (a > b) a else b
+local(
+a = 8,
+b = 2
+) {
+	println("Maximum " _ if (a > b) a else b)
+}
 ```
 
 ### For loops

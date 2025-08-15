@@ -364,6 +364,8 @@ func (p *LangParser) term() blky.Expr {
 		return &datatypes.Not{Expr: p.element()}
 	case l.Do:
 		return p.doExpr()
+	case l.If:
+		return p.simpleIf()
 	default:
 		if token.HasFlag(l.Value) {
 			value := p.value(token)
@@ -464,7 +466,7 @@ func (p *LangParser) name() string {
 }
 
 func (p *LangParser) consume(t l.Type) bool {
-	if p.peek().Type == t {
+	if p.notEOF() && p.peek().Type == t {
 		p.currIndex++
 		return true
 	}
@@ -483,6 +485,9 @@ func (p *LangParser) expect(t l.Type) *l.Token {
 }
 
 func (p *LangParser) isNext(checkTypes ...l.Type) bool {
+	if p.isEOF() {
+		return false
+	}
 	pType := p.peek().Type
 	for _, checkType := range checkTypes {
 		if checkType == pType {

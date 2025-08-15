@@ -3,6 +3,7 @@ package analysis
 import (
 	blky "Falcon/ast/blockly"
 	"Falcon/ast/common"
+	"Falcon/ast/control"
 	dtypes "Falcon/ast/datatypes"
 	"Falcon/ast/list"
 	"Falcon/ast/method"
@@ -48,8 +49,52 @@ func (p *XMLParser) parseAllBlocks(allBlocks []blky.Block) []blky.Expr {
 
 func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 	switch block.Type {
+	case "controls_if":
+		return p.ctrlIf(block)
+	case "controls_forRange":
+		return p.ctrlForRange(block)
+	case "controls_forEach":
+		return &control.Each{
+			IName:    block.SingleField(),
+			Iterable: p.parseBlock(block.SingleValue()),
+			Body:     p.optSingleBody(block)}
+	case "controls_for_each_dict":
+		return p.ctrlForEachDict(block)
+	case "controls_while":
+		return &control.While{
+			Condition: p.parseBlock(block.SingleValue()),
+			Body:      p.optSingleBody(block)}
+	case "controls_choose":
+		return p.ctrlChoose(block)
+	case "controls_do_then_return":
+		return &control.Do{Body: p.optSingleBody(block), Result: p.parseBlock(block.SingleValue())}
 	case "controls_eval_but_ignore":
 		return makeFuncCall("println", p.parseBlock(block.SingleValue()))
+	case "controls_openAnotherScreen":
+		return makeFuncCall("openScreen", p.parseBlock(block.SingleValue()))
+	case "controls_openAnotherScreenWithStartValue":
+		return makeFuncCall("openScreenWithValue", p.parseBlock(block.SingleValue()))
+	case "controls_getStartValue":
+		return makeFuncCall("getStartValue")
+	case "controls_closeScreen":
+		return makeFuncCall("closeScreen")
+	case "controls_closeScreenWithValue":
+		return makeFuncCall("closeScreenWithValue", p.parseBlock(block.SingleValue()))
+	case "controls_closeApplication":
+		return makeFuncCall("closeApp")
+	case "controls_getPlainStartText":
+		return makeFuncCall("getPlainStartText")
+	case "controls_closeScreenWithPlainText":
+		return makeFuncCall("closeScreenWithPlainText", p.parseBlock(block.SingleValue()))
+	case "controls_break":
+		return &control.Break{}
+
+	case "logic_boolean", "logic_true", "logic_false":
+		return &dtypes.Boolean{Value: block.SingleField() == "TRUE"}
+	case "logic_negate":
+		return &dtypes.Not{Expr: p.parseBlock(block.SingleValue())}
+	case "logic_compare", "logic_operation":
+		return p.logicExpr(block)
 
 	case "text":
 		return &dtypes.Text{Content: block.SingleField()}
@@ -272,9 +317,72 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 	case "procedures_callnoreturn", "procedures_callreturn":
 		return p.procedureCall(block)
 
+	case "helpers_assets":
+		return &dtypes.Text{Content: block.SingleField()}
+	//case "helpers_dropdown":
+	//	return TODO!
+	// case "component_component_block":
+
 	default:
 		panic("Unsupported block type: " + block.Type)
 	}
+}
+
+func (p *XMLParser) ctrlChoose(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return &control.SimpleIf{Condition: pVals["TEST"], Then: pVals["THENRETURN"], Else: pVals["ELSERETURN"]}
+}
+
+func (p *XMLParser) ctrlForEachDict(block blky.Block) blky.Expr {
+	pFields := p.makeFieldMap(block.Fields)
+	return &control.EachPair{
+		KeyName:   pFields["KEY"],
+		ValueName: pFields["VALUE"],
+		Iterable:  p.parseBlock(block.SingleValue()),
+		Body:      p.optSingleBody(block),
+	}
+}
+
+func (p *XMLParser) ctrlForRange(block blky.Block) blky.Expr {
+	pVals := p.makeValueMap(block.Values)
+	return &control.For{
+		IName: block.SingleField(),
+		From:  pVals["START"],
+		To:    pVals["END"],
+		By:    pVals["STEP"],
+		Body:  p.optSingleBody(block),
+	}
+}
+
+func (p *XMLParser) ctrlIf(block blky.Block) blky.Expr {
+	conditions := p.fromVals(block.Values)
+	var bodies [][]blky.Expr
+	var elseBody []blky.Expr
+	for _, smt := range block.Statements {
+		if strings.HasPrefix(smt.Name, "DO") {
+			bodies = append(bodies, p.recursiveParse(*smt.Block))
+		} else {
+			elseBody = p.recursiveParse(*smt.Block)
+		}
+	}
+	return &control.If{Conditions: conditions, Bodies: bodies, ElseBody: elseBody}
+}
+
+func (p *XMLParser) logicExpr(block blky.Block) blky.Expr {
+	var pOperation string
+	switch block.SingleField() {
+	case "EQ":
+		pOperation = "=="
+	case "NEQ":
+		pOperation = "!="
+	case "AND":
+		pOperation = "&&"
+	case "OR":
+		pOperation = "||"
+	default:
+		panic("Unknown Logic Compare operation: " + block.SingleField())
+	}
+	return p.makeBinary(pOperation, p.fromMinVals(block.Values, 2))
 }
 
 func (p *XMLParser) procedureCall(block blky.Block) blky.Expr {
@@ -317,7 +425,7 @@ func (p *XMLParser) voidProcedure(block blky.Block) blky.Expr {
 	return &procedures.VoidProcedure{
 		Name:       procedureName,
 		Parameters: paramNames,
-		Body:       p.recursiveParse(*block.SingleStatement().Block),
+		Body:       p.optSingleBody(block),
 	}
 }
 
@@ -337,7 +445,7 @@ func (p *XMLParser) variableSmts(block blky.Block) blky.Expr {
 		return &variables.Var{
 			Names:  varNames,
 			Values: varValues,
-			Body:   p.recursiveParse(*block.SingleStatement().Block),
+			Body:   p.optSingleBody(block),
 		}
 	}
 	return &variables.VarResult{Names: varNames, Values: varValues, Result: valueMap["RETURN"]}
@@ -861,6 +969,13 @@ func makeFakeToken(t l.Type) *l.Token {
 func makeToken(symbol string) *l.Token {
 	sToken := l.Symbols[symbol]
 	return sToken.Normal(-1, -1, nil, symbol)
+}
+
+func (p *XMLParser) optSingleBody(block blky.Block) []blky.Expr {
+	if len(block.Statements) > 0 {
+		return p.recursiveParse(*block.SingleStatement().Block)
+	}
+	return []blky.Expr{}
 }
 
 func (p *XMLParser) recursiveParse(currBlock blky.Block) []blky.Expr {

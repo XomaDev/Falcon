@@ -1,8 +1,6 @@
-func findResistance(v, i) = v / i
-
 local(
-    current = 2,
-    volt = 3
+    a = 8,
+    b = 2
 ) {
-    println("Resistance is " + findResistance(v, i))
+    println("Maximum " _ if (a > b) a else b)
 }
