@@ -1,6 +1,8 @@
 //go:build js && wasm
 // +build js,wasm
 
+// GOOS=js GOARCH=wasm go build -o web/falcon.wasm
+
 package main
 
 import (
@@ -9,6 +11,7 @@ import (
 	"Falcon/context"
 	"Falcon/lex"
 	"encoding/xml"
+	"runtime/debug"
 	"strings"
 	"syscall/js"
 )
@@ -16,7 +19,14 @@ import (
 func safeExec(fn func() js.Value) js.Value {
 	defer func() {
 		if r := recover(); r != nil {
-			println("Recovering from panic:", r)
+			switch err := r.(type) {
+			case error:
+				println("Recovered from panic:", err.Error())
+			default:
+				println("Recovered from panic (non-error):", r)
+			}
+			println("Stack trace:")
+			println(string(debug.Stack())) // Print full stack trace
 		}
 	}()
 	return fn()

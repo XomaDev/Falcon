@@ -38,26 +38,26 @@ var transformers = map[string]*Signature{
 
 func (t *Transformer) String() string {
 	if len(t.Args) == 0 {
-		pFormat := "%.% { % ->\n%}"
+		pFormat := "%.% { % -> % }"
 		if !t.List.Continuous() {
-			pFormat = "(%).% { % ->\n%}"
+			pFormat = "(%).% { % -> %} "
 		}
 		return sugar.Format(pFormat,
 			t.List.String(),
 			t.Name,
 			strings.Join(t.Names, ", "),
-			blky.Pad(t.Transformer))
+			t.Transformer.String())
 	} else {
-		pFormat := "%.%(%) { % ->\n%}"
+		pFormat := "%.%(%) { % -> % }"
 		if !t.List.Continuous() {
-			pFormat = "(%).%(%) { % ->\n%}"
+			pFormat = "(%).%(%) { % -> % }"
 		}
 		return sugar.Format(pFormat,
 			t.List.String(),
 			t.Name,
 			blky.JoinExprs(", ", t.Args),
 			strings.Join(t.Names, ", "),
-			blky.Pad(t.Transformer))
+			t.Transformer.String())
 	}
 }
 
@@ -98,7 +98,7 @@ func (t *Transformer) Blockly() blky.Block {
 }
 
 func (t *Transformer) Continuous() bool {
-	return false
+	return true
 }
 
 func (t *Transformer) max() blky.Block {

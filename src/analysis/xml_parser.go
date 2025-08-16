@@ -386,7 +386,10 @@ func (p *XMLParser) logicExpr(block blky.Block) blky.Expr {
 }
 
 func (p *XMLParser) procedureCall(block blky.Block) blky.Expr {
-	mutArgsNames := block.Mutation.Args
+	var mutArgsNames []blky.Arg
+	if block.Mutation != nil {
+		mutArgsNames = block.Mutation.Args
+	}
 	paramNames := make([]string, len(mutArgsNames))
 	for i := range mutArgsNames {
 		paramNames[i] = mutArgsNames[i].Name
@@ -403,7 +406,10 @@ func (p *XMLParser) procedureCall(block blky.Block) blky.Expr {
 
 func (p *XMLParser) returnProcedure(block blky.Block) blky.Expr {
 	procedureName := p.makeFieldMap(block.Fields)["NAME"]
-	mutArgs := block.Mutation.Args
+	var mutArgs []blky.Arg
+	if block.Mutation != nil {
+		mutArgs = block.Mutation.Args
+	}
 	paramNames := make([]string, len(mutArgs))
 	for i := range mutArgs {
 		paramNames[i] = mutArgs[i].Name
@@ -417,7 +423,10 @@ func (p *XMLParser) returnProcedure(block blky.Block) blky.Expr {
 
 func (p *XMLParser) voidProcedure(block blky.Block) blky.Expr {
 	procedureName := p.makeFieldMap(block.Fields)["NAME"]
-	mutArgs := block.Mutation.Args
+	var mutArgs []blky.Arg
+	if block.Mutation != nil {
+		mutArgs = block.Mutation.Args
+	}
 	paramNames := make([]string, len(mutArgs))
 	for i := range mutArgs {
 		paramNames[i] = mutArgs[i].Name

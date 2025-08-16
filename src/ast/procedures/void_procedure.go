@@ -13,7 +13,7 @@ type VoidProcedure struct {
 }
 
 func (v *VoidProcedure) String() string {
-	return sugar.Format("func %(%) {\n%}", v.Name, strings.Join(v.Parameters, ", "), blky.PadBody(v.Body))
+	return sugar.Format("func %(%) {\n %}", v.Name, strings.Join(v.Parameters, ", "), blky.PadBody(v.Body))
 }
 
 func (v *VoidProcedure) Blockly() blky.Block {
