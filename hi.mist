@@ -1,1 +1,4 @@
-println(EndedStatus@IncomingRejected)
+func fib(n) =
+    if (n < 2) n else fib(n - 1) + fib(n - 2)
+
+global lemonadeSold = [1, 2, 3, 4, 5, 6, 7, 8]

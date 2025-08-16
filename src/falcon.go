@@ -6,6 +6,7 @@ package main
 import (
 	"Falcon/analysis"
 	"Falcon/ast/blockly"
+	"Falcon/context"
 	"Falcon/lex"
 	"encoding/xml"
 	"strings"
@@ -21,14 +22,16 @@ func safeExec(fn func() js.Value) js.Value {
 	return fn()
 }
 
+// Code -> Blocks
 func mistToXml(this js.Value, p []js.Value) any {
 	return safeExec(func() js.Value {
 		if len(p) < 1 {
 			return js.ValueOf("No Mist content provided")
 		}
 		sourceCode := p[0].String()
+		codeContext := &context.CodeContext{SourceCode: &sourceCode, FileName: "appinventor.live"}
 
-		tokens := lex.NewLexer(sourceCode).Lex()
+		tokens := lex.NewLexer(codeContext).Lex()
 		expressions := analysis.NewLangParser(tokens).ParseAll()
 
 		var xmlCode strings.Builder
@@ -48,10 +51,34 @@ func mistToXml(this js.Value, p []js.Value) any {
 	})
 }
 
+// Blocks -> Code
+func xmlToMist(this js.Value, p []js.Value) any {
+	return safeExec(func() js.Value {
+		if len(p) < 1 {
+			return js.ValueOf("No XML content provided")
+		}
+		xmlContent := p[0].String()
+		exprs := analysis.NewXMLParser(xmlContent).ParseBlockly()
+		var builder strings.Builder
+
+		for _, expr := range exprs {
+			builder.WriteString(expr.String())
+			builder.WriteString("\n")
+
+			block := expr.Blockly()
+			if block.Order() > 0 {
+				builder.WriteString("\n")
+			}
+		}
+		return js.ValueOf(builder.String())
+	})
+}
+
 func main() {
 	println("Hello from falcon.go!")
 
 	c := make(chan struct{}, 0)
 	js.Global().Set("mistToXml", js.FuncOf(mistToXml))
+	js.Global().Set("xmlToMist", js.FuncOf(xmlToMist))
 	<-c
 }
