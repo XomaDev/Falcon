@@ -108,6 +108,7 @@ func (s *SyntaxDiff) Merge() string {
 			s.mergedWords.WriteString(mToken)
 
 			s.mIndex++
+			s.hIndex++
 		}
 	}
 	for s.mIndex < s.mSize {
@@ -130,6 +131,10 @@ func (s *SyntaxDiff) skipSpaces(appendHumanSpace bool) bool {
 		} else {
 			break
 		}
+	}
+	if s.hIndex >= s.hSize {
+		// change mode to machineSpaces after blob of machineWords is completed
+		appendHumanSpace = false
 	}
 	// Skip all spaces in machineWords
 	for s.mIndex < s.mSize {

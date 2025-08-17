@@ -1,9 +1,9 @@
-global lemonadeSold = [2, "N/A", 6, 9, "N/A", 8, "N/A"]
+global lemonadeSold = [1, 2, 3]
 
-func getTotalProfit() =
-	 this.lemonadeSold.filter { n -> n ? number }.map { n -> n * 8 }
+func GetTotalProfit() =
+    this.lemonadeSold
+        .filter { n -> n ? base10 }.map { n -> n * 3 }
 
 
-func init() {
-  println("Total profit selling lemonade was " _ getTotalProfit())
-}
+func fib(n) =
+	 if (n < 2) n else fib(n - 1) + fib(n - 2)

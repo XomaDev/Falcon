@@ -3,7 +3,6 @@ package procedures
 import (
 	blky "Falcon/ast/blockly"
 	"Falcon/sugar"
-	"strings"
 )
 
 type Call struct {
@@ -14,7 +13,7 @@ type Call struct {
 }
 
 func (v *Call) String() string {
-	return sugar.Format("%(%)", v.Name, strings.Join(v.Parameters, ", "))
+	return sugar.Format("%(%)", v.Name, blky.JoinExprs(", ", v.Arguments))
 }
 
 func (v *Call) Blockly() blky.Block {
