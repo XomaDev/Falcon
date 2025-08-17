@@ -6,14 +6,43 @@ import (
 	"Falcon/analysis"
 	"Falcon/ast/blockly"
 	"Falcon/context"
+	"Falcon/diff"
 	"Falcon/lex"
 	"encoding/xml"
 	"os"
+	"strings"
 )
 
 func main() {
-	println("Hello from Falcon!")
+	println("Hello from Falcon!\n")
 
+	diffTest()
+	//analyzeSyntax()
+}
+
+func diffTest() {
+	diff0 := "diff0.mist"
+	diff1 := "diff1.mist"
+
+	diff0Path := "/home/ekina/GolandProjects/Falcon/" + diff0
+	codeBytes, err := os.ReadFile(diff0Path)
+	if err != nil {
+		panic(err)
+	}
+	diff0Code := string(codeBytes)
+
+	diff1Path := "/home/ekina/GolandProjects/Falcon/" + diff1
+	codeBytes, err = os.ReadFile(diff1Path)
+	if err != nil {
+		panic(err)
+	}
+	diff1Code := string(codeBytes)
+
+	syntaxDiff := diff.MakeSyntaxDiff(diff0Code, diff1Code)
+	println(syntaxDiff.Merge())
+}
+
+func analyzeSyntax() {
 	fileName := "hi.mist"
 	filePath := "/home/ekina/GolandProjects/Falcon/" + fileName
 	codeBytes, err := os.ReadFile(filePath)
@@ -55,7 +84,15 @@ func main() {
 
 	// reconversion of Blockly XML -> Falcon
 	exprs := analysis.NewXMLParser(xmlContent).ParseBlockly()
+	var machineSourceCode strings.Builder
 	for _, expr := range exprs {
-		println(expr.String())
+		machineSourceCode.WriteString(expr.String())
+		machineSourceCode.WriteRune('\n')
 	}
+	println(machineSourceCode.String())
+
+	// Generate a merged syntax
+	println("\n=== DIFF ===\n")
+	syntaxDiff := diff.MakeSyntaxDiff(sourceCode, machineSourceCode.String())
+	println(syntaxDiff.Merge())
 }

@@ -1,4 +1,8 @@
+global lemonadeSold = [1, 3, 5]
+
 func GetTotalProfit() =
-    this.lemonadeSold
-        .filter { n -> n ? number }
-        .map { n -> n * 2 }
+    this.lemonadeSold.map { n -> n ? number }
+        .map { n -> n * 3 * 4 }
+        .reduce(0) { n, x -> n + x }
+
+println("Yayyyyy")

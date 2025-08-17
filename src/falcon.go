@@ -9,6 +9,7 @@ import (
 	"Falcon/analysis"
 	"Falcon/ast/blockly"
 	"Falcon/context"
+	"Falcon/diff"
 	"Falcon/lex"
 	"encoding/xml"
 	"runtime/debug"
@@ -84,11 +85,24 @@ func xmlToMist(this js.Value, p []js.Value) any {
 	})
 }
 
+func mergeSyntaxDiff(this js.Value, p []js.Value) any {
+	return safeExec(func() js.Value {
+		if len(p) < 2 {
+			return js.ValueOf("Requires two string arguments, [HumanSyntax, MachineSyntax]")
+		}
+		humanSyntax := p[0].String()
+		machineSyntax := p[1].String()
+		mergedSyntax := diff.MakeSyntaxDiff(humanSyntax, machineSyntax).Merge()
+		return js.ValueOf(mergedSyntax)
+	})
+}
+
 func main() {
 	println("Hello from falcon.go!")
 
 	c := make(chan struct{}, 0)
 	js.Global().Set("mistToXml", js.FuncOf(mistToXml))
 	js.Global().Set("xmlToMist", js.FuncOf(xmlToMist))
+	js.Global().Set("mergeSyntaxDiff", js.FuncOf(mergeSyntaxDiff))
 	<-c
 }
