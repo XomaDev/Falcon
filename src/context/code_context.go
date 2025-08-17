@@ -18,7 +18,7 @@ func (c *CodeContext) ReportError(
 	args ...string,
 ) {
 	code := *c.SourceCode
-	beginOfLine := indexAfterNthOccurrence(code, column-1, '\n') + 1
+	beginOfLine := sugar.IndexAfterNthOccurrence(code, column-1, '\n') + 1
 	endOfLine := strings.Index(code[beginOfLine:], "\n")
 	line := code[beginOfLine:max(beginOfLine+endOfLine, len(code))]
 
@@ -37,17 +37,4 @@ func (c *CodeContext) ReportError(
 	builder.WriteByte('\n')
 	builder.WriteString(boxTop)
 	panic(builder.String())
-}
-
-func indexAfterNthOccurrence(s string, n int, r rune) int {
-	count := 0
-	for i, ch := range s {
-		if ch == r {
-			count++
-			if count == n {
-				return i
-			}
-		}
-	}
-	return -1
 }

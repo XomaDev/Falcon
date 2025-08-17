@@ -19,3 +19,16 @@ func Format(format string, args ...string) string {
 	}
 	return builder.String()
 }
+
+func IndexAfterNthOccurrence(s string, n int, r rune) int {
+	count := 0
+	for i, ch := range s {
+		if ch == r {
+			count++
+			if count == n {
+				return i
+			}
+		}
+	}
+	return -1
+}

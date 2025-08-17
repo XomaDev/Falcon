@@ -33,7 +33,7 @@ This page assumes you have some experience in Programming and App Inventor.
 	- `<`, `<=`, `>`, `>=`
 - Text comparison operators
 	- `===` (*text equals*)
-	- `!===` (*text not equals*)
+	- `!==` (*text not equals*)
 	- `<<` (*text less than*)
 	- `>>` (text greater than)
 - Unary operators
@@ -52,9 +52,9 @@ This page assumes you have some experience in Programming and App Inventor.
 
 ## Operator precedence
 
-Precedence of operators dictate which operation is prioritized. (`*` and `/` parsed before `+` and `-`)
+Precedence of operators dictates which operation is prioritized. (`*` and `/` parsed before `+` and `-`)
 
-In Falcon, it is similar to that of Java. Below is the list, ranked from lowest priority to the highest.
+In Falcon, it is similar to that of Java. Below is the list, ranked from the lowest priority to the highest.
 
 1. `AssignmentType` (`=`)
 2. `Pair` (`:`)

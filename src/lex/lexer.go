@@ -273,6 +273,7 @@ func (l *Lexer) error(message string, args ...string) {
 func (l *Lexer) consume(expect uint8) bool {
 	if l.peek() == expect {
 		l.currIndex++
+		l.currRow++
 		return true
 	}
 	return false
