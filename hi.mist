@@ -1,1 +1,4 @@
-func hello() = "Cat"
+func GetTotalProfit() =
+    this.lemonadeSold
+        .filter { n -> n ? number }
+        .map { n -> n * 2 }
