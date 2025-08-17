@@ -35,7 +35,7 @@ var signatures = map[string]*Signature{
 	"containsAll":             makeSignature("text", "text_contains", 1),
 	"split":                   makeSignature("text", "text_split", 1),
 	"splitAtFirst":            makeSignature("text", "text_split", 1),
-	"splitAtAny":              makeSignature("text(", "text_split", 1),
+	"splitAtAny":              makeSignature("text", "text_split", 1),
 	"splitAtFirstOfAny":       makeSignature("text", "text_split", 1),
 	"splitAtSpaces":           makeSignature("text", "text_split_at_spaces", 0),
 	"reverse":                 makeSignature("text", "text_reverse", 0),
@@ -80,7 +80,11 @@ var signatures = map[string]*Signature{
 }
 
 func (c *Call) String() string {
-	return sugar.Format("%.%(%)", c.On.String(), c.Name, blockly.JoinExprs(", ", c.Args))
+	pFormat := "%.%(%)"
+	if !c.On.Continuous() {
+		pFormat = "(%).%(%)"
+	}
+	return sugar.Format(pFormat, c.On.String(), c.Name, blockly.JoinExprs(", ", c.Args))
 }
 
 func (c *Call) Blockly() blockly.Block {
@@ -111,6 +115,10 @@ func (c *Call) Blockly() blockly.Block {
 	default:
 		panic("Unknown module " + signature.Module)
 	}
+}
+
+func (c *Call) Continuous() bool {
+	return true
 }
 
 func (c *Call) simpleOperand(blockType string, valueName string) blockly.Block {

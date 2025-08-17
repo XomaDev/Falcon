@@ -38,6 +38,19 @@ func (l *Lexer) Lex() []*Token {
 
 func (l *Lexer) parse() {
 	c := l.next()
+
+	if c == '#' {
+		// skip the current line
+		for l.notEOF() {
+			n := l.next()
+			if n == '\n' {
+				l.currColumn++
+				l.currRow = 0
+				break
+			}
+		}
+		return
+	}
 	if c == '\n' {
 		l.currColumn++
 		l.currRow = 0
@@ -134,6 +147,8 @@ func (l *Lexer) parse() {
 		}
 	case '_':
 		l.createOp("_")
+	case '@':
+		l.createOp("@")
 	case '"':
 		l.text()
 	default:
@@ -153,7 +168,7 @@ func (l *Lexer) createOp(op string) {
 	if !ok {
 		l.error("Bad createOp('%')", op)
 	} else {
-		l.appendToken(sToken.normal(l.currColumn, l.currRow, l.ctx, op))
+		l.appendToken(sToken.Normal(l.currColumn, l.currRow, l.ctx, op))
 	}
 }
 
@@ -184,7 +199,7 @@ func (l *Lexer) alpha() {
 	content := l.source[startIndex:l.currIndex]
 	sToken, ok := Keywords[content]
 	if ok {
-		l.appendToken(sToken.normal(l.currColumn, l.currRow, l.ctx))
+		l.appendToken(sToken.Normal(l.currColumn, l.currRow, l.ctx, content))
 	} else {
 		l.appendToken(&Token{
 			Context: l.ctx,

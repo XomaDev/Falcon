@@ -15,7 +15,7 @@ func main() {
 	println("Hello from Falcon!")
 
 	fileName := "hi.mist"
-	filePath := "/home/kumaraswamy/GolandProjects/Falcon/" + fileName
+	filePath := "/home/ekina/GolandProjects/Falcon/" + fileName
 	codeBytes, err := os.ReadFile(filePath)
 	if err != nil {
 		panic(err)
@@ -23,6 +23,7 @@ func main() {
 	sourceCode := string(codeBytes)
 	codeContext := &context.CodeContext{SourceCode: &sourceCode, FileName: fileName}
 
+	// lexical analysis
 	tokens := lex.NewLexer(codeContext).Lex()
 	for _, token := range tokens {
 		println(token.Debug())
@@ -30,7 +31,8 @@ func main() {
 
 	println("\n=== AST ===\n")
 
-	expressions := analysis.NewParser(tokens).ParseAll()
+	// conversion of Falcon -> Blockly XML
+	expressions := analysis.NewLangParser(tokens).ParseAll()
 	for _, expression := range expressions {
 		println(expression.String())
 	}
@@ -46,5 +48,14 @@ func main() {
 		XMLNS:  "https://developers.google.com/blockly/xml",
 	}
 	bytes, _ := xml.MarshalIndent(xmlBlock, "", "  ")
-	println(string(bytes))
+	xmlContent := string(bytes)
+
+	println(xmlContent)
+	println()
+
+	// reconversion of Blockly XML -> Falcon
+	exprs := analysis.NewXMLParser(xmlContent).ParseBlockly()
+	for _, expr := range exprs {
+		println(expr.String())
+	}
 }

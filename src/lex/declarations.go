@@ -27,6 +27,7 @@ var Symbols = map[string]StaticToken{
 	">>": staticOf(TextGreaterThan, Relational, Operator),
 
 	"_":  staticOf(Underscore, TextJoin, Operator),
+	"@":  staticOf(At),
 	":":  staticOf(Colon, Pair, Operator),
 	"::": staticOf(DoubleColon),
 

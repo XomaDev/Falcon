@@ -22,3 +22,7 @@ func (d *Do) Blockly() blky.Block {
 		Consumable: true,
 	}
 }
+
+func (d *Do) Continuous() bool {
+	return false
+}

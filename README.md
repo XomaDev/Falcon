@@ -134,10 +134,12 @@ Ternary like expression for returning values.
 Unlike If statement, use `()` between your condition.
 
 ```go
-local a = 8
-local b = 2
-
-local max = if (a > b) a else b
+local(
+a = 8,
+b = 2
+) {
+	println("Maximum " _ if (a > b) a else b)
+}
 ```
 
 ### For loops
@@ -245,14 +247,14 @@ In-Built math converters:
 - `radians`
 - `hex`
 - `bin`
-- `parseHex`
-- `parseBin`
+- `fromHex`
+- `fromBin`
 
 ## Functions
 
 ### Math
 
-- `bin(string)`, `octal(string)`, `hexa(string)` parses string from respective base. The string provided must be a static constant i.e. no variables or function calls.
+-  `dec(string)`, `bin(string)`, `octal(string)`, `hexa(string)` parses string from respective base. The string provided must be a static constant i.e. no variables or function calls.
 
 - `randInt(from, to)`
 - `randFloat()`

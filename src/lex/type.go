@@ -46,6 +46,7 @@ const (
 	DoubleColon
 	RightArrow
 	Underscore
+	At
 
 	True
 	False

@@ -1,4 +1,4 @@
-package datatypes
+package fundamentals
 
 import (
 	"Falcon/ast/blockly"
@@ -20,4 +20,8 @@ func (l *List) Blockly() blockly.Block {
 		Values:     blockly.ValuesByPrefix("ADD", l.Elements),
 		Consumable: true,
 	}
+}
+
+func (l *List) Continuous() bool {
+	return true
 }

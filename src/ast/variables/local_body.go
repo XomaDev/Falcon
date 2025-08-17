@@ -19,7 +19,7 @@ func (v *Var) String() string {
 	for i, name := range v.Names {
 		varLines = append(varLines, blky.PadDirect(name+" = "+v.Values[i].String()))
 	}
-	builder.WriteString(strings.Join(varLines, "\n"))
+	builder.WriteString(strings.Join(varLines, ",\n"))
 	builder.WriteString("\n) {\n")
 	builder.WriteString(blky.PadBody(v.Body))
 	builder.WriteString("}")
@@ -35,4 +35,8 @@ func (v *Var) Blockly() blky.Block {
 		Statements: []blky.Statement{blky.CreateStatement("STACK", v.Body)},
 		Consumable: false,
 	}
+}
+
+func (v *Var) Continuous() bool {
+	return false
 }

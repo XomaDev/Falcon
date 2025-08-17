@@ -13,7 +13,7 @@ type RetProcedure struct {
 }
 
 func (v *RetProcedure) String() string {
-	return sugar.Format("func %(%)\n\t=%", v.Name, strings.Join(v.Parameters, ", "), blky.Pad(v.Result))
+	return sugar.Format("func %(%) =\n\t%", v.Name, strings.Join(v.Parameters, ", "), blky.Pad(v.Result))
 }
 
 func (v *RetProcedure) Blockly() blky.Block {
@@ -24,4 +24,8 @@ func (v *RetProcedure) Blockly() blky.Block {
 		Values:     []blky.Value{{Name: "RETURN", Block: v.Result.Blockly()}},
 		Consumable: false,
 	}
+}
+
+func (v *RetProcedure) Continuous() bool {
+	return false
 }

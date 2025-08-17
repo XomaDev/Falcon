@@ -12,7 +12,11 @@ type Set struct {
 }
 
 func (s *Set) String() string {
-	return sugar.Format("%[%] = %", s.List.String(), s.Index.String(), s.Value.String())
+	pFormat := "%[%] = %"
+	if !s.List.Continuous() {
+		pFormat = "(%)[%] = %"
+	}
+	return sugar.Format(pFormat, s.List.String(), s.Index.String(), s.Value.String())
 }
 
 func (s *Set) Blockly() blockly.Block {
@@ -21,4 +25,8 @@ func (s *Set) Blockly() blockly.Block {
 		Values:     blockly.MakeValues([]blockly.Expr{s.List, s.Index, s.Value}, "LIST", "NUM", "ITEM"),
 		Consumable: false,
 	}
+}
+
+func (s *Set) Continuous() bool {
+	return false
 }

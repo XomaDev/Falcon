@@ -22,3 +22,7 @@ func (s *SimpleIf) Blockly() blockly.Block {
 		Consumable: true,
 	}
 }
+
+func (s *SimpleIf) Continuous() bool {
+	return false
+}

@@ -2,7 +2,7 @@ package common
 
 import (
 	"Falcon/ast/blockly"
-	"Falcon/ast/datatypes"
+	"Falcon/ast/fundamentals"
 	"Falcon/lex"
 	"Falcon/sugar"
 )
@@ -20,7 +20,7 @@ func (t *Transform) String() string {
 func (t *Transform) Blockly() blockly.Block {
 	switch t.Name {
 	case "obfuscate":
-		textExpr, ok := t.On.(*datatypes.Text)
+		textExpr, ok := t.On.(*fundamentals.Text)
 		if ok {
 			return blockly.Block{
 				Type:       "obfuscated_text",
@@ -34,4 +34,8 @@ func (t *Transform) Blockly() blockly.Block {
 		t.Where.Error("Unknown constant transform call ::%", t.Name)
 	}
 	panic("")
+}
+
+func (t *Transform) Continuous() bool {
+	return true
 }

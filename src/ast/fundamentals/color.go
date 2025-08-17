@@ -1,4 +1,4 @@
-package datatypes
+package fundamentals
 
 import (
 	"Falcon/ast/blockly"
@@ -45,4 +45,8 @@ func (c *Color) Blockly() blockly.Block {
 		Fields:     []blockly.Field{{Name: "COLOR", Value: signature.Code}},
 		Consumable: true,
 	}
+}
+
+func (c *Color) Continuous() bool {
+	return true
 }

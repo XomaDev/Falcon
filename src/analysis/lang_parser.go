@@ -4,7 +4,7 @@ import (
 	blky "Falcon/ast/blockly"
 	"Falcon/ast/common"
 	"Falcon/ast/control"
-	"Falcon/ast/datatypes"
+	"Falcon/ast/fundamentals"
 	"Falcon/ast/list"
 	"Falcon/ast/method"
 	"Falcon/ast/procedures"
@@ -12,15 +12,15 @@ import (
 )
 import l "Falcon/lex"
 
-type Parser struct {
+type LangParser struct {
 	Tokens    []*l.Token
 	currIndex int
 	tokenSize int
 	resolver  *NameResolver
 }
 
-func NewParser(tokens []*l.Token) *Parser {
-	return &Parser{
+func NewLangParser(tokens []*l.Token) *LangParser {
+	return &LangParser{
 		Tokens:    tokens,
 		tokenSize: len(tokens),
 		currIndex: 0,
@@ -28,7 +28,7 @@ func NewParser(tokens []*l.Token) *Parser {
 	}
 }
 
-func (p *Parser) ParseAll() []blky.Expr {
+func (p *LangParser) ParseAll() []blky.Expr {
 	var expressions []blky.Expr
 	for p.notEOF() {
 		expressions = append(expressions, p.parse())
@@ -36,7 +36,7 @@ func (p *Parser) ParseAll() []blky.Expr {
 	return expressions
 }
 
-func (p *Parser) parse() blky.Expr {
+func (p *LangParser) parse() blky.Expr {
 	switch p.peek().Type {
 	case l.If:
 		return p.ifExpr()
@@ -51,7 +51,7 @@ func (p *Parser) parse() blky.Expr {
 		return &control.Break{}
 	case l.WalkAll:
 		p.skip()
-		return &datatypes.WalkAll{}
+		return &fundamentals.WalkAll{}
 	case l.Local:
 		return p.varExpr()
 	case l.Global:
@@ -63,7 +63,7 @@ func (p *Parser) parse() blky.Expr {
 	}
 }
 
-func (p *Parser) funcSmt() blky.Expr {
+func (p *LangParser) funcSmt() blky.Expr {
 	p.skip()
 	name := p.name()
 	p.expect(l.OpenCurve)
@@ -86,14 +86,14 @@ func (p *Parser) funcSmt() blky.Expr {
 	}
 }
 
-func (p *Parser) globVar() blky.Expr {
+func (p *LangParser) globVar() blky.Expr {
 	p.skip()
 	name := p.name()
 	p.expect(l.Assign)
 	return &variables.Global{Name: name, Value: p.parse()}
 }
 
-func (p *Parser) varExpr() blky.Expr {
+func (p *LangParser) varExpr() blky.Expr {
 	p.skip()
 
 	var varNames []string
@@ -128,14 +128,14 @@ func (p *Parser) varExpr() blky.Expr {
 	}
 }
 
-func (p *Parser) whileExpr() *control.While {
+func (p *LangParser) whileExpr() *control.While {
 	p.skip()
 	condition := p.expr(0)
 	body := p.body()
 	return &control.While{Condition: condition, Body: body}
 }
 
-func (p *Parser) eachExpr() blky.Expr {
+func (p *LangParser) eachExpr() blky.Expr {
 	p.skip()
 	keyName := p.name()
 	if p.consume(l.DoubleColon) {
@@ -150,7 +150,7 @@ func (p *Parser) eachExpr() blky.Expr {
 	}
 }
 
-func (p *Parser) forExpr() *control.For {
+func (p *LangParser) forExpr() *control.For {
 	p.skip()
 	iName := p.name()
 	p.expect(l.Colon)
@@ -169,7 +169,7 @@ func (p *Parser) forExpr() *control.For {
 	}
 }
 
-func (p *Parser) ifExpr() blky.Expr {
+func (p *LangParser) ifExpr() blky.Expr {
 	p.skip()
 	if p.isNext(l.OpenCurve) {
 		return p.simpleIf()
@@ -191,7 +191,7 @@ func (p *Parser) ifExpr() blky.Expr {
 	return &control.If{Conditions: conditions, Bodies: bodies, ElseBody: elseBody}
 }
 
-func (p *Parser) simpleIf() *control.SimpleIf {
+func (p *LangParser) simpleIf() *control.SimpleIf {
 	p.expect(l.OpenCurve)
 	condition := p.parse()
 	p.expect(l.CloseCurve)
@@ -201,14 +201,14 @@ func (p *Parser) simpleIf() *control.SimpleIf {
 	return &control.SimpleIf{Condition: condition, Then: then, Else: elze}
 }
 
-func (p *Parser) body() []blky.Expr {
+func (p *LangParser) body() []blky.Expr {
 	p.expect(l.OpenCurly)
 	expressions := p.bodyUntilCurly()
 	p.expect(l.CloseCurly)
 	return expressions
 }
 
-func (p *Parser) bodyUntilCurly() []blky.Expr {
+func (p *LangParser) bodyUntilCurly() []blky.Expr {
 	var expressions []blky.Expr
 	if p.consume(l.CloseCurly) {
 		return expressions
@@ -219,7 +219,7 @@ func (p *Parser) bodyUntilCurly() []blky.Expr {
 	return expressions
 }
 
-func (p *Parser) expr(minPrecedence int) blky.Expr {
+func (p *LangParser) expr(minPrecedence int) blky.Expr {
 	left := p.element()
 	for p.notEOF() {
 		opToken := p.peek()
@@ -285,11 +285,13 @@ func precedenceOf(flag l.Flag) int {
 	}
 }
 
-func (p *Parser) element() blky.Expr {
+func (p *LangParser) element() blky.Expr {
 	left := p.term()
 	for p.notEOF() {
 		pe := p.peek()
 		switch pe.Type {
+		case l.At:
+			left = p.helperDropdown(left)
 		case l.Dot:
 			left = p.objectCall(left)
 			continue
@@ -314,7 +316,16 @@ func (p *Parser) element() blky.Expr {
 	return left
 }
 
-func (p *Parser) objectCall(object blky.Expr) blky.Expr {
+func (p *LangParser) helperDropdown(keyExpr blky.Expr) blky.Expr {
+	where := p.next()
+	if key, ok := keyExpr.(*variables.Get); ok {
+		return &fundamentals.HelperDropdown{Key: key.Name, Option: p.name()}
+	}
+	where.Error("Invalid Helper Access operation ")
+	panic("")
+}
+
+func (p *LangParser) objectCall(object blky.Expr) blky.Expr {
 	p.skip()
 	where := p.next()
 	name := *where.Content
@@ -349,7 +360,7 @@ func (p *Parser) objectCall(object blky.Expr) blky.Expr {
 		Transformer: transformer}
 }
 
-func (p *Parser) term() blky.Expr {
+func (p *LangParser) term() blky.Expr {
 	token := p.next()
 	switch token.Type {
 	case l.OpenSquare:
@@ -361,9 +372,11 @@ func (p *Parser) term() blky.Expr {
 		p.expect(l.CloseCurve)
 		return e
 	case l.Not:
-		return &datatypes.Not{Expr: p.element()}
+		return &fundamentals.Not{Expr: p.element()}
 	case l.Do:
 		return p.doExpr()
+	case l.If:
+		return p.simpleIf()
 	default:
 		if token.HasFlag(l.Value) {
 			value := p.value(token)
@@ -386,14 +399,14 @@ func (p *Parser) term() blky.Expr {
 	}
 }
 
-func (p *Parser) doExpr() *control.Do {
+func (p *LangParser) doExpr() *control.Do {
 	body := p.body()
 	p.expect(l.RightArrow)
 	result := p.expr(0)
 	return &control.Do{Body: body, Result: result}
 }
 
-func (p *Parser) dictionary() *datatypes.Dictionary {
+func (p *LangParser) dictionary() *fundamentals.Dictionary {
 	var elements []blky.Expr
 	if !p.consume(l.CloseCurly) {
 		for p.notEOF() {
@@ -404,10 +417,10 @@ func (p *Parser) dictionary() *datatypes.Dictionary {
 		}
 		p.expect(l.CloseCurly)
 	}
-	return &datatypes.Dictionary{Elements: elements}
+	return &fundamentals.Dictionary{Elements: elements}
 }
 
-func (p *Parser) list() *datatypes.List {
+func (p *LangParser) list() *fundamentals.List {
 	var elements []blky.Expr
 	if !p.consume(l.CloseSquare) {
 		for p.notEOF() {
@@ -418,10 +431,10 @@ func (p *Parser) list() *datatypes.List {
 		}
 		p.expect(l.CloseSquare)
 	}
-	return &datatypes.List{Elements: elements}
+	return &fundamentals.List{Elements: elements}
 }
 
-func (p *Parser) arguments() []blky.Expr {
+func (p *LangParser) arguments() []blky.Expr {
 	p.expect(l.OpenCurve)
 	var args []blky.Expr
 	if p.consume(l.CloseCurve) {
@@ -437,14 +450,14 @@ func (p *Parser) arguments() []blky.Expr {
 	return args
 }
 
-func (p *Parser) value(t *l.Token) blky.Expr {
+func (p *LangParser) value(t *l.Token) blky.Expr {
 	switch t.Type {
 	case l.True, l.False:
-		return &datatypes.Boolean{Value: t.Type == l.True}
+		return &fundamentals.Boolean{Value: t.Type == l.True}
 	case l.Number:
-		return &datatypes.Number{Content: *t.Content}
+		return &fundamentals.Number{Content: *t.Content}
 	case l.Text:
-		return &datatypes.Text{Content: *t.Content}
+		return &fundamentals.Text{Content: *t.Content}
 	case l.Name:
 		return &variables.Get{Where: t, Global: false, Name: *t.Content}
 	case l.This:
@@ -452,26 +465,26 @@ func (p *Parser) value(t *l.Token) blky.Expr {
 		return &variables.Get{Where: t, Global: true, Name: p.name()}
 	case l.Color:
 		p.expect(l.Colon)
-		return &datatypes.Color{Where: t, Name: p.name()}
+		return &fundamentals.Color{Where: t, Name: p.name()}
 	default:
 		t.Error("Unknown value type '%'", t.Type.String())
 		panic("") // unreachable
 	}
 }
 
-func (p *Parser) name() string {
+func (p *LangParser) name() string {
 	return *p.expect(l.Name).Content
 }
 
-func (p *Parser) consume(t l.Type) bool {
-	if p.peek().Type == t {
+func (p *LangParser) consume(t l.Type) bool {
+	if p.notEOF() && p.peek().Type == t {
 		p.currIndex++
 		return true
 	}
 	return false
 }
 
-func (p *Parser) expect(t l.Type) *l.Token {
+func (p *LangParser) expect(t l.Type) *l.Token {
 	if p.isEOF() {
 		panic("Early EOF! Was expecting type " + t.String())
 	}
@@ -482,7 +495,10 @@ func (p *Parser) expect(t l.Type) *l.Token {
 	return got
 }
 
-func (p *Parser) isNext(checkTypes ...l.Type) bool {
+func (p *LangParser) isNext(checkTypes ...l.Type) bool {
+	if p.isEOF() {
+		return false
+	}
 	pType := p.peek().Type
 	for _, checkType := range checkTypes {
 		if checkType == pType {
@@ -492,24 +508,24 @@ func (p *Parser) isNext(checkTypes ...l.Type) bool {
 	return false
 }
 
-func (p *Parser) peek() *l.Token {
+func (p *LangParser) peek() *l.Token {
 	return p.Tokens[p.currIndex]
 }
 
-func (p *Parser) next() *l.Token {
+func (p *LangParser) next() *l.Token {
 	token := p.Tokens[p.currIndex]
 	p.currIndex++
 	return token
 }
 
-func (p *Parser) skip() {
+func (p *LangParser) skip() {
 	p.currIndex++
 }
 
-func (p *Parser) notEOF() bool {
+func (p *LangParser) notEOF() bool {
 	return p.currIndex < p.tokenSize
 }
 
-func (p *Parser) isEOF() bool {
+func (p *LangParser) isEOF() bool {
 	return p.currIndex >= p.tokenSize
 }

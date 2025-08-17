@@ -1,4 +1,4 @@
-package datatypes
+package fundamentals
 
 import (
 	"Falcon/ast/blockly"
@@ -22,6 +22,10 @@ func (d *Dictionary) Blockly() blockly.Block {
 	}
 }
 
+func (d *Dictionary) Continuous() bool {
+	return true
+}
+
 type WalkAll struct {
 }
 
@@ -31,4 +35,8 @@ func (w *WalkAll) String() string {
 
 func (w *WalkAll) Blockly() blockly.Block {
 	return blockly.Block{Type: "dictionaries_walk_all", Consumable: true}
+}
+
+func (w *WalkAll) Continuous() bool {
+	return true
 }

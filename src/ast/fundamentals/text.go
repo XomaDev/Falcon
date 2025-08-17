@@ -1,4 +1,4 @@
-package datatypes
+package fundamentals
 
 import "Falcon/ast/blockly"
 
@@ -16,4 +16,8 @@ func (t *Text) Blockly() blockly.Block {
 		Fields:     blockly.FieldsFromMap(map[string]string{"TEXT": t.Content}),
 		Consumable: false,
 	}
+}
+
+func (t *Text) Continuous() bool {
+	return true
 }

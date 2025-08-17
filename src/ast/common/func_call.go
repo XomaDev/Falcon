@@ -2,7 +2,7 @@ package common
 
 import (
 	"Falcon/ast/blockly"
-	"Falcon/ast/datatypes"
+	"Falcon/ast/fundamentals"
 	"Falcon/lex"
 	"Falcon/sugar"
 	"strconv"
@@ -20,7 +20,7 @@ func (f *FuncCall) String() string {
 
 func (f *FuncCall) Blockly() blockly.Block {
 	switch f.Name {
-	case "bin", "octal", "hexa":
+	case "dec", "bin", "octal", "hexa":
 		return f.mathRadix()
 	case "randInt":
 		return f.randInt()
@@ -57,7 +57,8 @@ func (f *FuncCall) Blockly() blockly.Block {
 		return f.ctrlSimpleBlock("controls_closeApplication", false)
 	case "getPlainStartText":
 		return f.ctrlSimpleBlock("controls_getPlainStartText", true)
-
+	case "closeScreenWithPlainText":
+		return f.closeScreenWithPlainText()
 	case "copyList":
 		return f.copyList()
 	case "copyDict":
@@ -70,6 +71,10 @@ func (f *FuncCall) Blockly() blockly.Block {
 	default:
 		panic("Unknown function " + f.Name)
 	}
+}
+
+func (f *FuncCall) Continuous() bool {
+	return true
 }
 
 func (f *FuncCall) splitColor() blockly.Block {
@@ -106,6 +111,15 @@ func (f *FuncCall) copyList() blockly.Block {
 
 func (f *FuncCall) ctrlSimpleBlock(blockType string, consumable bool) blockly.Block {
 	return blockly.Block{Type: blockType, Consumable: consumable}
+}
+
+func (f *FuncCall) closeScreenWithPlainText() blockly.Block {
+	f.assertArgLen(1)
+	return blockly.Block{
+		Type:       "controls_closeScreenWithPlainText",
+		Values:     blockly.MakeValues(f.Args, "TEXT"),
+		Consumable: false,
+	}
 }
 
 func (f *FuncCall) closeScreenWithValue() blockly.Block {
@@ -263,6 +277,8 @@ func (f *FuncCall) mathRadix() blockly.Block {
 	f.assertArgLen(1)
 	var fieldOp string
 	switch f.Name {
+	case "dec":
+		fieldOp = "DEC"
 	case "bin":
 		fieldOp = "BIN"
 	case "octal":
@@ -270,7 +286,7 @@ func (f *FuncCall) mathRadix() blockly.Block {
 	case "hexa":
 		fieldOp = "HEX"
 	}
-	textExpr, ok := f.Args[0].(*datatypes.Text)
+	textExpr, ok := f.Args[0].(*fundamentals.Text)
 	if !ok {
 		f.Where.Error("Expected a numeric string argument for %()", f.Name)
 	}

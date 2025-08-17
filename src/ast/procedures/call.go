@@ -32,3 +32,7 @@ func (v *Call) Blockly() blky.Block {
 		Consumable: v.Returning,
 	}
 }
+
+func (v *Call) Continuous() bool {
+	return true
+}

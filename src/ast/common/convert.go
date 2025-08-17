@@ -7,26 +7,26 @@ import (
 )
 
 var Conversions = map[string][]string{
-	"root":     {"math", "ROOT"},
-	"abs":      {"math", "ABS"},
-	"neg":      {"math", "NEG"},
-	"log":      {"math", "LN"},
-	"exp":      {"math", "EXP"},
-	"round":    {"math", "ROUND"},
-	"ceil":     {"math", "CEILING"},
-	"floor":    {"math", "FLOOR"},
-	"sin":      {"math", "SIN"},
-	"cos":      {"math", "COS"},
-	"tan":      {"math", "TAN"},
-	"asin":     {"math", "ASIN"},
-	"acos":     {"math", "ACOS"},
-	"atan":     {"math", "ATAN"},
-	"degrees":  {"math", "RADIANS_TO_DEGREES"},
-	"radians":  {"math", "DEGREES_TO_RADIANS"},
-	"hex":      {"math", "DEC_TO_HEX"},
-	"bin":      {"math", "DEC_TO_BIN"},
-	"parseHex": {"math", "HEX_TO_DEC"},
-	"parseBin": {"math", "BIN_TO_DEC"},
+	"root":    {"math", "ROOT"},
+	"abs":     {"math", "ABS"},
+	"neg":     {"math", "NEG"},
+	"log":     {"math", "LN"},
+	"exp":     {"math", "EXP"},
+	"round":   {"math", "ROUND"},
+	"ceil":    {"math", "CEILING"},
+	"floor":   {"math", "FLOOR"},
+	"sin":     {"math", "SIN"},
+	"cos":     {"math", "COS"},
+	"tan":     {"math", "TAN"},
+	"asin":    {"math", "ASIN"},
+	"acos":    {"math", "ACOS"},
+	"atan":    {"math", "ATAN"},
+	"degrees": {"math", "RADIANS_TO_DEGREES"},
+	"radians": {"math", "DEGREES_TO_RADIANS"},
+	"hex":     {"math", "DEC_TO_HEX"},
+	"bin":     {"math", "DEC_TO_BIN"},
+	"fromHex": {"math", "HEX_TO_DEC"},
+	"fromBin": {"math", "BIN_TO_DEC"},
 }
 
 type Convert struct {
@@ -36,7 +36,11 @@ type Convert struct {
 }
 
 func (p *Convert) String() string {
-	return sugar.Format("%->%", p.On.String(), p.Name)
+	pFormat := "%->%"
+	if !p.On.Continuous() {
+		pFormat = "(%)->%"
+	}
+	return sugar.Format(pFormat, p.On.String(), p.Name)
 }
 
 func (p *Convert) Blockly() blockly.Block {
@@ -50,6 +54,10 @@ func (p *Convert) Blockly() blockly.Block {
 	default:
 		panic("Unknown undefined module " + tags[0])
 	}
+}
+
+func (p *Convert) Continuous() bool {
+	return true
 }
 
 func (p *Convert) mathConversion(fieldOp string) blockly.Block {

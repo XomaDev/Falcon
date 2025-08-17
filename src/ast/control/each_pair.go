@@ -28,3 +28,7 @@ func (e *EachPair) Blockly() blockly.Block {
 		Consumable: false,
 	}
 }
+
+func (e *EachPair) Continuous() bool {
+	return false
+}

@@ -11,7 +11,11 @@ type Get struct {
 }
 
 func (g *Get) String() string {
-	return sugar.Format("%[%]", g.List.String(), g.Index.String())
+	pFormat := "%[%]"
+	if !g.List.Continuous() {
+		pFormat = "(%)[%]"
+	}
+	return sugar.Format(pFormat, g.List.String(), g.Index.String())
 }
 
 func (g *Get) Blockly() blockly.Block {
@@ -20,4 +24,8 @@ func (g *Get) Blockly() blockly.Block {
 		Values:     blockly.MakeValues([]blockly.Expr{g.List, g.Index}, "LIST", "NUM"),
 		Consumable: true,
 	}
+}
+
+func (g *Get) Continuous() bool {
+	return true
 }

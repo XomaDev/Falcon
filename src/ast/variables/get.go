@@ -13,7 +13,7 @@ type Get struct {
 
 func (g *Get) String() string {
 	if g.Global {
-		return "glob." + g.Name
+		return "this." + g.Name
 	}
 	return g.Name
 }
@@ -30,4 +30,8 @@ func (g *Get) Blockly() blky.Block {
 		Fields:     []blky.Field{{Name: "VAR", Value: name}},
 		Consumable: true,
 	}
+}
+
+func (g *Get) Continuous() bool {
+	return true
 }

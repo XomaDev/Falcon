@@ -13,7 +13,7 @@ type VoidProcedure struct {
 }
 
 func (v *VoidProcedure) String() string {
-	return sugar.Format("func %(%) {\n%}", v.Name, strings.Join(v.Parameters, ", "), blky.PadBody(v.Body))
+	return sugar.Format("func %(%) {\n %}", v.Name, strings.Join(v.Parameters, ", "), blky.PadBody(v.Body))
 }
 
 func (v *VoidProcedure) Blockly() blky.Block {
@@ -24,4 +24,8 @@ func (v *VoidProcedure) Blockly() blky.Block {
 		Statements: []blky.Statement{blky.CreateStatement("STACK", v.Body)},
 		Consumable: false,
 	}
+}
+
+func (v *VoidProcedure) Continuous() bool {
+	return false
 }

@@ -1,4 +1,4 @@
-package datatypes
+package fundamentals
 
 import "Falcon/ast/blockly"
 
@@ -16,4 +16,8 @@ func (n *Number) Blockly() blockly.Block {
 		Fields:     blockly.FieldsFromMap(map[string]string{"NUM": n.Content}),
 		Consumable: true,
 	}
+}
+
+func (n *Number) Continuous() bool {
+	return true
 }

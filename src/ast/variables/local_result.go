@@ -19,7 +19,7 @@ func (v *VarResult) String() string {
 	for i, name := range v.Names {
 		varLines = append(varLines, blky.PadDirect(name+" = "+v.Values[i].String()))
 	}
-	builder.WriteString(strings.Join(varLines, "\n"))
+	builder.WriteString(strings.Join(varLines, ",\n"))
 	builder.WriteString("\n) -> ")
 	builder.WriteString(v.Result.String())
 	return builder.String()
@@ -34,4 +34,8 @@ func (v *VarResult) Blockly() blky.Block {
 			blky.Value{Name: "RETURN", Block: v.Result.Blockly()}),
 		Consumable: true,
 	}
+}
+
+func (v *VarResult) Continuous() bool {
+	return true
 }
