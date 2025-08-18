@@ -53,22 +53,29 @@ func makeSimpleWords(sourceCode string, tokens []*lex.Token) []string {
 		} else {
 			tokenContent = *token.Content
 		}
+		words = append(words, tokenContent)
 		if lastTokenColumn != -1 {
 			if lastTokenColumn != token.Column {
+				var separation strings.Builder
+
 				separationLines := token.Column - lastTokenColumn
-				words = append(words, strings.Repeat("\n", separationLines))
+				separation.WriteString(strings.Repeat("\n", separationLines))
 
 				afterNthLine := sugar.IndexAfterNthOccurrence(sourceCode, token.Column-1, '\n') + 1
 				beforeNthSpace := afterNthLine + token.Row - len(tokenContent)
-				words = append(words, sourceCode[afterNthLine:beforeNthSpace])
+				separation.WriteString(sourceCode[afterNthLine:beforeNthSpace])
+				words = append(words, separation.String())
 			} else {
 				afterNthLine := sugar.IndexAfterNthOccurrence(sourceCode, token.Column-1, '\n') + 1
 				afterNthRow := afterNthLine + lastTokenRow
 				beforeNthRow := afterNthLine + token.Row - len(tokenContent)
-				words = append(words, sourceCode[afterNthRow:beforeNthRow])
+
+				separation := sourceCode[afterNthRow:beforeNthRow]
+				words = append(words, separation)
 			}
+		} else {
+			words = append(words, "")
 		}
-		words = append(words, tokenContent)
 
 		lastTokenColumn = token.Column
 		lastTokenRow = token.Row
@@ -78,75 +85,38 @@ func makeSimpleWords(sourceCode string, tokens []*lex.Token) []string {
 
 func (s *SyntaxDiff) Merge() string {
 	for s.mIndex < s.mSize && s.hIndex < s.hSize {
-		// Keep appending until mismatch
-		for {
-			if !s.skipSpaces(true) {
-				break
-			}
-			hToken := s.humanWords[s.hIndex]
-			mToken := s.machineWords[s.mIndex]
-			if hToken != mToken {
-				break
-			}
-			s.mergedWords.WriteString(hToken)
+		mWord := s.machineWords[s.mIndex]
+		hWord := s.humanWords[s.hIndex]
 
+		if mWord == hWord {
 			s.hIndex++
-			s.mIndex++
-		}
-
-		// Keep appending machineWords until match
-		for s.mIndex < s.mSize {
-			if !s.skipSpaces(false) {
-				break
-			}
-			hToken := s.humanWords[s.hIndex]
-			mToken := s.machineWords[s.mIndex]
-
-			if hToken == mToken {
-				break
-			}
-			s.mergedWords.WriteString(mToken)
-
-			s.mIndex++
+			// append human spacing
+			s.mergedWords.WriteString(s.humanWords[s.hIndex])
+			// append matching word
+			s.mergedWords.WriteString(hWord)
 			s.hIndex++
+			// skip machine word and spacing
+			s.mIndex += 2
+		} else {
+			s.mIndex++
+			// append machine spacing
+			s.mergedWords.WriteString(s.machineWords[s.mIndex])
+			// append machine word
+			s.mergedWords.WriteString(mWord)
+			s.mIndex++
+			// skip mismatched word and spacing
+			s.hIndex += 2
 		}
 	}
+	// drain all remaining mWords
 	for s.mIndex < s.mSize {
-		mToken := s.machineWords[s.mIndex]
-		s.mergedWords.WriteString(mToken)
+		mWord := s.machineWords[s.mIndex]
+		s.mIndex++
+		// append machine spacing
+		s.mergedWords.WriteString(s.machineWords[s.mIndex])
+		// append machine word
+		s.mergedWords.WriteString(mWord)
 		s.mIndex++
 	}
 	return s.mergedWords.String()
-}
-
-func (s *SyntaxDiff) skipSpaces(appendHumanSpace bool) bool {
-	// Skip all spaces in humanWords
-	for s.hIndex < s.hSize {
-		hWord := s.humanWords[s.hIndex]
-		if strings.TrimSpace(hWord) == "" {
-			if appendHumanSpace {
-				s.mergedWords.WriteString(hWord)
-			}
-			s.hIndex++
-		} else {
-			break
-		}
-	}
-	if s.hIndex >= s.hSize {
-		// change mode to machineSpaces after blob of machineWords is completed
-		appendHumanSpace = false
-	}
-	// Skip all spaces in machineWords
-	for s.mIndex < s.mSize {
-		mWord := s.machineWords[s.mIndex]
-		if strings.TrimSpace(mWord) == "" {
-			if !appendHumanSpace {
-				s.mergedWords.WriteString(mWord)
-			}
-			s.mIndex++
-		} else {
-			break
-		}
-	}
-	return s.hIndex < s.hSize && s.mIndex < s.mSize
 }

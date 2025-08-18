@@ -15,6 +15,18 @@ import (
 	"strings"
 )
 
+type ValueMap struct {
+	valueMap map[string]blky.Expr
+}
+
+func (v *ValueMap) get(name string) blky.Expr {
+	value := v.valueMap[name]
+	if value == nil {
+		return &common.EmptySocket{}
+	}
+	return value
+}
+
 type XMLParser struct {
 	xmlContent string
 }
@@ -47,6 +59,13 @@ func (p *XMLParser) parseAllBlocks(allBlocks []blky.Block) []blky.Expr {
 	return parsedBlocks
 }
 
+func (p *XMLParser) singleExpr(block blky.Block) blky.Expr {
+	if len(block.Values) == 0 {
+		return &common.EmptySocket{}
+	}
+	return p.parseBlock(block.Values[0].Block)
+}
+
 func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 	switch block.Type {
 	case "controls_if":
@@ -56,43 +75,43 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 	case "controls_forEach":
 		return &control.Each{
 			IName:    block.SingleField(),
-			Iterable: p.parseBlock(block.SingleValue()),
+			Iterable: p.singleExpr(block),
 			Body:     p.optSingleBody(block)}
 	case "controls_for_each_dict":
 		return p.ctrlForEachDict(block)
 	case "controls_while":
 		return &control.While{
-			Condition: p.parseBlock(block.SingleValue()),
+			Condition: p.singleExpr(block),
 			Body:      p.optSingleBody(block)}
 	case "controls_choose":
 		return p.ctrlChoose(block)
 	case "controls_do_then_return":
-		return &control.Do{Body: p.optSingleBody(block), Result: p.parseBlock(block.SingleValue())}
+		return &control.Do{Body: p.optSingleBody(block), Result: p.singleExpr(block)}
 	case "controls_eval_but_ignore":
-		return makeFuncCall("println", p.parseBlock(block.SingleValue()))
+		return makeFuncCall("println", p.singleExpr(block))
 	case "controls_openAnotherScreen":
-		return makeFuncCall("openScreen", p.parseBlock(block.SingleValue()))
+		return makeFuncCall("openScreen", p.singleExpr(block))
 	case "controls_openAnotherScreenWithStartValue":
-		return makeFuncCall("openScreenWithValue", p.parseBlock(block.SingleValue()))
+		return makeFuncCall("openScreenWithValue", p.singleExpr(block))
 	case "controls_getStartValue":
 		return makeFuncCall("getStartValue")
 	case "controls_closeScreen":
 		return makeFuncCall("closeScreen")
 	case "controls_closeScreenWithValue":
-		return makeFuncCall("closeScreenWithValue", p.parseBlock(block.SingleValue()))
+		return makeFuncCall("closeScreenWithValue", p.singleExpr(block))
 	case "controls_closeApplication":
 		return makeFuncCall("closeApp")
 	case "controls_getPlainStartText":
 		return makeFuncCall("getPlainStartText")
 	case "controls_closeScreenWithPlainText":
-		return makeFuncCall("closeScreenWithPlainText", p.parseBlock(block.SingleValue()))
+		return makeFuncCall("closeScreenWithPlainText", p.singleExpr(block))
 	case "controls_break":
 		return &control.Break{}
 
 	case "logic_boolean", "logic_true", "logic_false":
 		return &dtypes.Boolean{Value: block.SingleField() == "TRUE"}
 	case "logic_negate":
-		return &dtypes.Not{Expr: p.parseBlock(block.SingleValue())}
+		return &dtypes.Not{Expr: p.singleExpr(block)}
 	case "logic_compare", "logic_operation":
 		return p.logicExpr(block)
 
@@ -101,15 +120,15 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 	case "text_join":
 		return p.makeBinary("_", p.fromMinVals(block.Values, 1))
 	case "text_length":
-		return p.makePropCall("textLen", p.parseBlock(block.SingleValue()))
+		return p.makePropCall("textLen", p.singleExpr(block))
 	case "text_isEmpty":
-		return p.makeQuestion(l.Text, block.SingleValue(), "emptyText")
+		return p.makeQuestion(l.Text, block, "emptyText")
 	case "text_trim":
-		return p.makePropCall("trim", p.parseBlock(block.SingleValue()))
+		return p.makePropCall("trim", p.singleExpr(block))
 	case "text_reverse":
-		return p.makePropCall("reverse", p.parseBlock(block.SingleValue()))
+		return p.makePropCall("reverse", p.singleExpr(block))
 	case "text_split_at_spaces":
-		return p.makePropCall("splitAtSpaces", p.parseBlock(block.SingleValue()))
+		return p.makePropCall("splitAtSpaces", p.singleExpr(block))
 	case "text_compare":
 		return p.textCompare(block)
 	case "text_changeCase":
@@ -129,7 +148,7 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 	case "text_replace_mappings":
 		return p.textReplaceMap(block)
 	case "text_is_string":
-		return p.makeQuestion(l.Text, block.SingleValue(), "text")
+		return p.makeQuestion(l.Text, block, "text")
 
 	case "math_number":
 		return &dtypes.Number{Content: block.SingleField()}
@@ -150,7 +169,7 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 	case "math_random_float":
 		return makeFuncCall("randFloat")
 	case "math_random_set_seed":
-		return makeFuncCall("setRandSeed", p.parseBlock(block.SingleValue()))
+		return makeFuncCall("setRandSeed", p.singleExpr(block))
 	case "math_number_radix":
 		return p.mathRadix(block)
 	case "math_on_list": // min() and max()
@@ -158,7 +177,7 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 	case "math_on_list2":
 		return p.mathOnList2(block)
 	case "math_mode_of_list":
-		return makeFuncCall("modeOf", p.parseBlock(block.SingleValue()))
+		return makeFuncCall("modeOf", p.singleExpr(block))
 	case "math_trig", "math_sin", "math_cos", "math_tan":
 		return p.mathTrig(block)
 	case "math_single":
@@ -181,11 +200,11 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 	case "lists_is_in":
 		return p.listContainsItem(block)
 	case "lists_length":
-		return p.makePropCall("listLength", p.parseBlock(block.SingleValue()))
+		return p.makePropCall("listLength", p.singleExpr(block))
 	case "lists_is_empty":
-		return p.makeQuestion(l.OpenSquare, block.SingleValue(), "emptyList")
+		return p.makeQuestion(l.OpenSquare, block, "emptyList")
 	case "lists_pick_random_item":
-		return p.makePropCall("random", p.parseBlock(block.SingleValue()))
+		return p.makePropCall("random", p.singleExpr(block))
 	case "lists_position_in":
 		return p.listIndexOf(block)
 	case "lists_select_item":
@@ -197,25 +216,25 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 	case "lists_remove_item":
 		return p.listRemoveItem(block)
 	case "lists_copy":
-		return makeFuncCall("copyList", p.parseBlock(block.SingleValue()))
+		return makeFuncCall("copyList", p.singleExpr(block))
 	case "lists_reverse":
-		return p.makePropCall("reverseList", p.parseBlock(block.SingleValue()))
+		return p.makePropCall("reverseList", p.singleExpr(block))
 	case "lists_to_csv_row":
-		return p.makePropCall("toCsvRow", p.parseBlock(block.SingleValue()))
+		return p.makePropCall("toCsvRow", p.singleExpr(block))
 	case "lists_to_csv_table":
-		return p.makePropCall("toCsvTable", p.parseBlock(block.SingleValue()))
+		return p.makePropCall("toCsvTable", p.singleExpr(block))
 	case "lists_sort":
-		return p.makePropCall("sort", p.parseBlock(block.SingleValue()))
+		return p.makePropCall("sort", p.singleExpr(block))
 	case "lists_is_list":
-		return p.makeQuestion(l.OpenSquare, block.SingleValue(), "list")
+		return p.makeQuestion(l.OpenSquare, block, "list")
 	case "lists_from_csv_row":
-		return p.makePropCall("csvRowToList", p.parseBlock(block.SingleValue()))
+		return p.makePropCall("csvRowToList", p.singleExpr(block))
 	case "lists_from_csv_table":
-		return p.makePropCall("csvTableToList", p.parseBlock(block.SingleValue()))
+		return p.makePropCall("csvTableToList", p.singleExpr(block))
 	case "lists_but_first":
-		return p.makePropCall("allButFirst", p.parseBlock(block.SingleValue()))
+		return p.makePropCall("allButFirst", p.singleExpr(block))
 	case "lists_but_last":
-		return p.makePropCall("allButLast", p.parseBlock(block.SingleValue()))
+		return p.makePropCall("allButLast", p.singleExpr(block))
 	case "lists_lookup_in_pairs":
 		return p.listLookupPairs(block)
 	case "lists_join_with_separator":
@@ -256,13 +275,13 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 	case "dictionaries_is_key_in":
 		return p.dictHasKey(block)
 	case "dictionaries_length":
-		return p.makePropCall("dictLen", p.parseBlock(block.SingleValue()))
+		return p.makePropCall("dictLen", p.singleExpr(block))
 	case "dictionaries_alist_to_dict":
-		return p.makePropCall("pairsToDict", p.parseBlock(block.SingleValue()))
+		return p.makePropCall("pairsToDict", p.singleExpr(block))
 	case "dictionaries_dict_to_alist":
-		return p.makePropCall("toPairs", p.parseBlock(block.SingleValue()))
+		return p.makePropCall("toPairs", p.singleExpr(block))
 	case "dictionaries_copy":
-		return makeFuncCall("copyDict", p.parseBlock(block.SingleValue()))
+		return makeFuncCall("copyDict", p.singleExpr(block))
 	case "dictionaries_combine_dicts":
 		return p.dictCombine(block)
 	case "dictionaries_walk_tree":
@@ -270,7 +289,7 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 	case "dictionaries_walk_all":
 		return &dtypes.WalkAll{}
 	case "dictionaries_is_dict":
-		return p.makeQuestion(l.OpenCurly, block.SingleValue(), "dict")
+		return p.makeQuestion(l.OpenCurly, block, "dict")
 
 	case "color_black":
 		return p.makeColor("black")
@@ -297,12 +316,12 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 	case "color_dark_gray":
 		return p.makeColor("dark_gray")
 	case "color_make_color":
-		return makeFuncCall("makeColor", p.parseBlock(block.SingleValue()))
+		return makeFuncCall("makeColor", p.singleExpr(block))
 	case "color_split_color":
-		return makeFuncCall("splitColor", p.parseBlock(block.SingleValue()))
+		return makeFuncCall("splitColor", p.singleExpr(block))
 
 	case "global_declaration":
-		return &variables.Global{Name: block.SingleField(), Value: p.parseBlock(block.SingleValue())}
+		return &variables.Global{Name: block.SingleField(), Value: p.singleExpr(block)}
 	case "lexical_variable_get":
 		return p.variableGet(block)
 	case "lexical_variable_set":
@@ -330,7 +349,7 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 
 func (p *XMLParser) ctrlChoose(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return &control.SimpleIf{Condition: pVals["TEST"], Then: pVals["THENRETURN"], Else: pVals["ELSERETURN"]}
+	return &control.SimpleIf{Condition: pVals.get("TEST"), Then: pVals.get("THENRETURN"), Else: pVals.get("ELSERETURN")}
 }
 
 func (p *XMLParser) ctrlForEachDict(block blky.Block) blky.Expr {
@@ -338,7 +357,7 @@ func (p *XMLParser) ctrlForEachDict(block blky.Block) blky.Expr {
 	return &control.EachPair{
 		KeyName:   pFields["KEY"],
 		ValueName: pFields["VALUE"],
-		Iterable:  p.parseBlock(block.SingleValue()),
+		Iterable:  p.singleExpr(block),
 		Body:      p.optSingleBody(block),
 	}
 }
@@ -347,9 +366,9 @@ func (p *XMLParser) ctrlForRange(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return &control.For{
 		IName: block.SingleField(),
-		From:  pVals["START"],
-		To:    pVals["END"],
-		By:    pVals["STEP"],
+		From:  pVals.get("START"),
+		To:    pVals.get("END"),
+		By:    pVals.get("STEP"),
 		Body:  p.optSingleBody(block),
 	}
 }
@@ -360,9 +379,9 @@ func (p *XMLParser) ctrlIf(block blky.Block) blky.Expr {
 	var elseBody []blky.Expr
 	for _, smt := range block.Statements {
 		if strings.HasPrefix(smt.Name, "DO") {
-			bodies = append(bodies, p.recursiveParse(*smt.Block))
+			bodies = append(bodies, p.optSingleBody(*smt.Block))
 		} else {
-			elseBody = p.recursiveParse(*smt.Block)
+			elseBody = p.optSingleBody(*smt.Block)
 		}
 	}
 	return &control.If{Conditions: conditions, Bodies: bodies, ElseBody: elseBody}
@@ -417,7 +436,7 @@ func (p *XMLParser) returnProcedure(block blky.Block) blky.Expr {
 	return &procedures.RetProcedure{
 		Name:       procedureName,
 		Parameters: paramNames,
-		Result:     p.parseBlock(block.SingleValue()),
+		Result:     p.singleExpr(block),
 	}
 }
 
@@ -448,7 +467,7 @@ func (p *XMLParser) variableSmts(block blky.Block) blky.Expr {
 
 	for i := 0; i < numOfVars; i++ {
 		varNames[i] = fieldMap["VAR"+strconv.Itoa(i)]
-		varValues[i] = valueMap["DECL"+strconv.Itoa(i)]
+		varValues[i] = valueMap.get("DECL" + strconv.Itoa(i))
 	}
 	if block.GetType() == "local_declaration_statement" {
 		return &variables.Var{
@@ -457,7 +476,7 @@ func (p *XMLParser) variableSmts(block blky.Block) blky.Expr {
 			Body:   p.optSingleBody(block),
 		}
 	}
-	return &variables.VarResult{Names: varNames, Values: varValues, Result: valueMap["RETURN"]}
+	return &variables.VarResult{Names: varNames, Values: varValues, Result: valueMap.get("RETURN")}
 }
 
 func (p *XMLParser) variableSet(block blky.Block) blky.Expr {
@@ -473,7 +492,7 @@ func (p *XMLParser) variableSet(block blky.Block) blky.Expr {
 				Global: isGlobal,
 				Name:   varName,
 			},
-			p.parseBlock(block.SingleValue()),
+			p.singleExpr(block),
 		},
 	)
 }
@@ -492,17 +511,17 @@ func (p *XMLParser) variableGet(block blky.Block) blky.Expr {
 
 func (p *XMLParser) dictWalkTree(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makePropCall("walkTree", pVals["DICT"], pVals["PATH"])
+	return p.makePropCall("walkTree", pVals.get("DICT"), pVals.get("PATH"))
 }
 
 func (p *XMLParser) dictCombine(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makePropCall("mergeInto", pVals["DICT2"], pVals["DICT1"])
+	return p.makePropCall("mergeInto", pVals.get("DICT2"), pVals.get("DICT1"))
 }
 
 func (p *XMLParser) dictHasKey(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makePropCall("containsKey", pVals["DICT"], pVals["KEY"])
+	return p.makePropCall("containsKey", pVals.get("DICT"), pVals.get("KEY"))
 }
 
 func (p *XMLParser) dictGetters(block blky.Block) blky.Expr {
@@ -515,37 +534,37 @@ func (p *XMLParser) dictGetters(block blky.Block) blky.Expr {
 	default:
 		panic("Unknown DictGetters operation: " + block.SingleField())
 	}
-	return p.makePropCall(pOperation, p.parseBlock(block.SingleValue()))
+	return p.makePropCall(pOperation, p.singleExpr(block))
 }
 
 func (p *XMLParser) dictSetPath(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makePropCall("setAtPath", pVals["DICT"], pVals["KEYS"], pVals["VALUE"])
+	return p.makePropCall("setAtPath", pVals.get("DICT"), pVals.get("KEYS"), pVals.get("VALUE"))
 }
 
 func (p *XMLParser) dictLookupPath(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makePropCall("getAtPath", pVals["DICT"], pVals["KEYS"], pVals["NOTFOUND"])
+	return p.makePropCall("getAtPath", pVals.get("DICT"), pVals.get("KEYS"), pVals.get("NOTFOUND"))
 }
 
 func (p *XMLParser) dictRemove(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makePropCall("remove", pVals["DICT"], pVals["KEY"])
+	return p.makePropCall("remove", pVals.get("DICT"), pVals.get("KEY"))
 }
 
 func (p *XMLParser) dictSet(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makePropCall("set", pVals["KEY"], pVals["VALUE"])
+	return p.makePropCall("set", pVals.get("KEY"), pVals.get("VALUE"))
 }
 
 func (p *XMLParser) dictLookup(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makePropCall("get", pVals["DICT"], pVals["KEY"], pVals["NOTFOUND"])
+	return p.makePropCall("get", pVals.get("DICT"), pVals.get("KEY"), pVals.get("NOTFOUND"))
 }
 
 func (p *XMLParser) dictPair(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makeBinary(":", []blky.Expr{pVals["KEY"], pVals["VALUE"]})
+	return p.makeBinary(":", []blky.Expr{pVals.get("KEY"), pVals.get("VALUE")})
 }
 
 func (p *XMLParser) listTransMax(block blky.Block) blky.Expr {
@@ -553,11 +572,11 @@ func (p *XMLParser) listTransMax(block blky.Block) blky.Expr {
 	pFields := p.makeFieldMap(block.Fields)
 	return &list.Transformer{
 		Where:       makeFakeToken(l.OpenSquare),
-		List:        pVals["LIST"],
+		List:        pVals.get("LIST"),
 		Name:        "max",
 		Args:        []blky.Expr{},
 		Names:       []string{pFields["VAR1"], pFields["VAR2"]},
-		Transformer: pVals["COMPARE"],
+		Transformer: pVals.get("COMPARE"),
 	}
 }
 
@@ -566,11 +585,11 @@ func (p *XMLParser) listTransMin(block blky.Block) blky.Expr {
 	pFields := p.makeFieldMap(block.Fields)
 	return &list.Transformer{
 		Where:       makeFakeToken(l.OpenSquare),
-		List:        pVals["LIST"],
+		List:        pVals.get("LIST"),
 		Name:        "min",
 		Args:        []blky.Expr{},
 		Names:       []string{pFields["VAR1"], pFields["VAR2"]},
-		Transformer: pVals["COMPARE"],
+		Transformer: pVals.get("COMPARE"),
 	}
 }
 
@@ -578,11 +597,11 @@ func (p *XMLParser) listSortKeyComparator(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return &list.Transformer{
 		Where:       makeFakeToken(l.OpenSquare),
-		List:        pVals["LIST"],
+		List:        pVals.get("LIST"),
 		Name:        "sortByKey",
 		Args:        []blky.Expr{},
 		Names:       []string{block.SingleField()},
-		Transformer: pVals["KEY"],
+		Transformer: pVals.get("KEY"),
 	}
 }
 
@@ -591,11 +610,11 @@ func (p *XMLParser) listSortComparator(block blky.Block) blky.Expr {
 	pFields := p.makeFieldMap(block.Fields)
 	return &list.Transformer{
 		Where:       makeFakeToken(l.OpenSquare),
-		List:        pVals["LIST"],
+		List:        pVals.get("LIST"),
 		Name:        "sort",
 		Args:        []blky.Expr{},
 		Names:       []string{pFields["VAR1"], pFields["VAR2"]},
-		Transformer: pVals["COMPARE"],
+		Transformer: pVals.get("COMPARE"),
 	}
 }
 
@@ -604,11 +623,11 @@ func (p *XMLParser) listReduce(block blky.Block) blky.Expr {
 	pFields := p.makeFieldMap(block.Fields)
 	return &list.Transformer{
 		Where:       makeFakeToken(l.OpenSquare),
-		List:        pVals["LIST"],
+		List:        pVals.get("LIST"),
 		Name:        "reduce",
-		Args:        []blky.Expr{pVals["INITANSWER"]},
+		Args:        []blky.Expr{pVals.get("INITANSWER")},
 		Names:       []string{pFields["VAR1"], pFields["VAR2"]},
-		Transformer: pVals["COMBINE"],
+		Transformer: pVals.get("COMBINE"),
 	}
 }
 
@@ -616,11 +635,11 @@ func (p *XMLParser) listFilter(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return &list.Transformer{
 		Where:       makeFakeToken(l.OpenSquare),
-		List:        pVals["LIST"],
+		List:        pVals.get("LIST"),
 		Name:        "filter",
 		Args:        []blky.Expr{},
 		Names:       []string{block.SingleField()},
-		Transformer: pVals["TEST"],
+		Transformer: pVals.get("TEST"),
 	}
 }
 
@@ -628,57 +647,57 @@ func (p *XMLParser) listMap(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return &list.Transformer{
 		Where:       makeFakeToken(l.OpenSquare),
-		List:        pVals["LIST"],
+		List:        pVals.get("LIST"),
 		Name:        "map",
 		Args:        []blky.Expr{},
 		Names:       []string{block.SingleField()},
-		Transformer: pVals["TO"],
+		Transformer: pVals.get("TO"),
 	}
 }
 
 func (p *XMLParser) listSlice(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makePropCall("slice", pVals["LIST"], pVals["INDEX1"], pVals["INDEX2"])
+	return p.makePropCall("slice", pVals.get("LIST"), pVals.get("INDEX1"), pVals.get("INDEX2"))
 }
 
 func (p *XMLParser) listJoin(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makePropCall("join", pVals["LIST"], pVals["SEPARATOR"])
+	return p.makePropCall("join", pVals.get("LIST"), pVals.get("SEPARATOR"))
 }
 
 func (p *XMLParser) listLookupPairs(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makePropCall("lookupInPairs", pVals["LIST"], pVals["KEY"], pVals["NOTFOUND"])
+	return p.makePropCall("lookupInPairs", pVals.get("LIST"), pVals.get("KEY"), pVals.get("NOTFOUND"))
 }
 
 func (p *XMLParser) listRemoveItem(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makePropCall("remove", pVals["LIST"], pVals["INDEX"])
+	return p.makePropCall("remove", pVals.get("LIST"), pVals.get("INDEX"))
 }
 
 func (p *XMLParser) listReplaceItem(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return &list.Set{List: pVals["LIST"], Index: pVals["NUM"], Value: pVals["ITEM"]}
+	return &list.Set{List: pVals.get("LIST"), Index: pVals.get("NUM"), Value: pVals.get("ITEM")}
 }
 
 func (p *XMLParser) listInsertItem(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makePropCall("insert", pVals["LIST"], pVals["INDEX"], pVals["ITEM"])
+	return p.makePropCall("insert", pVals.get("LIST"), pVals.get("INDEX"), pVals.get("ITEM"))
 }
 
 func (p *XMLParser) listSelectItem(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return &list.Get{List: pVals["LIST"], Index: pVals["NUM"]}
+	return &list.Get{List: pVals.get("LIST"), Index: pVals.get("NUM")}
 }
 
 func (p *XMLParser) listIndexOf(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makePropCall("indexOf", pVals["LIST"], pVals["ITEM"])
+	return p.makePropCall("indexOf", pVals.get("LIST"), pVals.get("ITEM"))
 }
 
 func (p *XMLParser) listContainsItem(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makePropCall("containsItem", pVals["LIST"], pVals["ITEM"])
+	return p.makePropCall("containsItem", pVals.get("LIST"), pVals.get("ITEM"))
 }
 
 func (p *XMLParser) listAddItem(block blky.Block) blky.Expr {
@@ -686,9 +705,9 @@ func (p *XMLParser) listAddItem(block blky.Block) blky.Expr {
 	numElements := block.Mutation.ItemCount
 	arrElements := make([]blky.Expr, numElements)
 	for i := 0; i < numElements; i++ {
-		arrElements[i] = pVals["ITEM"+strconv.Itoa(i)]
+		arrElements[i] = pVals.get("ITEM" + strconv.Itoa(i))
 	}
-	return p.makePropCall("add", pVals["LIST"], arrElements...)
+	return p.makePropCall("add", pVals.get("LIST"), arrElements...)
 }
 
 func (p *XMLParser) textReplaceMap(block blky.Block) blky.Expr {
@@ -702,7 +721,7 @@ func (p *XMLParser) textReplaceMap(block blky.Block) blky.Expr {
 		panic("Unknown Text Replace Map operation: " + block.SingleField())
 	}
 	pVals := p.makeValueMap(block.Values)
-	return p.makePropCall(pOperation, pVals["TEXT"], pVals["MAPPINGS"])
+	return p.makePropCall(pOperation, pVals.get("TEXT"), pVals.get("MAPPINGS"))
 }
 
 func (p *XMLParser) textObfuscate(block blky.Block) blky.Expr {
@@ -714,12 +733,12 @@ func (p *XMLParser) textObfuscate(block blky.Block) blky.Expr {
 
 func (p *XMLParser) textSegment(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makePropCall("segment", pVals["TEXT"], pVals["START"], pVals["LENGTH"])
+	return p.makePropCall("segment", pVals.get("TEXT"), pVals.get("START"), pVals.get("LENGTH"))
 }
 
 func (p *XMLParser) textReplace(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makePropCall("replace", pVals["TEXT"], pVals["SEGMENT"], pVals["REPLACEMENT"])
+	return p.makePropCall("replace", pVals.get("TEXT"), pVals.get("SEGMENT"), pVals.get("REPLACEMENT"))
 }
 
 func (p *XMLParser) textSplit(block blky.Block) blky.Expr {
@@ -737,7 +756,7 @@ func (p *XMLParser) textSplit(block blky.Block) blky.Expr {
 	default:
 		panic("Unsupported Text Split operation: " + block.SingleField())
 	}
-	return p.makePropCall(pOperation, pVals["TEXT"], pVals["AT"])
+	return p.makePropCall(pOperation, pVals.get("TEXT"), pVals.get("AT"))
 }
 
 func (p *XMLParser) textContains(block blky.Block) blky.Expr {
@@ -753,12 +772,12 @@ func (p *XMLParser) textContains(block blky.Block) blky.Expr {
 	default:
 		panic("Unsupported Text Contains operation: " + block.SingleField())
 	}
-	return p.makePropCall(pOperation, pVals["TEXT"], pVals["PIECE"])
+	return p.makePropCall(pOperation, pVals.get("TEXT"), pVals.get("PIECE"))
 }
 
 func (p *XMLParser) textStartsWith(block blky.Block) blky.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makePropCall("startsWith", pVals["TEXT"], pVals["PIECE"])
+	return p.makePropCall("startsWith", pVals.get("TEXT"), pVals.get("PIECE"))
 }
 
 func (p *XMLParser) textChangeCase(block blky.Block) blky.Expr {
@@ -771,7 +790,7 @@ func (p *XMLParser) textChangeCase(block blky.Block) blky.Expr {
 	default:
 		panic("Unsupported Text Change Case operation type: " + block.SingleField())
 	}
-	return p.makePropCall(pOperation, p.parseBlock(block.SingleValue()))
+	return p.makePropCall(pOperation, p.singleExpr(block))
 }
 
 func (p *XMLParser) textCompare(block blky.Block) blky.Expr {
@@ -805,14 +824,14 @@ func (p *XMLParser) mathConvertNumber(block blky.Block) blky.Expr {
 	default:
 		panic("Unknown MathConvertNumber type: " + block.SingleField())
 	}
-	return &common.Convert{Where: makeFakeToken(l.Number), Name: opConvert, On: p.parseBlock(block.SingleValue())}
+	return &common.Convert{Where: makeFakeToken(l.Number), Name: opConvert, On: p.singleExpr(block)}
 }
 
 func (p *XMLParser) mathTrig(block blky.Block) blky.Expr {
 	return &common.Convert{
 		Where: makeFakeToken(l.Number),
 		Name:  strings.ToLower(block.SingleField()),
-		On:    p.parseBlock(block.SingleValue())}
+		On:    p.singleExpr(block)}
 }
 
 func (p *XMLParser) mathIsNumber(block blky.Block) blky.Expr {
@@ -829,7 +848,7 @@ func (p *XMLParser) mathIsNumber(block blky.Block) blky.Expr {
 	default:
 		panic("Unknown MathIsNumber type: " + block.SingleField())
 	}
-	return p.makeQuestion(l.Number, block.SingleValue(), question)
+	return p.makeQuestion(l.Number, block, question)
 }
 
 func (p *XMLParser) mathDivide(block blky.Block) blky.Expr {
@@ -855,7 +874,7 @@ func (p *XMLParser) mathSingle(block blky.Block) blky.Expr {
 	case "ceiling":
 		mathOp = "ceil"
 	}
-	return &common.Convert{Where: makeFakeToken(l.Number), Name: mathOp, On: p.parseBlock(block.SingleValue())}
+	return &common.Convert{Where: makeFakeToken(l.Number), Name: mathOp, On: p.singleExpr(block)}
 }
 
 func (p *XMLParser) mathOnList2(block blky.Block) blky.Expr {
@@ -876,7 +895,7 @@ func (p *XMLParser) mathOnList2(block blky.Block) blky.Expr {
 	default:
 		panic("Unsupported math on list operation: " + block.SingleField())
 	}
-	return makeFuncCall(funcName, p.parseBlock(block.SingleValue()))
+	return makeFuncCall(funcName, p.singleExpr(block))
 }
 
 func (p *XMLParser) mathRadix(block blky.Block) blky.Expr {
@@ -899,7 +918,7 @@ func (p *XMLParser) mathRadix(block blky.Block) blky.Expr {
 
 func (p *XMLParser) mathRandom(block blky.Block) blky.Expr {
 	valMap := p.makeValueMap(block.Values)
-	return makeFuncCall("randInt", valMap["FROM"], valMap["TO"])
+	return makeFuncCall("randInt", valMap.get("FROM"), valMap.get("TO"))
 }
 
 func (p *XMLParser) mathExpr(block blky.Block) blky.Expr {
@@ -934,7 +953,7 @@ func (p *XMLParser) makeColor(name string) blky.Expr {
 }
 
 func (p *XMLParser) makeQuestion(t l.Type, on blky.Block, name string) blky.Expr {
-	return &common.Question{Where: makeFakeToken(t), On: p.parseBlock(on), Question: name}
+	return &common.Question{Where: makeFakeToken(t), On: p.singleExpr(on), Question: name}
 }
 
 func (p *XMLParser) makePropCall(name string, on blky.Expr, args ...blky.Expr) blky.Expr {
@@ -1007,12 +1026,12 @@ func (p *XMLParser) makeFieldMap(allFields []blky.Field) map[string]string {
 	return fieldMap
 }
 
-func (p *XMLParser) makeValueMap(allValues []blky.Value) map[string]blky.Expr {
+func (p *XMLParser) makeValueMap(allValues []blky.Value) ValueMap {
 	valueMap := make(map[string]blky.Expr, len(allValues))
 	for _, val := range allValues {
 		valueMap[val.Name] = p.parseBlock(val.Block)
 	}
-	return valueMap
+	return ValueMap{valueMap: valueMap}
 }
 
 func (p *XMLParser) fromVals(allValues []blky.Value) []blky.Expr {
@@ -1024,9 +1043,13 @@ func (p *XMLParser) fromVals(allValues []blky.Value) []blky.Expr {
 }
 
 func (p *XMLParser) fromMinVals(allValues []blky.Value, minCount int) []blky.Expr {
-	arrExprs := make([]blky.Expr, max(minCount, len(allValues)))
+	size := max(minCount, len(allValues))
+	arrExprs := make([]blky.Expr, size)
 	for i := range allValues {
 		arrExprs[i] = p.parseBlock(allValues[i].Block)
+	}
+	for i := len(allValues); i < size; i++ {
+		arrExprs[i] = &common.EmptySocket{}
 	}
 	return arrExprs
 }

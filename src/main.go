@@ -9,6 +9,7 @@ import (
 	"Falcon/diff"
 	"Falcon/lex"
 	"encoding/xml"
+	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -17,7 +18,25 @@ func main() {
 	println("Hello from Falcon!\n")
 
 	//diffTest()
-	analyzeSyntax()
+	//analyzeSyntax()
+	xmlTest()
+}
+
+func xmlTest() {
+	xmlFile := "xml.txt"
+	xmlPath := "/home/ekina/GolandProjects/Falcon/" + xmlFile
+	codeBytes, err := ioutil.ReadFile(xmlPath)
+	if err != nil {
+		panic(err)
+	}
+	xmlString := string(codeBytes)
+	exprs := analysis.NewXMLParser(xmlString).ParseBlockly()
+	var machineSourceCode strings.Builder
+	for _, expr := range exprs {
+		machineSourceCode.WriteString(expr.String())
+		machineSourceCode.WriteRune('\n')
+	}
+	println(machineSourceCode.String())
 }
 
 func diffTest() {

@@ -12,6 +12,16 @@ import (
 )
 import l "Falcon/lex"
 
+type NameResolver struct {
+	Procedures map[string]Procedure
+}
+
+type Procedure struct {
+	Name       string
+	Parameters []string
+	Returning  bool
+}
+
 type LangParser struct {
 	Tokens    []*l.Token
 	currIndex int
@@ -204,7 +214,6 @@ func (p *LangParser) simpleIf() *control.SimpleIf {
 func (p *LangParser) body() []blky.Expr {
 	p.expect(l.OpenCurly)
 	expressions := p.bodyUntilCurly()
-	p.expect(l.CloseCurly)
 	return expressions
 }
 
@@ -216,6 +225,7 @@ func (p *LangParser) bodyUntilCurly() []blky.Expr {
 	for p.notEOF() && !p.isNext(l.CloseCurly) {
 		expressions = append(expressions, p.parse())
 	}
+	p.expect(l.CloseCurly)
 	return expressions
 }
 
@@ -509,6 +519,9 @@ func (p *LangParser) isNext(checkTypes ...l.Type) bool {
 }
 
 func (p *LangParser) peek() *l.Token {
+	if p.isEOF() {
+		panic("Early EOF! Expected more content.")
+	}
 	return p.Tokens[p.currIndex]
 }
 
