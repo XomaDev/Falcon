@@ -42,6 +42,7 @@ type Mutation struct {
 	Args          []Arg       `xml:"arg"`
 	Key           string      `xml:"key,attr,omitempty"`
 	SetOrGet      string      `xml:"set_or_get,attr,omitempty"`
+	PropertyName  string      `xml:"property_name,attr,omitempty"`
 	IsGeneric     bool        `xml:"is_generic,attr,omitempty"`
 	ComponentType string      `xml:"component_type,attr,omitempty"`
 	InstanceName  string      `xml:"instance_name,attr,omitempty"`

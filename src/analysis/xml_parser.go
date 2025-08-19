@@ -3,6 +3,7 @@ package analysis
 import (
 	blky "Falcon/ast/blockly"
 	"Falcon/ast/common"
+	"Falcon/ast/components"
 	"Falcon/ast/control"
 	dtypes "Falcon/ast/fundamentals"
 	"Falcon/ast/list"
@@ -17,6 +18,10 @@ import (
 
 type ValueMap struct {
 	valueMap map[string]blky.Expr
+}
+
+func (v *ValueMap) getUnsafe(name string) blky.Expr {
+	return v.valueMap[name]
 }
 
 func (v *ValueMap) get(name string) blky.Expr {
@@ -341,9 +346,93 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 	case "helpers_dropdown":
 		return &dtypes.HelperDropdown{Key: block.Mutation.Key, Option: block.SingleField()}
 
-	// TODO: impl component blocks
+	case "component_component_block":
+		return &dtypes.Component{Name: block.SingleField()}
+	case "component_set_get":
+		return p.componentProp(block)
+	case "component_event":
+		return p.componentEvent(block)
+	case "component_method":
+		return p.componentMethod(block)
+	case "component_all_component_block":
+		return &components.EveryComponent{Type: block.Mutation.ComponentType}
 	default:
 		panic("Unsupported block type: " + block.Type)
+	}
+}
+
+func (p *XMLParser) componentMethod(block blky.Block) blky.Expr {
+	if block.Mutation.IsGeneric {
+		pVals := p.makeValueMap(block.Values)
+		var callArgs []blky.Expr
+
+		for i := 0; ; i++ {
+			aArg := pVals.getUnsafe("ARG" + strconv.Itoa(i))
+			if aArg == nil {
+				break
+			}
+			callArgs = append(callArgs, aArg)
+		}
+		return &components.GenericMethodCall{
+			Component: pVals.get("COMPONENT"),
+			Method:    block.Mutation.MethodName,
+			Args:      callArgs,
+		}
+	}
+	return &components.MethodCall{
+		Component: block.Mutation.InstanceName,
+		Method:    block.Mutation.MethodName,
+		Args:      p.fromVals(block.Values),
+	}
+}
+
+func (p *XMLParser) componentEvent(block blky.Block) blky.Expr {
+	var component string
+	if block.Mutation.IsGeneric {
+		component = block.Mutation.ComponentType
+	} else {
+		component = block.Mutation.InstanceName
+	}
+	// TODO: supply parameters to events later
+	return &components.Event{
+		IsGeneric:  block.Mutation.IsGeneric,
+		Component:  component,
+		Event:      block.Mutation.EventName,
+		Parameters: make([]string, 0),
+		Body:       p.optSingleBody(block),
+	}
+}
+
+func (p *XMLParser) componentProp(block blky.Block) blky.Expr {
+	pFields := p.makeFieldMap(block.Fields)
+	property := pFields["PROP"]
+	isSet := block.Mutation.SetOrGet == "set"
+
+	if block.Mutation.IsGeneric {
+		pVals := p.makeValueMap(block.Values)
+		if isSet {
+			return &components.GenericPropertySet{
+				Component: pVals.get("COMPONENT"),
+				Property:  property,
+				Value:     pVals.get("VALUE"),
+			}
+		}
+		return &components.GenericPropertyGet{
+			Component: pVals.get("COMPONENT"),
+			Property:  property,
+		}
+	}
+
+	if isSet {
+		return &components.PropertySet{
+			Component: pFields["COMPONENT_SELECTOR"],
+			Property:  property,
+			Value:     p.singleExpr(block),
+		}
+	}
+	return &components.PropertyGet{
+		Component: pFields["COMPONENT_SELECTOR"],
+		Property:  property,
 	}
 }
 
