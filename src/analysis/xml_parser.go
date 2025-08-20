@@ -184,7 +184,7 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 	case "math_mode_of_list":
 		return makeFuncCall("modeOf", p.singleExpr(block))
 	case "math_trig", "math_sin", "math_cos", "math_tan":
-		return p.mathTrig(block)
+		return makeFuncCall(strings.ToLower(block.SingleField()), p.singleExpr(block))
 	case "math_single":
 		return p.mathSingle(block)
 	case "math_atan2":
@@ -907,27 +907,20 @@ func (p *XMLParser) textCompare(block blky.Block) blky.Expr {
 }
 
 func (p *XMLParser) mathConvertNumber(block blky.Block) blky.Expr {
-	var opConvert string
+	var funcName string
 	switch block.SingleField() {
 	case "DEC_TO_HEX":
-		opConvert = "hex"
+		funcName = "decToHex"
 	case "DEC_TO_BIN":
-		opConvert = "bin"
+		funcName = "decToBin"
 	case "HEX_TO_DEC":
-		opConvert = "fromHex"
+		funcName = "hexToDec"
 	case "BIN_TO_DEC":
-		opConvert = "fromBin"
+		funcName = "binToDec"
 	default:
 		panic("Unknown MathConvertNumber type: " + block.SingleField())
 	}
-	return &common.Convert{Where: makeFakeToken(l.Number), Name: opConvert, On: p.singleExpr(block)}
-}
-
-func (p *XMLParser) mathTrig(block blky.Block) blky.Expr {
-	return &common.Convert{
-		Where: makeFakeToken(l.Number),
-		Name:  strings.ToLower(block.SingleField()),
-		On:    p.singleExpr(block)}
+	return makeFuncCall(funcName, p.singleExpr(block))
 }
 
 func (p *XMLParser) mathIsNumber(block blky.Block) blky.Expr {
@@ -963,14 +956,14 @@ func (p *XMLParser) mathDivide(block blky.Block) blky.Expr {
 }
 
 func (p *XMLParser) mathSingle(block blky.Block) blky.Expr {
-	mathOp := strings.ToLower(block.SingleField())
-	switch mathOp {
+	funcName := strings.ToLower(block.SingleField())
+	switch funcName {
 	case "ln":
-		mathOp = "log"
+		funcName = "log"
 	case "ceiling":
-		mathOp = "ceil"
+		funcName = "ceil"
 	}
-	return &common.Convert{Where: makeFakeToken(l.Number), Name: mathOp, On: p.singleExpr(block)}
+	return makeFuncCall(funcName, p.singleExpr(block))
 }
 
 func (p *XMLParser) mathOnList2(block blky.Block) blky.Expr {

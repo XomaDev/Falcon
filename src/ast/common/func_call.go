@@ -8,6 +8,29 @@ import (
 	"strconv"
 )
 
+var MathConversions = map[string]string{
+	"root":     "ROOT",
+	"abs":      "ABS",
+	"neg":      "NEG",
+	"log":      "LN",
+	"exp":      "EXP",
+	"round":    "ROUND",
+	"ceil":     "CEILING",
+	"floor":    "FLOOR",
+	"sin":      "SIN",
+	"cos":      "COS",
+	"tan":      "TAN",
+	"asin":     "ASIN",
+	"acos":     "ACOS",
+	"atan":     "ATAN",
+	"degrees":  "RADIANS_TO_DEGREES",
+	"radians":  "DEGREES_TO_RADIANS",
+	"decToHex": "DEC_TO_HEX",
+	"decToBin": "DEC_TO_BIN",
+	"hexToDec": "HEX_TO_DEC",
+	"binToDec": "BIN_TO_DEC",
+}
+
 type FuncCall struct {
 	Where *lex.Token
 	Name  string
@@ -20,6 +43,11 @@ func (f *FuncCall) String() string {
 
 func (f *FuncCall) Blockly() blockly.Block {
 	switch f.Name {
+	case "root", "abs", "neg", "log", "exp", "round", "ceil", "floor",
+		"sin", "cos", "tan", "asin", "acos", "atan", "degrees", "radians",
+		"decToHex", "decToBin", "hexToDec", "binToDec":
+		return f.mathConversions()
+
 	case "dec", "bin", "octal", "hexa":
 		return f.mathRadix()
 	case "randInt":
@@ -155,6 +183,31 @@ func (f *FuncCall) println() blockly.Block {
 		Type:       "controls_eval_but_ignore",
 		Values:     blockly.MakeValues(f.Args, "VALUE"),
 		Consumable: false,
+	}
+}
+
+func (f *FuncCall) mathConversions() blockly.Block {
+	f.assertArgLen(1)
+	fieldOp, ok := MathConversions[f.Name]
+	if !ok {
+		f.Where.Error("Unknown Math Conversion %()", f.Name)
+	}
+	var blockType string
+	switch fieldOp {
+	case "SIN", "COS", "TAN", "ASIN", "ACOS", "ATAN":
+		blockType = "math_trig"
+	case "RADIANS_TO_DEGREES", "DEGREES_TO_RADIANS":
+		blockType = "math_convert_angles"
+	case "DEC_TO_HEX", "HEX_TO_DEC", "DEC_TO_BIN", "BIN_TO_DEC":
+		blockType = "math_convert_number"
+	default:
+		blockType = "math_single"
+	}
+	return blockly.Block{
+		Type:       blockType,
+		Fields:     []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Values:     []blockly.Value{{Name: "NUM", Block: f.Args[0].Blockly()}},
+		Consumable: true,
 	}
 }
 

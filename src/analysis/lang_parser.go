@@ -338,9 +338,9 @@ func (p *LangParser) element() blky.Expr {
 		case l.Dot:
 			left = p.objectCall(left)
 			continue
-		case l.RightArrow:
-			left = &common.Convert{Where: p.next(), On: left, Name: p.name()}
-			continue
+		//case l.RightArrow:
+		//left = &common.Convert{Where: p.next(), On: left, Name: p.name()}
+		//continue
 		case l.Question:
 			left = &common.Question{Where: p.next(), On: left, Question: p.name()}
 			continue

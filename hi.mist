@@ -1,3 +1,1 @@
-@Button { Button1, Button2 }
-
-a = Button1
+sin(root(1234))
