@@ -6,9 +6,10 @@ import (
 )
 
 type GenericMethodCall struct {
-	Component blky.Expr
-	Method    string
-	Args      []blky.Expr
+	Component     blky.Expr
+	ComponentType string
+	Method        string
+	Args          []blky.Expr
 }
 
 func (g *GenericMethodCall) String() string {
@@ -21,10 +22,11 @@ func (g *GenericMethodCall) String() string {
 
 func (g *GenericMethodCall) Blockly() blky.Block {
 	return blky.Block{
-		// TODO: add component_type to Mutation later
+		Type: "component_method",
 		Mutation: &blky.Mutation{
-			MethodName: g.Method,
-			IsGeneric:  true,
+			MethodName:    g.Method,
+			IsGeneric:     true,
+			ComponentType: g.ComponentType,
 		},
 		Values: blky.ValueArgsByPrefix(g.Component, "COMPONENT", "ARG", g.Args),
 	}

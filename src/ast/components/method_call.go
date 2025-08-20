@@ -6,24 +6,26 @@ import (
 )
 
 type MethodCall struct {
-	Component string
-	Method    string
-	Args      []blky.Expr
+	ComponentName string
+	ComponentType string
+	Method        string
+	Args          []blky.Expr
 }
 
 func (m *MethodCall) String() string {
-	return sugar.Format("%.%(%)", m.Component, m.Method, blky.JoinExprs(", ", m.Args))
+	return sugar.Format("%.%(%)", m.ComponentName, m.Method, blky.JoinExprs(", ", m.Args))
 }
 
 func (m *MethodCall) Blockly() blky.Block {
 	return blky.Block{
-		// TODO: add component_type to Mutation
+		Type: "component_method",
 		Mutation: &blky.Mutation{
-			MethodName:   m.Method,
-			IsGeneric:    false,
-			InstanceName: m.Component,
+			MethodName:    m.Method,
+			IsGeneric:     false,
+			InstanceName:  m.ComponentName,
+			ComponentType: m.ComponentType,
 		},
-		Fields: []blky.Field{{Name: "COMPONENT_SELECTOR", Value: m.Component}},
+		Fields: []blky.Field{{Name: "COMPONENT_SELECTOR", Value: m.ComponentName}},
 		Values: blky.ValuesByPrefix("ARG", m.Args),
 	}
 }

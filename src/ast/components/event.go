@@ -7,11 +7,12 @@ import (
 )
 
 type Event struct {
-	IsGeneric  bool
-	Component  string
-	Event      string
-	Parameters []string
-	Body       []blockly.Expr
+	IsGeneric     bool
+	ComponentName string
+	ComponentType string
+	Event         string
+	Parameters    []string
+	Body          []blockly.Expr
 }
 
 func (e *Event) String() string {
@@ -19,28 +20,30 @@ func (e *Event) String() string {
 	if e.IsGeneric {
 		pFormat = "when any %.%(%) {\n%}"
 	}
-	return sugar.Format(pFormat, e.Component, e.Event, strings.Join(e.Parameters, ", "), blockly.PadBody(e.Body))
+	return sugar.Format(pFormat, e.ComponentName, e.Event, strings.Join(e.Parameters, ", "), blockly.PadBody(e.Body))
 }
 
 func (e *Event) Blockly() blockly.Block {
 	if e.IsGeneric {
 		return blockly.Block{
-			// TODO: add component_type to Mutation later
+			Type: "component_event",
 			Mutation: &blockly.Mutation{
-				IsGeneric: true,
-				EventName: e.Event,
+				IsGeneric:     true,
+				EventName:     e.Event,
+				ComponentType: e.ComponentType,
 			},
 			Statements: []blockly.Statement{blockly.CreateStatement("DO", e.Body)},
 		}
 	}
 	return blockly.Block{
-		// TODO: add component_type to Mutation later
+		Type: "component_event",
 		Mutation: &blockly.Mutation{
-			IsGeneric:    false,
-			InstanceName: e.Component,
-			EventName:    e.Event,
+			IsGeneric:     false,
+			InstanceName:  e.ComponentName,
+			EventName:     e.Event,
+			ComponentType: e.ComponentType,
 		},
-		Fields:     []blockly.Field{{Name: "COMPONENT_SELECTOR", Value: e.Component}},
+		Fields:     []blockly.Field{{Name: "COMPONENT_SELECTOR", Value: e.ComponentName}},
 		Statements: []blockly.Statement{blockly.CreateStatement("DO", e.Body)},
 	}
 }

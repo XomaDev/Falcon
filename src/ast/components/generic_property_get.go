@@ -6,8 +6,9 @@ import (
 )
 
 type GenericPropertyGet struct {
-	Component blockly.Expr
-	Property  string
+	Component     blockly.Expr
+	ComponentType string
+	Property      string
 }
 
 func (g *GenericPropertyGet) String() string {
@@ -20,11 +21,12 @@ func (g *GenericPropertyGet) String() string {
 
 func (g *GenericPropertyGet) Blockly() blockly.Block {
 	return blockly.Block{
-		// TODO: add component_type to Mutation
+		Type: "component_set_get",
 		Mutation: &blockly.Mutation{
-			SetOrGet:     "get",
-			PropertyName: g.Property,
-			IsGeneric:    true,
+			SetOrGet:      "get",
+			PropertyName:  g.Property,
+			IsGeneric:     true,
+			ComponentType: g.ComponentType,
 		},
 		Fields: []blockly.Field{{Name: "PROP", Value: g.Property}},
 		Values: []blockly.Value{{Name: "COMPONENT", Block: g.Component.Blockly()}},

@@ -6,6 +6,7 @@ import (
 
 type Component struct {
 	Name string
+	Type string
 }
 
 func (c *Component) String() string {
@@ -14,8 +15,8 @@ func (c *Component) String() string {
 
 func (c *Component) Blockly() blockly.Block {
 	return blockly.Block{
-		// TODO: add component_type to Mutation
-		Mutation: &blockly.Mutation{InstanceName: c.Name},
+		Type:     "component_component_block",
+		Mutation: &blockly.Mutation{InstanceName: c.Name, ComponentType: c.Type},
 		Fields:   []blockly.Field{{Name: "COMPONENT_SELECTOR", Value: c.Name}},
 	}
 }

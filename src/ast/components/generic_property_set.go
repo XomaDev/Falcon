@@ -6,9 +6,10 @@ import (
 )
 
 type GenericPropertySet struct {
-	Component blockly.Expr
-	Property  string
-	Value     blockly.Expr
+	Component     blockly.Expr
+	ComponentType string
+	Property      string
+	Value         blockly.Expr
 }
 
 func (g *GenericPropertySet) String() string {
@@ -21,11 +22,12 @@ func (g *GenericPropertySet) String() string {
 
 func (g *GenericPropertySet) Blockly() blockly.Block {
 	return blockly.Block{
-		// TODO: add component_type to mutation
+		Type: "component_set_get",
 		Mutation: &blockly.Mutation{
-			SetOrGet:     "set",
-			PropertyName: g.Property,
-			IsGeneric:    true,
+			SetOrGet:      "set",
+			PropertyName:  g.Property,
+			IsGeneric:     true,
+			ComponentType: g.ComponentType,
 		},
 		Fields: []blockly.Field{{Name: "PROP", Value: g.Property}},
 		Values: blockly.MakeValues([]blockly.Expr{g.Component, g.Value}, "COMPONENT", "VALUE"),

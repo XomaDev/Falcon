@@ -3,6 +3,7 @@ package analysis
 import (
 	blky "Falcon/ast/blockly"
 	"Falcon/ast/common"
+	"Falcon/ast/components"
 	"Falcon/ast/control"
 	"Falcon/ast/fundamentals"
 	"Falcon/ast/list"
@@ -13,7 +14,8 @@ import (
 import l "Falcon/lex"
 
 type NameResolver struct {
-	Procedures map[string]Procedure
+	Procedures     map[string]Procedure
+	ComponentTypes map[string]string // Button1 -> Button
 }
 
 type Procedure struct {
@@ -34,16 +36,38 @@ func NewLangParser(tokens []*l.Token) *LangParser {
 		Tokens:    tokens,
 		tokenSize: len(tokens),
 		currIndex: 0,
-		resolver:  &NameResolver{Procedures: map[string]Procedure{}},
+		resolver: &NameResolver{
+			Procedures:     map[string]Procedure{},
+			ComponentTypes: map[string]string{},
+		},
 	}
 }
 
 func (p *LangParser) ParseAll() []blky.Expr {
 	var expressions []blky.Expr
+	if p.notEOF() {
+		p.defineStatements()
+	}
 	for p.notEOF() {
 		expressions = append(expressions, p.parse())
 	}
 	return expressions
+}
+
+func (p *LangParser) defineStatements() {
+	for p.notEOF() && p.consume(l.At) {
+		compType := p.name()
+		p.expect(l.OpenCurly)
+		if !p.consume(l.CloseCurly) {
+			for {
+				p.resolver.ComponentTypes[p.name()] = compType
+				if !p.consume(l.Comma) {
+					break
+				}
+			}
+			p.expect(l.CloseCurly)
+		}
+	}
 }
 
 func (p *LangParser) parse() blky.Expr {
@@ -298,6 +322,14 @@ func precedenceOf(flag l.Flag) int {
 func (p *LangParser) element() blky.Expr {
 	left := p.term()
 	for p.notEOF() {
+		// check if it's a variable Get, if so, check if it refers to a component
+		if getExpr, ok := left.(*variables.Get); ok && !getExpr.Global {
+			if compType, exists := p.resolver.ComponentTypes[getExpr.Name]; exists {
+				left = p.componentCall(getExpr.Name, compType)
+				continue
+			}
+		}
+
 		pe := p.peek()
 		switch pe.Type {
 		case l.At:
@@ -320,10 +352,34 @@ func (p *LangParser) element() blky.Expr {
 			left = &list.Get{List: left, Index: p.parse()}
 			p.expect(l.CloseSquare)
 			continue
+		default:
+			break
 		}
-		break
 	}
 	return left
+}
+
+func (p *LangParser) componentCall(compName string, compType string) blky.Expr {
+	if p.consume(l.Dot) {
+		resource := p.name()
+		if p.consume(l.OpenCurve) {
+			return &components.MethodCall{
+				ComponentName: compName,
+				ComponentType: compType,
+				Method:        resource,
+				Args:          p.arguments(),
+			}
+		} else if p.consume(l.Assign) {
+			return &components.PropertySet{
+				ComponentName: compName,
+				ComponentType: compType,
+				Property:      resource,
+				Value:         p.expr(0),
+			}
+		}
+		return &components.PropertyGet{ComponentName: compName, ComponentType: compType, Property: resource}
+	}
+	panic("WOHOOOOO!")
 }
 
 func (p *LangParser) helperDropdown(keyExpr blky.Expr) blky.Expr {
@@ -343,11 +399,12 @@ func (p *LangParser) objectCall(object blky.Expr) blky.Expr {
 	var args []blky.Expr
 	if p.isNext(l.OpenCurve) {
 		args = p.arguments()
+		if !p.isNext(l.OpenCurly) {
+			// he's a simple call!
+			return &method.Call{Where: where, On: object, Name: name, Args: args}
+		}
 	}
-	if p.isEOF() || !p.consume(l.OpenCurly) {
-		// he's a simple call!
-		return &method.Call{Where: where, On: object, Name: name, Args: args}
-	}
+	p.expect(l.OpenCurly)
 	// oh, no! he's a transformer >_>
 	var namesUsed []string
 	if !p.consume(l.RightArrow) {
@@ -407,6 +464,7 @@ func (p *LangParser) term() blky.Expr {
 		token.Error("Unexpected! %", token.String())
 		panic("") // unreachable
 	}
+	// TODO: a returning local statement might be possible here
 }
 
 func (p *LangParser) doExpr() *control.Do {
@@ -477,7 +535,7 @@ func (p *LangParser) value(t *l.Token) blky.Expr {
 		p.expect(l.Colon)
 		return &fundamentals.Color{Where: t, Name: p.name()}
 	default:
-		t.Error("Unknown value type '%'", t.Type.String())
+		t.Error("Unknown value type '%'", t.String())
 		panic("") // unreachable
 	}
 }
@@ -500,7 +558,7 @@ func (p *LangParser) expect(t l.Type) *l.Token {
 	}
 	got := p.next()
 	if got.Type != t {
-		got.Error("Expected type % but got %", t.String(), got.Type.String())
+		got.Error("Expected type % but got %", t.String(), got.String())
 	}
 	return got
 }

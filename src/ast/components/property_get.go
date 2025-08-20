@@ -6,25 +6,27 @@ import (
 )
 
 type PropertyGet struct {
-	Component string
-	Property  string
+	ComponentName string
+	ComponentType string
+	Property      string
 }
 
 func (p *PropertyGet) String() string {
-	return sugar.Format("%.%", p.Component, p.Property)
+	return sugar.Format("%.%", p.ComponentName, p.Property)
 }
 
 func (p *PropertyGet) Blockly() blockly.Block {
 	return blockly.Block{
-		// TODO: add component_type to Mutation
+		Type: "component_set_get",
 		Mutation: &blockly.Mutation{
-			SetOrGet:     "get",
-			PropertyName: p.Property,
-			IsGeneric:    false,
-			InstanceName: p.Component,
+			SetOrGet:      "get",
+			PropertyName:  p.Property,
+			IsGeneric:     false,
+			InstanceName:  p.ComponentName,
+			ComponentType: p.ComponentType,
 		},
 		Fields: []blockly.Field{
-			{Name: "COMPONENT_SELECTOR", Value: p.Component},
+			{Name: "COMPONENT_SELECTOR", Value: p.ComponentName},
 			{Name: "PROP", Value: p.Property},
 		},
 	}

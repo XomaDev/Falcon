@@ -6,26 +6,28 @@ import (
 )
 
 type PropertySet struct {
-	Component string
-	Property  string
-	Value     blockly.Expr
+	ComponentName string
+	ComponentType string
+	Property      string
+	Value         blockly.Expr
 }
 
 func (p *PropertySet) String() string {
-	return sugar.Format("%.% = %", p.Component, p.Property, p.Value.String())
+	return sugar.Format("%.% = %", p.ComponentName, p.Property, p.Value.String())
 }
 
 func (p *PropertySet) Blockly() blockly.Block {
 	return blockly.Block{
-		// TODO: add component_type to Mutation
+		Type: "component_set_get",
 		Mutation: &blockly.Mutation{
-			SetOrGet:     "set",
-			PropertyName: p.Property,
-			IsGeneric:    false,
-			InstanceName: p.Component,
+			SetOrGet:      "set",
+			PropertyName:  p.Property,
+			IsGeneric:     false,
+			InstanceName:  p.ComponentName,
+			ComponentType: p.ComponentType,
 		},
 		Fields: blockly.FieldsFromMap(map[string]string{
-			"COMPONENT_SELECTOR": p.Component,
+			"COMPONENT_SELECTOR": p.ComponentName,
 			"PROP":               p.Property,
 		}),
 		Values: []blockly.Value{{Name: "VALUE", Block: p.Value.Blockly()}},

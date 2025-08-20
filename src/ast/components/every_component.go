@@ -15,8 +15,8 @@ func (e *EveryComponent) String() string {
 
 func (e *EveryComponent) Blockly() blky.Block {
 	return blky.Block{
-		// TODO: add component_type to Mutation later
-		Mutation: &blky.Mutation{},
+		Type:     "component_all_component_block",
+		Mutation: &blky.Mutation{ComponentType: e.Type},
 		Fields:   []blky.Field{{Name: "COMPONENT_SELECTOR", Value: e.Type}},
 	}
 }

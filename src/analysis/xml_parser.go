@@ -347,7 +347,7 @@ func (p *XMLParser) parseBlock(block blky.Block) blky.Expr {
 		return &dtypes.HelperDropdown{Key: block.Mutation.Key, Option: block.SingleField()}
 
 	case "component_component_block":
-		return &dtypes.Component{Name: block.SingleField()}
+		return &dtypes.Component{Name: block.SingleField(), Type: block.Mutation.ComponentType}
 	case "component_set_get":
 		return p.componentProp(block)
 	case "component_event":
@@ -374,15 +374,17 @@ func (p *XMLParser) componentMethod(block blky.Block) blky.Expr {
 			callArgs = append(callArgs, aArg)
 		}
 		return &components.GenericMethodCall{
-			Component: pVals.get("COMPONENT"),
-			Method:    block.Mutation.MethodName,
-			Args:      callArgs,
+			Component:     pVals.get("COMPONENT"),
+			ComponentType: block.Mutation.ComponentType,
+			Method:        block.Mutation.MethodName,
+			Args:          callArgs,
 		}
 	}
 	return &components.MethodCall{
-		Component: block.Mutation.InstanceName,
-		Method:    block.Mutation.MethodName,
-		Args:      p.fromVals(block.Values),
+		ComponentName: block.Mutation.InstanceName,
+		ComponentType: block.Mutation.ComponentType,
+		Method:        block.Mutation.MethodName,
+		Args:          p.fromVals(block.Values),
 	}
 }
 
@@ -395,11 +397,12 @@ func (p *XMLParser) componentEvent(block blky.Block) blky.Expr {
 	}
 	// TODO: supply parameters to events later
 	return &components.Event{
-		IsGeneric:  block.Mutation.IsGeneric,
-		Component:  component,
-		Event:      block.Mutation.EventName,
-		Parameters: make([]string, 0),
-		Body:       p.optSingleBody(block),
+		IsGeneric:     block.Mutation.IsGeneric,
+		ComponentName: component,
+		ComponentType: block.Mutation.ComponentType,
+		Event:         block.Mutation.EventName,
+		Parameters:    make([]string, 0),
+		Body:          p.optSingleBody(block),
 	}
 }
 
@@ -412,27 +415,31 @@ func (p *XMLParser) componentProp(block blky.Block) blky.Expr {
 		pVals := p.makeValueMap(block.Values)
 		if isSet {
 			return &components.GenericPropertySet{
-				Component: pVals.get("COMPONENT"),
-				Property:  property,
-				Value:     pVals.get("VALUE"),
+				Component:     pVals.get("COMPONENT"),
+				ComponentType: block.Mutation.ComponentType,
+				Property:      property,
+				Value:         pVals.get("VALUE"),
 			}
 		}
 		return &components.GenericPropertyGet{
-			Component: pVals.get("COMPONENT"),
-			Property:  property,
+			Component:     pVals.get("COMPONENT"),
+			ComponentType: block.Mutation.ComponentType,
+			Property:      property,
 		}
 	}
 
 	if isSet {
 		return &components.PropertySet{
-			Component: pFields["COMPONENT_SELECTOR"],
-			Property:  property,
-			Value:     p.singleExpr(block),
+			ComponentName: pFields["COMPONENT_SELECTOR"],
+			ComponentType: block.Mutation.ComponentType,
+			Property:      property,
+			Value:         p.singleExpr(block),
 		}
 	}
 	return &components.PropertyGet{
-		Component: pFields["COMPONENT_SELECTOR"],
-		Property:  property,
+		ComponentName: pFields["COMPONENT_SELECTOR"],
+		ComponentType: block.Mutation.ComponentType,
+		Property:      property,
 	}
 }
 
