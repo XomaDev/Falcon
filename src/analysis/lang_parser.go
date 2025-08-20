@@ -14,8 +14,8 @@ import (
 import l "Falcon/lex"
 
 type NameResolver struct {
-	Procedures     map[string]Procedure
-	ComponentTypes map[string]string // Button1 -> Button
+	Procedures        map[string]Procedure
+	ComponentTypesMap map[string]string // Button1 -> Button
 }
 
 type Procedure struct {
@@ -37,8 +37,8 @@ func NewLangParser(tokens []*l.Token) *LangParser {
 		tokenSize: len(tokens),
 		currIndex: 0,
 		resolver: &NameResolver{
-			Procedures:     map[string]Procedure{},
-			ComponentTypes: map[string]string{},
+			Procedures:        map[string]Procedure{},
+			ComponentTypesMap: map[string]string{},
 		},
 	}
 }
@@ -60,7 +60,7 @@ func (p *LangParser) defineStatements() {
 		p.expect(l.OpenCurly)
 		if !p.consume(l.CloseCurly) {
 			for {
-				p.resolver.ComponentTypes[p.name()] = compType
+				p.resolver.ComponentTypesMap[p.name()] = compType
 				if !p.consume(l.Comma) {
 					break
 				}
@@ -324,7 +324,8 @@ func (p *LangParser) element() blky.Expr {
 	for p.notEOF() {
 		// check if it's a variable Get, if so, check if it refers to a component
 		if getExpr, ok := left.(*variables.Get); ok && !getExpr.Global {
-			if compType, exists := p.resolver.ComponentTypes[getExpr.Name]; exists {
+			if compType, exists := p.resolver.ComponentTypesMap[getExpr.Name]; exists {
+				// a specific component call (MethodCall, PropertyGet, PropertySet)
 				left = p.componentCall(getExpr.Name, compType)
 				continue
 			}
@@ -352,34 +353,32 @@ func (p *LangParser) element() blky.Expr {
 			left = &list.Get{List: left, Index: p.parse()}
 			p.expect(l.CloseSquare)
 			continue
-		default:
-			break
 		}
+		break
 	}
 	return left
 }
 
 func (p *LangParser) componentCall(compName string, compType string) blky.Expr {
-	if p.consume(l.Dot) {
-		resource := p.name()
-		if p.consume(l.OpenCurve) {
-			return &components.MethodCall{
-				ComponentName: compName,
-				ComponentType: compType,
-				Method:        resource,
-				Args:          p.arguments(),
-			}
-		} else if p.consume(l.Assign) {
-			return &components.PropertySet{
-				ComponentName: compName,
-				ComponentType: compType,
-				Property:      resource,
-				Value:         p.expr(0),
-			}
+	p.expect(l.Dot)
+	resource := p.name()
+	if p.isNext(l.OpenCurve) {
+		return &components.MethodCall{
+			ComponentName: compName,
+			ComponentType: compType,
+			Method:        resource,
+			Args:          p.arguments(),
 		}
-		return &components.PropertyGet{ComponentName: compName, ComponentType: compType, Property: resource}
+	} else if p.consume(l.Assign) {
+		assignment := p.expr(0)
+		return &components.PropertySet{
+			ComponentName: compName,
+			ComponentType: compType,
+			Property:      resource,
+			Value:         assignment,
+		}
 	}
-	panic("WOHOOOOO!")
+	return &components.PropertyGet{ComponentName: compName, ComponentType: compType, Property: resource}
 }
 
 func (p *LangParser) helperDropdown(keyExpr blky.Expr) blky.Expr {
