@@ -405,16 +405,17 @@ func (p *XMLParser) componentMethod(block blky.Block) blky.Expr {
 }
 
 func (p *XMLParser) componentEvent(block blky.Block) blky.Expr {
-	var component string
-	if block.Mutation.IsGeneric {
-		component = block.Mutation.ComponentType
-	} else {
-		component = block.Mutation.InstanceName
-	}
 	// TODO: supply parameters to events later
+	if block.Mutation.IsGeneric {
+		return &components.GenericEvent{
+			ComponentType: block.Mutation.ComponentType,
+			Event:         block.Mutation.EventName,
+			Parameters:    make([]string, 0),
+			Body:          p.optSingleBody(block),
+		}
+	}
 	return &components.Event{
-		IsGeneric:     block.Mutation.IsGeneric,
-		ComponentName: component,
+		ComponentName: block.Mutation.InstanceName,
 		ComponentType: block.Mutation.ComponentType,
 		Event:         block.Mutation.EventName,
 		Parameters:    make([]string, 0),

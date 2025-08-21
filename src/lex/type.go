@@ -71,5 +71,7 @@ const (
 	Local
 	This
 	Func
+	When
+	Any
 	Undefined
 )

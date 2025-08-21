@@ -109,25 +109,56 @@ func (p *LangParser) parse() blky.Expr {
 		return p.globVar()
 	case l.Func:
 		return p.funcSmt()
+	case l.When:
+		p.skip()
+		if p.consume(l.Any) {
+			return p.genericEvent()
+		}
+		return p.event()
 	default:
 		return p.expr(0)
+	}
+}
+
+func (p *LangParser) genericEvent() blky.Expr {
+	componentType := p.componentType()
+	p.expect(l.Dot)
+	eventName := p.name()
+	var parameters []string
+	if p.isNext(l.OpenCurve) {
+		parameters = p.parameters()
+	}
+	body := p.body()
+	return &components.GenericEvent{
+		ComponentType: componentType,
+		Event:         eventName,
+		Parameters:    parameters,
+		Body:          body,
+	}
+}
+
+func (p *LangParser) event() blky.Expr {
+	component := p.component()
+	p.expect(l.Dot)
+	eventName := p.name()
+	var parameters []string
+	if p.isNext(l.OpenCurve) {
+		parameters = p.parameters()
+	}
+	body := p.body()
+	return &components.Event{
+		ComponentName: component.Name,
+		ComponentType: component.Type,
+		Event:         eventName,
+		Parameters:    parameters,
+		Body:          body,
 	}
 }
 
 func (p *LangParser) funcSmt() blky.Expr {
 	p.skip()
 	name := p.name()
-	p.expect(l.OpenCurve)
-	var parameters []string
-	if !p.consume(l.CloseCurve) {
-		for p.notEOF() && !p.isNext(l.CloseCurve) {
-			parameters = append(parameters, p.name())
-			if !p.consume(l.Comma) {
-				break
-			}
-		}
-		p.expect(l.CloseCurve)
-	}
+	var parameters = p.parameters()
 	returning := p.consume(l.Assign)
 	p.Resolver.Procedures[name] = Procedure{Name: name, Parameters: parameters, Returning: returning}
 	if returning {
@@ -518,6 +549,21 @@ func (p *LangParser) list() *fundamentals.List {
 	return &fundamentals.List{Elements: elements}
 }
 
+func (p *LangParser) parameters() []string {
+	p.expect(l.OpenCurve)
+	var parameters []string
+	if !p.consume(l.CloseCurve) {
+		for p.notEOF() && !p.isNext(l.CloseCurve) {
+			parameters = append(parameters, p.name())
+			if !p.consume(l.Comma) {
+				break
+			}
+		}
+		p.expect(l.CloseCurve)
+	}
+	return parameters
+}
+
 func (p *LangParser) arguments() []blky.Expr {
 	p.expect(l.OpenCurve)
 	var args []blky.Expr
@@ -557,6 +603,26 @@ func (p *LangParser) value(t *l.Token) blky.Expr {
 		t.Error("Unknown value type '%'", t.String())
 		panic("") // unreachable
 	}
+}
+
+func (p *LangParser) componentType() string {
+	token := p.expect(l.Name)
+	name := *token.Content
+	if _, exists := p.Resolver.ComponentNameMap[name]; exists {
+		return name
+	}
+	token.Error("Undefined component group %", name)
+	panic("")
+}
+
+func (p *LangParser) component() fundamentals.Component {
+	token := p.expect(l.Name)
+	name := *token.Content
+	if compType, exists := p.Resolver.ComponentTypesMap[name]; exists {
+		return fundamentals.Component{Name: name, Type: compType}
+	}
+	token.Error("Undefined component %", name)
+	panic("")
 }
 
 func (p *LangParser) name() string {

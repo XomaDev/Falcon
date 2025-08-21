@@ -1,3 +1,5 @@
 @Button { Button1, Button2 }
 
-set(Button, Button1, Text, "Hello, World!")
+when any Button.Click {
+    println("Hello, World!")
+}

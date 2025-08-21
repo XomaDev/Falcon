@@ -67,5 +67,7 @@ var Keywords = map[string]StaticToken{
 	"local":     staticOf(Local),
 	"this":      staticOf(This, Value),
 	"func":      staticOf(Func),
+	"when":      staticOf(When),
+	"any":       staticOf(Any),
 	"undefined": staticOf(Undefined),
 }
