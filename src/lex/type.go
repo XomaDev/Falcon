@@ -71,4 +71,5 @@ const (
 	Local
 	This
 	Func
+	Undefined
 )

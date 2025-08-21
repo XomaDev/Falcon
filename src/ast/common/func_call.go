@@ -3,12 +3,13 @@ package common
 import (
 	"Falcon/ast/blockly"
 	"Falcon/ast/fundamentals"
+	"Falcon/ast/variables"
 	"Falcon/lex"
 	"Falcon/sugar"
 	"strconv"
 )
 
-var MathConversions = map[string]string{
+var mathConversions = map[string]string{
 	"root":     "ROOT",
 	"abs":      "ABS",
 	"neg":      "NEG",
@@ -96,8 +97,59 @@ func (f *FuncCall) Blockly() blockly.Block {
 		return f.makeColor()
 	case "splitColor":
 		return f.splitColor()
+
+	case "set":
+		return f.genericSet()
+	case "get":
+		return f.genericGet()
 	default:
 		panic("Unknown function " + f.Name)
+	}
+}
+
+func (f *FuncCall) genericGet() blockly.Block {
+	f.assertArgLen(3)
+	compType, ok := f.Args[0].(*variables.Get)
+	if !ok || compType.Global {
+		f.Where.Error("Expected a component type for get() 1st argument!")
+	}
+	vGet, ok := f.Args[2].(*variables.Get)
+	if !ok || vGet.Global {
+		f.Where.Error("Expected a property type for get() 3rd argument!")
+	}
+	return blockly.Block{
+		Type: "component_set_get",
+		Mutation: &blockly.Mutation{
+			SetOrGet:      "get",
+			PropertyName:  vGet.Name,
+			IsGeneric:     true,
+			ComponentType: compType.Name,
+		},
+		Fields: []blockly.Field{{Name: "PROP", Value: vGet.Name}},
+		Values: []blockly.Value{{Name: "COMPONENT", Block: f.Args[1].Blockly()}},
+	}
+}
+
+func (f *FuncCall) genericSet() blockly.Block {
+	f.assertArgLen(4)
+	compType, ok := f.Args[0].(*variables.Get)
+	if !ok || compType.Global {
+		f.Where.Error("Expected a component type for set() 1st argument!")
+	}
+	vGet, ok := f.Args[2].(*variables.Get)
+	if !ok || vGet.Global {
+		f.Where.Error("Expected a property type for set() 3rd argument!")
+	}
+	return blockly.Block{
+		Type: "component_set_get",
+		Mutation: &blockly.Mutation{
+			SetOrGet:      "set",
+			PropertyName:  vGet.Name,
+			IsGeneric:     true,
+			ComponentType: compType.Name,
+		},
+		Fields: []blockly.Field{{Name: "PROP", Value: vGet.Name}},
+		Values: blockly.MakeValues([]blockly.Expr{f.Args[1], f.Args[3]}, "COMPONENT", "VALUE"),
 	}
 }
 
@@ -188,7 +240,7 @@ func (f *FuncCall) println() blockly.Block {
 
 func (f *FuncCall) mathConversions() blockly.Block {
 	f.assertArgLen(1)
-	fieldOp, ok := MathConversions[f.Name]
+	fieldOp, ok := mathConversions[f.Name]
 	if !ok {
 		f.Where.Error("Unknown Math Conversion %()", f.Name)
 	}

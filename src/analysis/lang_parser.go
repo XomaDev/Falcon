@@ -10,12 +10,15 @@ import (
 	"Falcon/ast/method"
 	"Falcon/ast/procedures"
 	"Falcon/ast/variables"
+	"Falcon/sugar"
+	"strings"
 )
 import l "Falcon/lex"
 
 type NameResolver struct {
 	Procedures        map[string]Procedure
 	ComponentTypesMap map[string]string // Button1 -> Button
+	ComponentNameMap  map[string][]string
 }
 
 type Procedure struct {
@@ -28,7 +31,7 @@ type LangParser struct {
 	Tokens    []*l.Token
 	currIndex int
 	tokenSize int
-	resolver  *NameResolver
+	Resolver  *NameResolver
 }
 
 func NewLangParser(tokens []*l.Token) *LangParser {
@@ -36,11 +39,21 @@ func NewLangParser(tokens []*l.Token) *LangParser {
 		Tokens:    tokens,
 		tokenSize: len(tokens),
 		currIndex: 0,
-		resolver: &NameResolver{
+		Resolver: &NameResolver{
 			Procedures:        map[string]Procedure{},
 			ComponentTypesMap: map[string]string{},
+			ComponentNameMap:  map[string][]string{},
 		},
 	}
+}
+
+func (p *LangParser) GetComponentDefinitions() string {
+	// convert the AST back to syntax
+	var definitions strings.Builder
+	for key, value := range p.Resolver.ComponentNameMap {
+		definitions.WriteString(sugar.Format("@% { % }\n", key, strings.Join(value, ", ")))
+	}
+	return definitions.String()
 }
 
 func (p *LangParser) ParseAll() []blky.Expr {
@@ -59,12 +72,16 @@ func (p *LangParser) defineStatements() {
 		compType := p.name()
 		p.expect(l.OpenCurly)
 		if !p.consume(l.CloseCurly) {
+			var componentNames []string
 			for {
-				p.resolver.ComponentTypesMap[p.name()] = compType
+				name := p.name()
+				componentNames = append(componentNames, name)
+				p.Resolver.ComponentTypesMap[name] = compType
 				if !p.consume(l.Comma) {
 					break
 				}
 			}
+			p.Resolver.ComponentNameMap[compType] = componentNames
 			p.expect(l.CloseCurly)
 		}
 	}
@@ -112,7 +129,7 @@ func (p *LangParser) funcSmt() blky.Expr {
 		p.expect(l.CloseCurve)
 	}
 	returning := p.consume(l.Assign)
-	p.resolver.Procedures[name] = Procedure{Name: name, Parameters: parameters, Returning: returning}
+	p.Resolver.Procedures[name] = Procedure{Name: name, Parameters: parameters, Returning: returning}
 	if returning {
 		return &procedures.RetProcedure{Name: name, Parameters: parameters, Result: p.parse()}
 	} else {
@@ -238,18 +255,18 @@ func (p *LangParser) simpleIf() *control.SimpleIf {
 func (p *LangParser) body() []blky.Expr {
 	p.expect(l.OpenCurly)
 	expressions := p.bodyUntilCurly()
+	p.expect(l.CloseCurly)
 	return expressions
 }
 
 func (p *LangParser) bodyUntilCurly() []blky.Expr {
 	var expressions []blky.Expr
-	if p.consume(l.CloseCurly) {
+	if p.isNext(l.CloseCurly) {
 		return expressions
 	}
 	for p.notEOF() && !p.isNext(l.CloseCurly) {
 		expressions = append(expressions, p.parse())
 	}
-	p.expect(l.CloseCurly)
 	return expressions
 }
 
@@ -322,16 +339,16 @@ func precedenceOf(flag l.Flag) int {
 func (p *LangParser) element() blky.Expr {
 	left := p.term()
 	for p.notEOF() {
+		pe := p.peek()
 		// check if it's a variable Get, if so, check if it refers to a component
-		if getExpr, ok := left.(*variables.Get); ok && !getExpr.Global {
-			if compType, exists := p.resolver.ComponentTypesMap[getExpr.Name]; exists {
+		if getExpr, ok := left.(*variables.Get); ok && !getExpr.Global && pe.Type == l.Dot {
+			if compType, exists := p.Resolver.ComponentTypesMap[getExpr.Name]; exists {
 				// a specific component call (MethodCall, PropertyGet, PropertySet)
 				left = p.componentCall(getExpr.Name, compType)
 				continue
 			}
 		}
 
-		pe := p.peek()
 		switch pe.Type {
 		case l.At:
 			left = p.helperDropdown(left)
@@ -447,7 +464,7 @@ func (p *LangParser) term() blky.Expr {
 		if token.HasFlag(l.Value) {
 			value := p.value(token)
 			if nameExpr, ok := value.(*variables.Get); ok && p.notEOF() && p.isNext(l.OpenCurve) {
-				signature, ok := p.resolver.Procedures[nameExpr.Name]
+				signature, ok := p.Resolver.Procedures[nameExpr.Name]
 				if ok {
 					return &procedures.Call{
 						Name:       nameExpr.Name,
@@ -526,6 +543,9 @@ func (p *LangParser) value(t *l.Token) blky.Expr {
 	case l.Text:
 		return &fundamentals.Text{Content: *t.Content}
 	case l.Name:
+		if compType, exists := p.Resolver.ComponentTypesMap[*t.Content]; exists {
+			return &fundamentals.Component{Name: *t.Content, Type: compType}
+		}
 		return &variables.Get{Where: t, Global: false, Name: *t.Content}
 	case l.This:
 		p.expect(l.Dot)

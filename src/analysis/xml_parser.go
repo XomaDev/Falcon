@@ -32,6 +32,22 @@ func (v *ValueMap) get(name string) blky.Expr {
 	return value
 }
 
+type StatementMap struct {
+	statementMap map[string][]blky.Expr
+}
+
+func (s *StatementMap) getUnsafe(name string) []blky.Expr {
+	return s.statementMap[name]
+}
+
+func (s *StatementMap) get(name string) []blky.Expr {
+	value := s.statementMap[name]
+	if value == nil {
+		return []blky.Expr{}
+	}
+	return value
+}
+
 type XMLParser struct {
 	xmlContent string
 }
@@ -471,14 +487,13 @@ func (p *XMLParser) ctrlForRange(block blky.Block) blky.Expr {
 
 func (p *XMLParser) ctrlIf(block blky.Block) blky.Expr {
 	conditions := p.fromVals(block.Values)
+	statementMap := p.makeStatementMap(block.Statements)
+
 	var bodies [][]blky.Expr
-	var elseBody []blky.Expr
-	for _, smt := range block.Statements {
-		if strings.HasPrefix(smt.Name, "DO") {
-			bodies = append(bodies, p.optSingleBody(*smt.Block))
-		} else {
-			elseBody = p.optSingleBody(*smt.Block)
-		}
+	elseBody := statementMap.getUnsafe("ELSE")
+
+	for i := range conditions {
+		bodies = append(bodies, statementMap.get("DO"+strconv.Itoa(i)))
 	}
 	return &control.If{Conditions: conditions, Bodies: bodies, ElseBody: elseBody}
 }
@@ -1093,6 +1108,14 @@ func (p *XMLParser) optSingleBody(block blky.Block) []blky.Expr {
 		return p.recursiveParse(*block.SingleStatement().Block)
 	}
 	return []blky.Expr{}
+}
+
+func (p *XMLParser) makeStatementMap(allStatements []blky.Statement) StatementMap {
+	statementMap := make(map[string][]blky.Expr, len(allStatements))
+	for _, stmt := range allStatements {
+		statementMap[stmt.Name] = p.recursiveParse(*stmt.Block)
+	}
+	return StatementMap{statementMap: statementMap}
 }
 
 func (p *XMLParser) recursiveParse(currBlock blky.Block) []blky.Expr {

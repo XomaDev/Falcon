@@ -12,11 +12,7 @@ type GenericPropertyGet struct {
 }
 
 func (g *GenericPropertyGet) String() string {
-	pFormat := "%->%"
-	if !g.Component.Continuous() {
-		pFormat = "(%)->%"
-	}
-	return sugar.Format(pFormat, g.Component.String(), g.Property)
+	return sugar.Format("get(%, %, %)", g.ComponentType, g.Component.String(), g.Property)
 }
 
 func (g *GenericPropertyGet) Blockly() blockly.Block {

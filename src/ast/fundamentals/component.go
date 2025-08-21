@@ -10,7 +10,7 @@ type Component struct {
 }
 
 func (c *Component) String() string {
-	return "@" + c.Name
+	return c.Name
 }
 
 func (c *Component) Blockly() blockly.Block {

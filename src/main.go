@@ -80,7 +80,9 @@ func analyzeSyntax() {
 	println("\n=== AST ===\n")
 
 	// conversion of Falcon -> Blockly XML
-	expressions := analysis.NewLangParser(tokens).ParseAll()
+	langParser := analysis.NewLangParser(tokens)
+	expressions := langParser.ParseAll()
+	println(langParser.GetComponentDefinitions())
 	for _, expression := range expressions {
 		println(expression.String())
 	}
