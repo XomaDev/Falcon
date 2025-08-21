@@ -20,6 +20,10 @@ func (e *Event) String() string {
 }
 
 func (e *Event) Blockly() blockly.Block {
+	var statements []blockly.Statement
+	if len(e.Body) > 0 {
+		statements = []blockly.Statement{blockly.CreateStatement("DO", e.Body)}
+	}
 	return blockly.Block{
 		Type: "component_event",
 		Mutation: &blockly.Mutation{
@@ -29,7 +33,7 @@ func (e *Event) Blockly() blockly.Block {
 			ComponentType: e.ComponentType,
 		},
 		Fields:     []blockly.Field{{Name: "COMPONENT_SELECTOR", Value: e.ComponentName}},
-		Statements: []blockly.Statement{blockly.CreateStatement("DO", e.Body)},
+		Statements: statements,
 	}
 }
 

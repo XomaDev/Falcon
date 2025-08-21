@@ -19,6 +19,10 @@ func (e *GenericEvent) String() string {
 }
 
 func (e *GenericEvent) Blockly() blockly.Block {
+	var statements []blockly.Statement
+	if len(e.Body) > 0 {
+		statements = []blockly.Statement{blockly.CreateStatement("DO", e.Body)}
+	}
 	return blockly.Block{
 		Type: "component_event",
 		Mutation: &blockly.Mutation{
@@ -26,7 +30,7 @@ func (e *GenericEvent) Blockly() blockly.Block {
 			EventName:     e.Event,
 			ComponentType: e.ComponentType,
 		},
-		Statements: []blockly.Statement{blockly.CreateStatement("DO", e.Body)},
+		Statements: statements,
 	}
 }
 

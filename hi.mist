@@ -1,3 +1,4 @@
-@Notifier { Notifier1 }
+@Button { Button1 }
 
-call(Notifier, Notifier1, ShowAlert, "Hello!")
+when Button1.Click {
+}
