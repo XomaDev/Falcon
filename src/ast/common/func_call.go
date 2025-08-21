@@ -102,8 +102,34 @@ func (f *FuncCall) Blockly() blockly.Block {
 		return f.genericSet()
 	case "get":
 		return f.genericGet()
+	case "call":
+		return f.genericCall()
 	default:
 		panic("Unknown function " + f.Name)
+	}
+}
+
+func (f *FuncCall) genericCall() blockly.Block {
+	// arg[0] 	 compType
+	// arg[1] 	 component (any object)
+	// arg[2] 	 method name
+	// arg[4->n] invoke args
+	compType, ok := f.Args[0].(*variables.Get)
+	if !ok || compType.Global {
+		f.Where.Error("Expected a component type for call() 1st argument!")
+	}
+	vGet, ok := f.Args[2].(*variables.Get)
+	if !ok || vGet.Global {
+		f.Where.Error("Expected a method name for call() 3rd argument!")
+	}
+	return blockly.Block{
+		Type: "component_method",
+		Mutation: &blockly.Mutation{
+			MethodName:    vGet.Name,
+			IsGeneric:     true,
+			ComponentType: compType.Name,
+		},
+		Values: blockly.ValueArgsByPrefix(f.Args[1], "COMPONENT", "ARG", f.Args[3:]),
 	}
 }
 
