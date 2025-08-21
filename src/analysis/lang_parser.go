@@ -372,7 +372,7 @@ func (p *LangParser) element() blky.Expr {
 	for p.notEOF() {
 		pe := p.peek()
 		// check if it's a variable Get, if so, check if it refers to a component
-		if getExpr, ok := left.(*variables.Get); ok && !getExpr.Global && pe.Type == l.Dot {
+		if getExpr, ok := left.(*fundamentals.Component); ok && pe.Type == l.Dot {
 			if compType, exists := p.Resolver.ComponentTypesMap[getExpr.Name]; exists {
 				// a specific component call (MethodCall, PropertyGet, PropertySet)
 				left = p.componentCall(getExpr.Name, compType)

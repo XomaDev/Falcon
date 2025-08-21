@@ -17,11 +17,15 @@ func (v *VoidProcedure) String() string {
 }
 
 func (v *VoidProcedure) Blockly() blky.Block {
+	var statements []blky.Statement
+	if len(v.Body) > 0 {
+		statements = []blky.Statement{blky.CreateStatement("STACK", v.Body)}
+	}
 	return blky.Block{
 		Type:       "procedures_defnoreturn",
 		Mutation:   &blky.Mutation{Args: blky.ToArgs(v.Parameters)},
 		Fields:     append(blky.ToFields("VAR", v.Parameters), blky.Field{Name: "NAME", Value: v.Name}),
-		Statements: []blky.Statement{blky.CreateStatement("STACK", v.Body)},
+		Statements: statements,
 		Consumable: false,
 	}
 }
