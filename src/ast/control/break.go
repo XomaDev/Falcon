@@ -11,9 +11,13 @@ func (b *Break) String() string {
 }
 
 func (b *Break) Blockly() blockly.Block {
-	return blockly.Block{Type: "controls_break", Consumable: false}
+	return blockly.Block{Type: "controls_break"}
 }
 
 func (b *Break) Continuous() bool {
 	return true
+}
+
+func (b *Break) Consumable() bool {
+	return false
 }

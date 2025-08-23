@@ -35,3 +35,7 @@ func (p *PropertyGet) Blockly() blockly.Block {
 func (p *PropertyGet) Continuous() bool {
 	return false
 }
+
+func (p *PropertyGet) Consumable() bool {
+	return true
+}

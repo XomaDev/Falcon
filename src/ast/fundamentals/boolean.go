@@ -24,13 +24,16 @@ func (b *Boolean) Blockly() blockly.Block {
 		bText = "FALSE"
 	}
 	return blockly.Block{
-		Type:       "logic_boolean",
-		Fields:     blockly.FieldsFromMap(map[string]string{"BOOL": bText}),
-		Consumable: true,
+		Type:   "logic_boolean",
+		Fields: blockly.FieldsFromMap(map[string]string{"BOOL": bText}),
 	}
 }
 
 func (b *Boolean) Continuous() bool {
+	return true
+}
+
+func (b *Boolean) Consumable() bool {
 	return true
 }
 
@@ -44,12 +47,15 @@ func (n *Not) String() string {
 
 func (n *Not) Blockly() blockly.Block {
 	return blockly.Block{
-		Type:       "logic_negate",
-		Values:     []blockly.Value{{Name: "BOOL", Block: n.Expr.Blockly()}},
-		Consumable: true,
+		Type:   "logic_negate",
+		Values: []blockly.Value{{Name: "BOOL", Block: n.Expr.Blockly()}},
 	}
 }
 
 func (n *Not) Continuous() bool {
 	return false
+}
+
+func (n *Not) Consumable() bool {
+	return true
 }

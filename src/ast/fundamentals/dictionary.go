@@ -15,14 +15,17 @@ func (d *Dictionary) String() string {
 
 func (d *Dictionary) Blockly() blockly.Block {
 	return blockly.Block{
-		Type:       "dictionaries_create_with",
-		Mutation:   &blockly.Mutation{ItemCount: len(d.Elements)},
-		Values:     blockly.ValuesByPrefix("ADD", d.Elements),
-		Consumable: true,
+		Type:     "dictionaries_create_with",
+		Mutation: &blockly.Mutation{ItemCount: len(d.Elements)},
+		Values:   blockly.ValuesByPrefix("ADD", d.Elements),
 	}
 }
 
 func (d *Dictionary) Continuous() bool {
+	return true
+}
+
+func (d *Dictionary) Consumable() bool {
 	return true
 }
 
@@ -34,9 +37,13 @@ func (w *WalkAll) String() string {
 }
 
 func (w *WalkAll) Blockly() blockly.Block {
-	return blockly.Block{Type: "dictionaries_walk_all", Consumable: true}
+	return blockly.Block{Type: "dictionaries_walk_all"}
 }
 
 func (w *WalkAll) Continuous() bool {
+	return true
+}
+
+func (w *WalkAll) Consumable() bool {
 	return true
 }

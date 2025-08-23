@@ -56,10 +56,13 @@ func (i *If) Blockly() blockly.Block {
 		Mutation:   &blockly.Mutation{ElseIfCount: numbElifs, ElseCount: numbElse},
 		Values:     conditions,
 		Statements: bodies,
-		Consumable: false,
 	}
 }
 
 func (i *If) Continuous() bool {
+	return false
+}
+
+func (i *If) Consumable() bool {
 	return false
 }

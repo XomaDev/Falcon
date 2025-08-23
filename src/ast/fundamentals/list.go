@@ -15,13 +15,16 @@ func (l *List) String() string {
 
 func (l *List) Blockly() blockly.Block {
 	return blockly.Block{
-		Type:       "lists_create_with",
-		Mutation:   &blockly.Mutation{ItemCount: len(l.Elements)},
-		Values:     blockly.ValuesByPrefix("ADD", l.Elements),
-		Consumable: true,
+		Type:     "lists_create_with",
+		Mutation: &blockly.Mutation{ItemCount: len(l.Elements)},
+		Values:   blockly.ValuesByPrefix("ADD", l.Elements),
 	}
 }
 
 func (l *List) Continuous() bool {
+	return true
+}
+
+func (l *List) Consumable() bool {
 	return true
 }

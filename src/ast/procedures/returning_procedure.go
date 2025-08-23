@@ -18,14 +18,17 @@ func (v *RetProcedure) String() string {
 
 func (v *RetProcedure) Blockly() blky.Block {
 	return blky.Block{
-		Type:       "procedures_defreturn",
-		Mutation:   &blky.Mutation{Args: blky.ToArgs(v.Parameters)},
-		Fields:     append(blky.ToFields("VAR", v.Parameters), blky.Field{Name: "NAME", Value: v.Name}),
-		Values:     []blky.Value{{Name: "RETURN", Block: v.Result.Blockly()}},
-		Consumable: false,
+		Type:     "procedures_defreturn",
+		Mutation: &blky.Mutation{Args: blky.ToArgs(v.Parameters)},
+		Fields:   append(blky.ToFields("VAR", v.Parameters), blky.Field{Name: "NAME", Value: v.Name}),
+		Values:   []blky.Value{{Name: "RETURN", Block: v.Result.Blockly()}},
 	}
 }
 
 func (v *RetProcedure) Continuous() bool {
+	return false
+}
+
+func (v *RetProcedure) Consumable() bool {
 	return false
 }

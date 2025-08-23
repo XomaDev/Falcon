@@ -37,3 +37,7 @@ func (e *GenericEvent) Blockly() blockly.Block {
 func (e *GenericEvent) Continuous() bool {
 	return false
 }
+
+func (e *GenericEvent) Consumable() bool {
+	return false
+}

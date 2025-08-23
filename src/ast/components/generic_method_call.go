@@ -31,3 +31,7 @@ func (g *GenericMethodCall) Blockly() blky.Block {
 func (g *GenericMethodCall) Continuous() bool {
 	return false
 }
+
+func (g *GenericMethodCall) Consumable() bool {
+	return false // play safe, may be consumable too
+}

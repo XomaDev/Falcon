@@ -18,8 +18,6 @@ type Block struct {
 	Values     []Value     `xml:"value"`
 	Statements []Statement `xml:"statement"`
 	Next       *Next       `xml:"next"`
-
-	Consumable bool
 }
 
 type Field struct {
@@ -78,6 +76,7 @@ type Expr interface {
 	String() string
 	Blockly() Block
 	Continuous() bool
+	Consumable() bool
 }
 
 func (b *Block) String() string {
@@ -86,10 +85,6 @@ func (b *Block) String() string {
 
 func (b *Block) GetType() string {
 	return b.Type
-}
-
-func (b *Block) Continuous() bool {
-	return true
 }
 
 func (b *Block) Order() int {

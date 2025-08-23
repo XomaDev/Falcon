@@ -40,3 +40,7 @@ func (e *Event) Blockly() blockly.Block {
 func (e *Event) Continuous() bool {
 	return false
 }
+
+func (e *Event) Consumable() bool {
+	return false
+}

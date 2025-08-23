@@ -44,43 +44,42 @@ func (q *Question) Continuous() bool {
 	return false
 }
 
+func (q *Question) Consumable() bool {
+	return true
+}
+
 func (q *Question) listIsEmpty() blockly.Block {
 	return blockly.Block{
-		Type:       "lists_is_empty",
-		Values:     []blockly.Value{{Name: "LIST", Block: q.On.Blockly()}},
-		Consumable: true,
+		Type:   "lists_is_empty",
+		Values: []blockly.Value{{Name: "LIST", Block: q.On.Blockly()}},
 	}
 }
 
 func (q *Question) textIsEmpty() blockly.Block {
 	return blockly.Block{
-		Type:       "text_isEmpty",
-		Values:     []blockly.Value{{Name: "VALUE", Block: q.On.Blockly()}},
-		Consumable: true,
+		Type:   "text_isEmpty",
+		Values: []blockly.Value{{Name: "VALUE", Block: q.On.Blockly()}},
 	}
 }
 
 func (q *Question) dictQuestion() blockly.Block {
 	return blockly.Block{
-		Type:       "dictionaries_is_dict",
-		Values:     []blockly.Value{{Name: "THING", Block: q.On.Blockly()}},
-		Consumable: true,
+		Type:   "dictionaries_is_dict",
+		Values: []blockly.Value{{Name: "THING", Block: q.On.Blockly()}},
 	}
 }
 
 func (q *Question) listQuestion() blockly.Block {
 	return blockly.Block{
-		Type:       "lists_is_list",
-		Values:     []blockly.Value{{Name: "ITEM", Block: q.On.Blockly()}},
-		Consumable: true,
+		Type:   "lists_is_list",
+		Values: []blockly.Value{{Name: "ITEM", Block: q.On.Blockly()}},
 	}
 }
 
 func (q *Question) textQuestion() blockly.Block {
 	return blockly.Block{
-		Type:       "text_is_string",
-		Values:     []blockly.Value{{Name: "ITEM", Block: q.On.Blockly()}},
-		Consumable: true,
+		Type:   "text_is_string",
+		Values: []blockly.Value{{Name: "ITEM", Block: q.On.Blockly()}},
 	}
 }
 
@@ -97,9 +96,8 @@ func (q *Question) mathQuestion() blockly.Block {
 		fieldOp = "BINARY"
 	}
 	return blockly.Block{
-		Type:       "math_is_a_number",
-		Fields:     []blockly.Field{{Name: "OP", Value: fieldOp}},
-		Values:     []blockly.Value{{Name: "NUM", Block: q.On.Blockly()}},
-		Consumable: true,
+		Type:   "math_is_a_number",
+		Fields: []blockly.Field{{Name: "OP", Value: fieldOp}},
+		Values: []blockly.Value{{Name: "NUM", Block: q.On.Blockly()}},
 	}
 }

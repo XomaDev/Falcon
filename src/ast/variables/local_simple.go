@@ -33,10 +33,13 @@ func (v *SimpleVar) Blockly() blky.Block {
 		Fields:     []blky.Field{{Name: "VAR0", Value: v.Name}},
 		Values:     []blky.Value{{Name: "DECL0", Block: v.Value.Blockly()}},
 		Statements: statements,
-		Consumable: false,
 	}
 }
 
 func (v *SimpleVar) Continuous() bool {
+	return false
+}
+
+func (v *SimpleVar) Consumable() bool {
 	return false
 }

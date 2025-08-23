@@ -21,12 +21,15 @@ func (s *Set) String() string {
 
 func (s *Set) Blockly() blockly.Block {
 	return blockly.Block{
-		Type:       "lists_replace_item",
-		Values:     blockly.MakeValues([]blockly.Expr{s.List, s.Index, s.Value}, "LIST", "NUM", "ITEM"),
-		Consumable: false,
+		Type:   "lists_replace_item",
+		Values: blockly.MakeValues([]blockly.Expr{s.List, s.Index, s.Value}, "LIST", "NUM", "ITEM"),
 	}
 }
 
 func (s *Set) Continuous() bool {
+	return false
+}
+
+func (s *Set) Consumable() bool {
 	return false
 }

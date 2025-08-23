@@ -24,3 +24,7 @@ func (e *EveryComponent) Blockly() blky.Block {
 func (e *EveryComponent) Continuous() bool {
 	return true
 }
+
+func (e *EveryComponent) Consumable() bool {
+	return true
+}

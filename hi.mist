@@ -1,6 +1,6 @@
-local(personality = { "food" : "Masala Dosa",
-    "fruit" : "Mango", "animal" :
-    "The Royal Bengal Tiger" }
-) {
- println(personality.get("food", "not found"))
+@Button { Button1 }
+
+when Button1.Click {
+  println("Hello")
+  Button1
 }

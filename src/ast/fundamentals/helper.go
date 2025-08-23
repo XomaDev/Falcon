@@ -22,3 +22,7 @@ func (h *HelperDropdown) Blockly() blockly.Block {
 func (h *HelperDropdown) Continuous() bool {
 	return true
 }
+
+func (h *HelperDropdown) Consumable() bool {
+	return true
+}

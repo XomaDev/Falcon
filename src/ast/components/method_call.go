@@ -33,3 +33,7 @@ func (m *MethodCall) Blockly() blky.Block {
 func (m *MethodCall) Continuous() bool {
 	return false
 }
+
+func (m *MethodCall) Consumable() bool {
+	return false // may be consumable too
+}

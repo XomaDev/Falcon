@@ -17,12 +17,15 @@ func (s *SimpleIf) String() string {
 
 func (s *SimpleIf) Blockly() blockly.Block {
 	return blockly.Block{
-		Type:       "controls_choose",
-		Values:     blockly.MakeValues([]blockly.Expr{s.Condition, s.Then, s.Else}, "TEST", "THENRETURN", "ELSERETURN"),
-		Consumable: true,
+		Type:   "controls_choose",
+		Values: blockly.MakeValues([]blockly.Expr{s.Condition, s.Then, s.Else}, "TEST", "THENRETURN", "ELSERETURN"),
 	}
 }
 
 func (s *SimpleIf) Continuous() bool {
 	return false
+}
+
+func (s *SimpleIf) Consumable() bool {
+	return true
 }

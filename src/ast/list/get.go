@@ -20,12 +20,15 @@ func (g *Get) String() string {
 
 func (g *Get) Blockly() blockly.Block {
 	return blockly.Block{
-		Type:       "lists_select_item",
-		Values:     blockly.MakeValues([]blockly.Expr{g.List, g.Index}, "LIST", "NUM"),
-		Consumable: true,
+		Type:   "lists_select_item",
+		Values: blockly.MakeValues([]blockly.Expr{g.List, g.Index}, "LIST", "NUM"),
 	}
 }
 
 func (g *Get) Continuous() bool {
+	return true
+}
+
+func (g *Get) Consumable() bool {
 	return true
 }

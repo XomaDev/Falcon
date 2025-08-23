@@ -41,12 +41,15 @@ func (c *Color) Blockly() blockly.Block {
 		c.Where.Error("Unknown color name '%'", c.Name)
 	}
 	return blockly.Block{
-		Type:       signature.BlockType,
-		Fields:     []blockly.Field{{Name: "COLOR", Value: signature.Code}},
-		Consumable: true,
+		Type:   signature.BlockType,
+		Fields: []blockly.Field{{Name: "COLOR", Value: signature.Code}},
 	}
 }
 
 func (c *Color) Continuous() bool {
+	return true
+}
+
+func (c *Color) Consumable() bool {
 	return true
 }

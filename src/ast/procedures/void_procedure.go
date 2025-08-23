@@ -26,10 +26,13 @@ func (v *VoidProcedure) Blockly() blky.Block {
 		Mutation:   &blky.Mutation{Args: blky.ToArgs(v.Parameters)},
 		Fields:     append(blky.ToFields("VAR", v.Parameters), blky.Field{Name: "NAME", Value: v.Name}),
 		Statements: statements,
-		Consumable: false,
 	}
 }
 
 func (v *VoidProcedure) Continuous() bool {
+	return false
+}
+
+func (v *VoidProcedure) Consumable() bool {
 	return false
 }

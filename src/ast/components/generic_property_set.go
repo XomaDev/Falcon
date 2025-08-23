@@ -34,3 +34,7 @@ func (g *GenericPropertySet) Blockly() blockly.Block {
 func (g *GenericPropertySet) Continuous() bool {
 	return false
 }
+
+func (g *GenericPropertySet) Consumable() bool {
+	return false
+}

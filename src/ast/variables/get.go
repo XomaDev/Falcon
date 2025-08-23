@@ -26,12 +26,15 @@ func (g *Get) Blockly() blky.Block {
 		name = g.Name
 	}
 	return blky.Block{
-		Type:       "lexical_variable_get",
-		Fields:     []blky.Field{{Name: "VAR", Value: name}},
-		Consumable: true,
+		Type:   "lexical_variable_get",
+		Fields: []blky.Field{{Name: "VAR", Value: name}},
 	}
 }
 
 func (g *Get) Continuous() bool {
+	return true
+}
+
+func (g *Get) Consumable() bool {
 	return true
 }

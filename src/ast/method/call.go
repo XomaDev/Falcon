@@ -18,65 +18,66 @@ type Signature struct {
 	Module     string
 	Name       string
 	ParamCount int
+	Consumable bool
 }
 
-func makeSignature(module string, name string, paramCount int) *Signature {
+func makeSignature(module string, name string, paramCount int, consumable bool) *Signature {
 	return &Signature{Module: module, Name: name, ParamCount: paramCount}
 }
 
 var signatures = map[string]*Signature{
-	"textLen":                 makeSignature("text", "text_length", 0),
-	"trim":                    makeSignature("text", "text_trim", 0),
-	"uppercase":               makeSignature("text", "text_changeCase", 0),
-	"lowercase":               makeSignature("text", "text_changeCase", 0),
-	"startsWith":              makeSignature("text", "text_starts_at", 1),
-	"contains":                makeSignature("text", "text_contains", 1),
-	"containsAny":             makeSignature("text", "text_contains", 1),
-	"containsAll":             makeSignature("text", "text_contains", 1),
-	"split":                   makeSignature("text", "text_split", 1),
-	"splitAtFirst":            makeSignature("text", "text_split", 1),
-	"splitAtAny":              makeSignature("text", "text_split", 1),
-	"splitAtFirstOfAny":       makeSignature("text", "text_split", 1),
-	"splitAtSpaces":           makeSignature("text", "text_split_at_spaces", 0),
-	"reverse":                 makeSignature("text", "text_reverse", 0),
-	"csvRowToList":            makeSignature("text", "lists_from_csv_row", 0),
-	"csvTableToList":          makeSignature("text", "lists_from_csv_table", 0),
-	"segment":                 makeSignature("text", "text_segment", 2),
-	"replace":                 makeSignature("text", "text_replace_all", 2),
-	"replaceFrom":             makeSignature("text", "text_replace_mappings", 1),
-	"replaceFromLongestFirst": makeSignature("text", "text_replace_mappings", 1),
+	"textLen":                 makeSignature("text", "text_length", 0, true),
+	"trim":                    makeSignature("text", "text_trim", 0, true),
+	"uppercase":               makeSignature("text", "text_changeCase", 0, true),
+	"lowercase":               makeSignature("text", "text_changeCase", 0, true),
+	"startsWith":              makeSignature("text", "text_starts_at", 1, true),
+	"contains":                makeSignature("text", "text_contains", 1, true),
+	"containsAny":             makeSignature("text", "text_contains", 1, true),
+	"containsAll":             makeSignature("text", "text_contains", 1, true),
+	"split":                   makeSignature("text", "text_split", 1, true),
+	"splitAtFirst":            makeSignature("text", "text_split", 1, true),
+	"splitAtAny":              makeSignature("text", "text_split", 1, true),
+	"splitAtFirstOfAny":       makeSignature("text", "text_split", 1, true),
+	"splitAtSpaces":           makeSignature("text", "text_split_at_spaces", 0, true),
+	"reverse":                 makeSignature("text", "text_reverse", 0, true),
+	"csvRowToList":            makeSignature("text", "lists_from_csv_row", 0, true),
+	"csvTableToList":          makeSignature("text", "lists_from_csv_table", 0, true),
+	"segment":                 makeSignature("text", "text_segment", 2, true),
+	"replace":                 makeSignature("text", "text_replace_all", 2, true),
+	"replaceFrom":             makeSignature("text", "text_replace_mappings", 1, true),
+	"replaceFromLongestFirst": makeSignature("text", "text_replace_mappings", 1, true),
 
-	"listLen":       makeSignature("list", "lists_length", 0),
-	"add":           makeSignature("list", "lists_add_items", -1),
-	"containsItem":  makeSignature("list", "lists_is_in", 1),
-	"indexOf":       makeSignature("list", "lists_position_in", 1),
-	"insert":        makeSignature("list", "lists_insert_item", 2),
-	"remove":        makeSignature("list", "lists_remove_item", 1),
-	"appendList":    makeSignature("list", "lists_append_list", 1),
-	"lookupInPairs": makeSignature("list", "lists_lookup_in_pairs", 2),
-	"join":          makeSignature("list", "lists_join_with_separator", 1),
-	"slice":         makeSignature("list", "lists_slice", 2),
-	"random":        makeSignature("list", "lists_pick_random_item", 0),
-	"reverseList":   makeSignature("list", "lists_reverse", 0),
-	"toCsvRow":      makeSignature("list", "lists_to_csv_row", 0),
-	"toCsvTable":    makeSignature("list", "lists_to_csv_table", 0),
-	"sort":          makeSignature("list", "lists_sort", 0),
-	"allButFirst":   makeSignature("list", "lists_but_first", 0),
-	"allButLast":    makeSignature("list", "lists_but_last", 0),
-	"pairsToDict":   makeSignature("list", "dictionaries_alist_to_dict", 0),
+	"listLen":       makeSignature("list", "lists_length", 0, true),
+	"add":           makeSignature("list", "lists_add_items", -1, false),
+	"containsItem":  makeSignature("list", "lists_is_in", 1, true),
+	"indexOf":       makeSignature("list", "lists_position_in", 1, true),
+	"insert":        makeSignature("list", "lists_insert_item", 2, true),
+	"remove":        makeSignature("list", "lists_remove_item", 1, false),
+	"appendList":    makeSignature("list", "lists_append_list", 1, false),
+	"lookupInPairs": makeSignature("list", "lists_lookup_in_pairs", 2, true),
+	"join":          makeSignature("list", "lists_join_with_separator", 1, true),
+	"slice":         makeSignature("list", "lists_slice", 2, true),
+	"random":        makeSignature("list", "lists_pick_random_item", 0, true),
+	"reverseList":   makeSignature("list", "lists_reverse", 0, true),
+	"toCsvRow":      makeSignature("list", "lists_to_csv_row", 0, true),
+	"toCsvTable":    makeSignature("list", "lists_to_csv_table", 0, true),
+	"sort":          makeSignature("list", "lists_sort", 0, true),
+	"allButFirst":   makeSignature("list", "lists_but_first", 0, true),
+	"allButLast":    makeSignature("list", "lists_but_last", 0, true),
+	"pairsToDict":   makeSignature("list", "dictionaries_alist_to_dict", 0, true),
 
-	"dictLen":     makeSignature("dict", "dictionaries_length", 0),
-	"get":         makeSignature("dict", "dictionaries_lookup", 2),
-	"set":         makeSignature("dict", "dictionaries_set_pair", 2),
-	"delete":      makeSignature("dict", "dictionaries_delete_pair", 1),
-	"getAtPath":   makeSignature("dict", "dictionaries_recursive_lookup", 2),
-	"setAtPath":   makeSignature("dict", "dictionaries_recursive_set", 2),
-	"containsKey": makeSignature("dict", "dictionaries_is_key_in", 1),
-	"mergeInto":   makeSignature("dict", "dictionaries_combine_dicts", 1),
-	"walkTree":    makeSignature("dict", "dictionaries_walk_tree", 1),
-	"keys":        makeSignature("dict", "dictionaries_getters", 0),
-	"values":      makeSignature("dict", "dictionaries_getters", 0),
-	"toPairs":     makeSignature("dict", "dictionaries_dict_to_alist", 0),
+	"dictLen":     makeSignature("dict", "dictionaries_length", 0, true),
+	"get":         makeSignature("dict", "dictionaries_lookup", 2, true),
+	"set":         makeSignature("dict", "dictionaries_set_pair", 2, false),
+	"delete":      makeSignature("dict", "dictionaries_delete_pair", 1, false),
+	"getAtPath":   makeSignature("dict", "dictionaries_recursive_lookup", 2, true),
+	"setAtPath":   makeSignature("dict", "dictionaries_recursive_set", 2, false),
+	"containsKey": makeSignature("dict", "dictionaries_is_key_in", 1, true),
+	"mergeInto":   makeSignature("dict", "dictionaries_combine_dicts", 1, false),
+	"walkTree":    makeSignature("dict", "dictionaries_walk_tree", 1, true),
+	"keys":        makeSignature("dict", "dictionaries_getters", 0, true),
+	"values":      makeSignature("dict", "dictionaries_getters", 0, true),
+	"toPairs":     makeSignature("dict", "dictionaries_dict_to_alist", 0, true),
 }
 
 func (c *Call) String() string {
@@ -119,6 +120,14 @@ func (c *Call) Blockly() blockly.Block {
 
 func (c *Call) Continuous() bool {
 	return true
+}
+
+func (c *Call) Consumable() bool {
+	signature, ok := signatures[c.Name]
+	if !ok {
+		c.Where.Error("Cannot find method .%", c.Name)
+	}
+	return signature.Consumable
 }
 
 func (c *Call) simpleOperand(blockType string, valueName string) blockly.Block {

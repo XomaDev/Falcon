@@ -25,10 +25,13 @@ func (e *EachPair) Blockly() blockly.Block {
 		},
 		Values:     []blockly.Value{{Name: "DICT", Block: e.Iterable.Blockly()}},
 		Statements: []blockly.Statement{blockly.CreateStatement("DO", e.Body)},
-		Consumable: false,
 	}
 }
 
 func (e *EachPair) Continuous() bool {
+	return false
+}
+
+func (e *EachPair) Consumable() bool {
 	return false
 }
