@@ -1,3 +1,1 @@
-@Button { }
-
-every(Button)
+println(compute(a = 2) -> a * 2)

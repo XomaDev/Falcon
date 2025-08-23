@@ -69,6 +69,7 @@ const (
 	WalkAll
 	Global
 	Local
+	Compute
 	This
 	Func
 	When

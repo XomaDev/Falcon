@@ -119,13 +119,6 @@ func mergeSyntaxDiff(this js.Value, p []js.Value) any {
 	})
 }
 
-func supplyComponentContext(this js.Value, p []js.Value) any {
-	return safeExec(func() js.Value {
-
-		return js.Undefined()
-	})
-}
-
 func main() {
 	println("Hello from falcon.go!")
 

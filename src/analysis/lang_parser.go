@@ -200,11 +200,7 @@ func (p *LangParser) varExpr() blky.Expr {
 			}
 		}
 		p.expect(l.CloseCurve)
-		if p.consume(l.RightArrow) {
-			return &variables.VarResult{Names: varNames, Values: varValues, Result: p.parse()}
-		} else {
-			return &variables.Var{Names: varNames, Values: varValues, Body: p.body()}
-		}
+		return &variables.Var{Names: varNames, Values: varValues, Body: p.body()}
 	} else {
 		// a clean full scope variable
 		name := p.name()
@@ -496,6 +492,8 @@ func (p *LangParser) term() blky.Expr {
 		return p.doExpr()
 	case l.If:
 		return p.simpleIf()
+	case l.Compute:
+		return p.computeExpr()
 	default:
 		if token.HasFlag(l.Value) {
 			value := p.value(token)
@@ -517,6 +515,31 @@ func (p *LangParser) term() blky.Expr {
 		panic("") // unreachable
 	}
 	// TODO: a returning local statement might be possible here
+}
+
+func (p *LangParser) computeExpr() *variables.VarResult {
+	p.skip()
+
+	var varNames []string
+	var varValues []blky.Expr
+	p.expect(l.OpenCurve)
+
+	// a result local var
+	for p.notEOF() && !p.isNext(l.CloseCurve) {
+		name := p.name()
+		p.expect(l.Assign)
+		value := p.parse()
+
+		varNames = append(varNames, name)
+		varValues = append(varValues, value)
+
+		if !p.consume(l.Comma) {
+			break
+		}
+	}
+	p.expect(l.CloseCurve)
+	p.expect(l.RightArrow)
+	return &variables.VarResult{Names: varNames, Values: varValues, Result: p.parse()}
 }
 
 func (p *LangParser) doExpr() *control.Do {
