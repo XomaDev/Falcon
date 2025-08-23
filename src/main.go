@@ -17,8 +17,8 @@ import (
 func main() {
 	println("Hello from Falcon!\n")
 
-	//diffTest()
-	analyzeSyntax()
+	diffTest()
+	//analyzeSyntax()
 	//xmlTest()
 }
 
@@ -82,7 +82,7 @@ func analyzeSyntax() {
 	// conversion of Falcon -> Blockly XML
 	langParser := analysis.NewLangParser(tokens)
 	expressions := langParser.ParseAll()
-	println(langParser.GetComponentDefinitions())
+	println(langParser.GetComponentDefinitionsCode())
 	for _, expression := range expressions {
 		println(expression.String())
 	}

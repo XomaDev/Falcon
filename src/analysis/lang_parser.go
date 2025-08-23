@@ -47,7 +47,12 @@ func NewLangParser(tokens []*l.Token) *LangParser {
 	}
 }
 
-func (p *LangParser) GetComponentDefinitions() string {
+func (p *LangParser) SetComponentDefinitions(definitions map[string][]string, reverseDefinitions map[string]string) {
+	p.Resolver.ComponentNameMap = definitions
+	p.Resolver.ComponentTypesMap = reverseDefinitions
+}
+
+func (p *LangParser) GetComponentDefinitionsCode() string {
 	// convert the AST back to syntax
 	var definitions strings.Builder
 	for key, value := range p.Resolver.ComponentNameMap {

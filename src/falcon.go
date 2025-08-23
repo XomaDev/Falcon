@@ -36,14 +36,36 @@ func safeExec(fn func() js.Value) js.Value {
 // Code -> Blocks
 func mistToXml(this js.Value, p []js.Value) any {
 	return safeExec(func() js.Value {
-		if len(p) < 1 {
-			return js.ValueOf("No Mist content provided")
+		if len(p) < 2 {
+			return js.ValueOf("mistToXML(sourceCode string, componentDefinitions map[string][]string) not provided!")
 		}
 		sourceCode := p[0].String()
+
+		// Parse the Component Definition Context
+		componentContextMap := make(map[string][]string) // Button -> [Button1, Button2]
+		reverseComponentMap := make(map[string]string)   // Button1 -> Button, Button2 -> Button
+		obj := p[1]
+		keys := js.Global().Get("Object").Call("keys", obj)
+		length := keys.Length()
+		for i := 0; i < length; i++ {
+			compType := keys.Index(i).String()
+			jsArr := obj.Get(compType)
+			var compNames []string
+			for j := 0; j < jsArr.Length(); j++ {
+				instanceName := jsArr.Index(j).String()
+				compNames = append(compNames, instanceName)
+				reverseComponentMap[instanceName] = compType
+			}
+			componentContextMap[compType] = compNames
+		}
+
+		// Parse Mist To XML Blockly
 		codeContext := &context.CodeContext{SourceCode: &sourceCode, FileName: "appinventor.live"}
 
 		tokens := lex.NewLexer(codeContext).Lex()
-		expressions := analysis.NewLangParser(tokens).ParseAll()
+		langParser := analysis.NewLangParser(tokens)
+		langParser.SetComponentDefinitions(componentContextMap, reverseComponentMap)
+		expressions := langParser.ParseAll()
 
 		var xmlCode strings.Builder
 
@@ -94,6 +116,13 @@ func mergeSyntaxDiff(this js.Value, p []js.Value) any {
 		machineSyntax := p[1].String()
 		mergedSyntax := diff.MakeSyntaxDiff(humanSyntax, machineSyntax).Merge()
 		return js.ValueOf(mergedSyntax)
+	})
+}
+
+func supplyComponentContext(this js.Value, p []js.Value) any {
+	return safeExec(func() js.Value {
+
+		return js.Undefined()
 	})
 }
 

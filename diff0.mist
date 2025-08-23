@@ -1,2 +1,6 @@
-func hello() {
+@Button { Button1 }
+@Notifier { Notifier1 }
+
+when Button1.Click() {
+   Notifier1.ShowAlert("Hello, World!")
 }
