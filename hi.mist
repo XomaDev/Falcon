@@ -1,1 +1,6 @@
-println(compute(a = 2) -> a * 2)
+local(personality = { "food" : "Masala Dosa",
+    "fruit" : "Mango", "animal" :
+    "The Royal Bengal Tiger" }
+) {
+ println(personality.get("food", "not found"))
+}

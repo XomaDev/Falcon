@@ -18,7 +18,7 @@ func main() {
 	println("Hello from Falcon!\n")
 
 	//diffTest()
-	//analyzeSyntax()
+	analyzeSyntax()
 	//xmlTest()
 }
 

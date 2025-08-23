@@ -105,10 +105,7 @@ local (
 A returning variable expression:
 
 ```python
-local (
-  k = 2,
-  j = 8
-) -> k * j
+compute(a = 2, b = 8) -> a * b
 ```
 
 
@@ -134,11 +131,8 @@ Ternary like expression for returning values.
 Unlike If statement, use `()` between your condition.
 
 ```go
-local(
-a = 8,
-b = 2
-) {
-	println("Maximum " _ if (a > b) a else b)
+local(a = 8, b = 2) {
+  println("Maximum " _ if (a > b) a else b)
 }
 ```
 
@@ -199,7 +193,7 @@ do {
 } -> result # outer scope
 ```
 
-The `result` expression in `do`, is executed outside of the body (outer scope).
+The `result` expression in `do`, is executed outside the body (outer scope).
 
 ## Colors
 
@@ -223,38 +217,34 @@ A returning function:
 func greet(name) = "Hello " _ name _ "!"
 ```
 
-## Math converters
-
-e.g. `1234->root->sin`: Square roots 1234 and passes it through a sin function.
-
-In-Built math converters:
-
-- `root`
-- `abs`
-- `neg`
-- `log`
-- `exp`
-- `round`
-- `ceil`
-- `floor`
-- `sin`
-- `cos`
-- `tan`
-- `asin`
-- `acos`
-- `atan`
-- `degrees`
-- `radians`
-- `hex`
-- `bin`
-- `fromHex`
-- `fromBin`
-
 ## Functions
 
 ### Math
 
 -  `dec(string)`, `bin(string)`, `octal(string)`, `hexa(string)` parses string from respective base. The string provided must be a static constant i.e. no variables or function calls.
+
+
+- `root(number)`
+- `abs(number)`
+- `neg(number)`
+- `log(number)`
+- `exp(number)`
+- `round(number)`
+- `ceil(number)`
+- `floor(number)`
+- `sin(number)`
+- `cos(number)`
+- `tan(number)`
+- `asin(number)`
+- `acos(number)`
+- `atan(number)`
+- `degrees(number)`
+- `radians(number)`
+- `decToHex(number)`
+- `decToBin(number)`
+- `hexToDec(number)`
+- `binToDec(number)`
+
 
 - `randInt(from, to)`
 - `randFloat()`
@@ -283,6 +273,23 @@ In-Built math converters:
 - `copyDict(dict)`
 - `makeColor(rgb list)`
 - `splitColor(number)`
+
+### Generic calls
+
+
+- `set(comonent_group, instance_name, property_name, value)` generic property set call<br>
+  e.g. `set(Button, Button1, Text, "Hello, World")`<br>
+  > The first three arguments must be call time constants, no expressions or variables allowed
+
+- `get(component_group, instance_name, property_name)` generic property get call<br>
+  e.g. `get(Button, Button1, Text)`
+<br><br>
+
+- `call(component_group, instance_name, method_name)` generic method call<br>
+  e.g. `call(Notifier, Notifier1, ShowAlert, "Hello, World")`
+<br><br>
+- `every(component_type)` returns a list of all component instances belonging to that type<br>
+  e.g. `every(Button)`
 
 ## Methods
 
@@ -350,13 +357,25 @@ e.g. `"Hello  ".trim()`
 ## List access
 
 ```python
-numbers = [1, 2, 4]
+local numbers = [1, 2, 4]
 
 # access second element (1 based indexing)
 println(numbers[2])
 
 # change the first element
 numbers[1] = 8
+```
+
+## Dictionary access
+
+```python
+local(personality = {
+  "food": "Masala Dosa",
+  "fruit": "Mango",
+  "animal": "The Royal Bengal Tiger"
+}) {
+    println(personality.get("food", 0))
+}
 ```
 
 ## List transformer
@@ -394,3 +413,10 @@ These are available list transformers:
 - `min { m, n -> bool_m_preceeds_n_expr }` returns minimum of a list
 - `max { m, n -> bool_m_preceeds_n_expr }` returns maximum of a list
 - `reduce(initValue) { x, valueSoFar -> new_value_expr }` helps to reduce values of a list to a single value
+
+## Helper Blocks
+
+By default, any asset helper block is mapped to a equivalent text block.
+
+For enums: `key@option`<br>
+e.g. `FileScope@App`
