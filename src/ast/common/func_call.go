@@ -104,8 +104,22 @@ func (f *FuncCall) Blockly() blockly.Block {
 		return f.genericGet()
 	case "call":
 		return f.genericCall()
+	case "every":
+		return f.everyComponent()
 	default:
 		panic("Unknown function " + f.Name)
+	}
+}
+
+func (f *FuncCall) everyComponent() blockly.Block {
+	compType, ok := f.Args[0].(*variables.Get)
+	if !ok || compType.Global {
+		f.Where.Error("Expected a component type for every() 1st argument!")
+	}
+	return blockly.Block{
+		Type:     "component_all_component_block",
+		Mutation: &blockly.Mutation{ComponentType: compType.Name},
+		Fields:   []blockly.Field{{Name: "COMPONENT_SELECTOR", Value: compType.Name}},
 	}
 }
 
