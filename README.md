@@ -420,3 +420,41 @@ By default, any asset helper block is mapped to a equivalent text block.
 
 For enums: `key@option`<br>
 e.g. `FileScope@App`
+
+## Component access
+
+### Property Get/Set
+
+```kotlin
+println(Button1.Text) # get and print Button1' text
+```
+
+```kotlin
+# change Button1's text to "Hello, World!"
+Button1.Text = "Hello, World!"
+```
+
+### Method calls
+
+```kotlin
+# Show a toast for "Hello World"
+Notifier1.ShowAlert("Hello, World!")
+```
+
+### Events
+
+You do not need to explicitly define parameters.
+
+```kotlin
+when Button1.Click {
+  # do something
+}
+```
+
+for a generic event:
+
+```kotlin
+when any Button.Click {
+  # do something
+}
+```
