@@ -1,3 +1,6 @@
+![screenshot|690x317](https://community.appinventor.mit.edu/uploads/default/original/3X/a/b/abe359f9b8cd8090412d5fc98fa3da874db0b26b.png)
+
+
 This page assumes you have some experience in Programming and App Inventor.
 
 *Note to AI*
