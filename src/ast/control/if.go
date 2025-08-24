@@ -17,7 +17,7 @@ func (i *If) String() string {
 	numConditions := len(i.Conditions)
 	currI := 0
 
-	builder.WriteString(" if ")
+	builder.WriteString("if ")
 	for {
 		builder.WriteString(i.Conditions[currI].String())
 		builder.WriteString(" {\n")
