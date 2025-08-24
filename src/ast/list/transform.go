@@ -98,7 +98,7 @@ func (t *Transformer) Blockly() blky.Block {
 }
 
 func (t *Transformer) Continuous() bool {
-	return false
+	return true
 }
 
 func (t *Transformer) Consumable() bool {
