@@ -518,8 +518,6 @@ func (p *LangParser) term() blky.Expr {
 }
 
 func (p *LangParser) computeExpr() *variables.VarResult {
-	p.skip()
-
 	var varNames []string
 	var varValues []blky.Expr
 	p.expect(l.OpenCurve)
