@@ -478,6 +478,8 @@ func (p *LangParser) objectCall(object blky.Expr) blky.Expr {
 func (p *LangParser) term() blky.Expr {
 	token := p.next()
 	switch token.Type {
+	case l.Undefined:
+		return &common.EmptySocket{}
 	case l.OpenSquare:
 		return p.list()
 	case l.OpenCurly:
