@@ -32,7 +32,7 @@ func designTest() {
 		panic(err)
 	}
 	xmlString := string(codeBytes)
-	result, err := designAnalysis.ConvertXmlToSchema(xmlString)
+	result, err := designAnalysis.NewXmlParser(xmlString).ConvertXmlToSchema()
 	if err != nil {
 		panic(err)
 	}

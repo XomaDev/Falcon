@@ -3,19 +3,29 @@ package design
 import (
 	"encoding/json"
 	"encoding/xml"
+	"strconv"
 )
 
-func ConvertXmlToSchema(xmlContent string) (string, error) {
+type XmlParser struct {
+	xmlContent  string
+	autoIdCount map[string]int
+}
+
+func NewXmlParser(xmlContent string) *XmlParser {
+	return &XmlParser{xmlContent: xmlContent, autoIdCount: make(map[string]int)}
+}
+
+func (p *XmlParser) ConvertXmlToSchema() (string, error) {
 	var root XmlRoot
-	if err := xml.Unmarshal([]byte(xmlContent), &root); err != nil {
+	if err := xml.Unmarshal([]byte(p.xmlContent), &root); err != nil {
 		panic(err)
 	}
+	screen := root.Screen
 	var components []interface{}
-	for _, child := range root.Screen.Children {
-		components = append(components, componentToJson(child))
+	for _, child := range screen.Children {
+		components = append(components, p.componentToJson(child))
 	}
 
-	screen := root.Screen
 	props := map[string]interface{}{
 		"$Name":       screen.Id,
 		"$Type":       "Form",
@@ -37,13 +47,19 @@ func ConvertXmlToSchema(xmlContent string) (string, error) {
 	return string(jsonBytes), nil
 }
 
-func componentToJson(component Component) interface{} {
+func (p *XmlParser) componentToJson(component Component) interface{} {
 	var children []interface{}
 	for _, child := range component.Children {
-		children = append(children, componentToJson(child))
+		children = append(children, p.componentToJson(child))
+	}
+	compId := component.Id
+	if compId == "" {
+		// dynamically generate an Id
+		compId = component.Type + strconv.Itoa(p.autoIdCount[component.Type]+1)
+		p.autoIdCount[component.Type]++
 	}
 	schema := map[string]interface{}{
-		"$Name":    component.Id,
+		"$Name":    compId,
 		"$Type":    component.Type,
 		"$Version": "0",
 	}
