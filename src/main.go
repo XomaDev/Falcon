@@ -3,13 +3,14 @@
 package main
 
 import (
-	"Falcon/analysis"
-	"Falcon/ast/blockly"
-	"Falcon/context"
-	"Falcon/diff"
-	"Falcon/lex"
+	codeAnalysis "Falcon/code/analysis"
+	"Falcon/code/ast/blockly"
+	"Falcon/code/context"
+	"Falcon/code/diff"
+	"Falcon/code/lex"
+
+	designAnalysis "Falcon/design"
 	"encoding/xml"
-	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -18,19 +19,35 @@ func main() {
 	println("Hello from Falcon!\n")
 
 	//diffTest()
-	analyzeSyntax()
+	//analyzeSyntax()
 	//xmlTest()
+	designTest()
+}
+
+func designTest() {
+	xmlFile := "Screen1.aiml"
+	xmlPath := "/home/melon/GolandProjects/Falcon/" + xmlFile
+	codeBytes, err := os.ReadFile(xmlPath)
+	if err != nil {
+		panic(err)
+	}
+	xmlString := string(codeBytes)
+	result, err := designAnalysis.ConvertXmlToSchema(xmlString)
+	if err != nil {
+		panic(err)
+	}
+	println(result)
 }
 
 func xmlTest() {
 	xmlFile := "xml.txt"
 	xmlPath := "/home/ekina/GolandProjects/Falcon/" + xmlFile
-	codeBytes, err := ioutil.ReadFile(xmlPath)
+	codeBytes, err := os.ReadFile(xmlPath)
 	if err != nil {
 		panic(err)
 	}
 	xmlString := string(codeBytes)
-	exprs := analysis.NewXMLParser(xmlString).ParseBlockly()
+	exprs := codeAnalysis.NewXMLParser(xmlString).ParseBlockly()
 	var machineSourceCode strings.Builder
 	for _, expr := range exprs {
 		machineSourceCode.WriteString(expr.String())
@@ -80,7 +97,7 @@ func analyzeSyntax() {
 	println("\n=== AST ===\n")
 
 	// conversion of Falcon -> Blockly XML
-	langParser := analysis.NewLangParser(tokens)
+	langParser := codeAnalysis.NewLangParser(tokens)
 	expressions := langParser.ParseAll()
 	println(langParser.GetComponentDefinitionsCode())
 	for _, expression := range expressions {
@@ -104,7 +121,7 @@ func analyzeSyntax() {
 	println()
 
 	// reconversion of Blockly XML -> Falcon
-	exprs := analysis.NewXMLParser(xmlContent).ParseBlockly()
+	exprs := codeAnalysis.NewXMLParser(xmlContent).ParseBlockly()
 	var machineSourceCode strings.Builder
 	for _, expr := range exprs {
 		machineSourceCode.WriteString(expr.String())

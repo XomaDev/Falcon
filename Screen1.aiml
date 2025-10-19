@@ -1,0 +1,15 @@
+<xml version="1.0" encoding="UTF-8">
+  <Screen id="Screen1" title="Calculator">
+    <Label id="Label1" Text="First number: "/>
+    <TextBox id="firstNumberTextBox" numbersOnly="true" hint="Enter first number"/>
+    <Label id="Label2" Text="Second number: "/>
+    <TextBox id="firstNumberTextBox" numbersOnly="true" hint="Enter second number"/>
+    <HorizontalArrangement id="HR1">
+      <Button id="AddButton" Text="+"/>
+      <Button id="SubtractButton" Text="-"/>
+      <Button id="MultiplyButton" Text="*"/>
+      <Button id="DivideButton" Text="/"/>
+    </HorizontalArrangement>
+    <Label id="resultLabel" Text="Result will appear here"/>
+  </Screen>
+</xml>

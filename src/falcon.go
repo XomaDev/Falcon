@@ -1,16 +1,16 @@
 //go:build js && wasm
 // +build js,wasm
 
-// GOOS=js GOARCH=wasm go build -o web/falcon.wasm
+// GOOS=js GOARCH=wasm go build -o /web/falcon.wasm
 
 package main
 
 import (
-	"Falcon/analysis"
-	"Falcon/ast/blockly"
-	"Falcon/context"
-	"Falcon/diff"
-	"Falcon/lex"
+	analysis2 "Falcon/code/analysis"
+	"Falcon/code/ast/blockly"
+	"Falcon/code/context"
+	"Falcon/code/diff"
+	"Falcon/code/lex"
 	"encoding/xml"
 	"runtime/debug"
 	"strings"
@@ -63,7 +63,7 @@ func mistToXml(this js.Value, p []js.Value) any {
 		codeContext := &context.CodeContext{SourceCode: &sourceCode, FileName: "appinventor.live"}
 
 		tokens := lex.NewLexer(codeContext).Lex()
-		langParser := analysis.NewLangParser(tokens)
+		langParser := analysis2.NewLangParser(tokens)
 		langParser.SetComponentDefinitions(componentContextMap, reverseComponentMap)
 		expressions := langParser.ParseAll()
 
@@ -91,7 +91,7 @@ func xmlToMist(this js.Value, p []js.Value) any {
 			return js.ValueOf("No XML content provided")
 		}
 		xmlContent := p[0].String()
-		exprs := analysis.NewXMLParser(xmlContent).ParseBlockly()
+		exprs := analysis2.NewXMLParser(xmlContent).ParseBlockly()
 		var builder strings.Builder
 
 		for _, expr := range exprs {

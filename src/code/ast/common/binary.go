@@ -1,0 +1,240 @@
+package common
+
+import (
+	blockly2 "Falcon/code/ast/blockly"
+	list2 "Falcon/code/ast/list"
+	"Falcon/code/ast/variables"
+	"Falcon/code/lex"
+	"strconv"
+)
+
+type BinaryExpr struct {
+	Where    *lex.Token
+	Operands []blockly2.Expr
+	Operator lex.Type
+}
+
+func (b *BinaryExpr) String() string {
+	return blockly2.JoinExprs(" "+*b.Where.Content+" ", b.Operands)
+}
+
+// CanRepeat: return true if the binary expr can be optimized into one struct
+//	without the need to create additional BinaryExpr struct for the same Operator.
+//	This factor also depends on the type of Operator being used. (Some support, some don't)
+
+func (b *BinaryExpr) CanRepeat(testOperator lex.Type) bool {
+	if b.Operator != testOperator {
+		return false
+	}
+	switch b.Operator {
+	case lex.Power, lex.Dash, lex.Slash, lex.Colon:
+		return false
+	default:
+		return true
+	}
+}
+
+func (b *BinaryExpr) Blockly() blockly2.Block {
+	switch b.Operator {
+	case lex.BitwiseAnd, lex.BitwiseOr, lex.BitwiseXor:
+		return b.bitwiseExpr()
+	case lex.Equals, lex.NotEquals:
+		return b.compareExpr()
+	case lex.LogicAnd, lex.LogicOr:
+		return b.boolExpr()
+	case lex.Colon:
+		return b.pairExpr()
+	case lex.Plus, lex.Times:
+		return b.addOrTimes()
+	case lex.Dash, lex.Slash, lex.Power:
+		return b.simpleMathExpr()
+	case lex.Underscore:
+		return b.textJoin()
+	case lex.LessThan, lex.LessThanEqual, lex.GreatThan, lex.GreaterThanEqual:
+		return b.relationalExpr()
+	case lex.TextEquals, lex.TextNotEquals, lex.TextLessThan, lex.TextGreaterThan:
+		return b.textCompare()
+	case lex.Assign:
+		return b.assignment()
+	default:
+		b.Where.Error("Unknown binary operator! " + b.Operator.String())
+		panic("") // unreachable
+	}
+}
+
+func (b *BinaryExpr) Continuous() bool {
+	return false
+}
+
+func (b *BinaryExpr) Consumable() bool {
+	return b.Operator != lex.Assign
+}
+
+func (b *BinaryExpr) assignment() blockly2.Block {
+	if len(b.Operands) != 2 {
+		b.Where.Error("Assignment '=' received more than two operands")
+	}
+	settable := b.Operands[0]
+	newValue := b.Operands[1]
+
+	if listGet, ok := settable.(*list2.Get); ok {
+		listSet := list2.Set{List: listGet.List, Index: listGet.Index, Value: newValue}
+		return listSet.Blockly()
+	} else if varGet, ok := settable.(*variables.Get); ok {
+		var name string
+		if varGet.Global {
+			name = "global " + varGet.Name
+		} else {
+			name = varGet.Name
+		}
+		return blockly2.Block{
+			Type:   "lexical_variable_set",
+			Fields: []blockly2.Field{{Name: "VAR", Value: name}},
+			Values: []blockly2.Value{{Name: "VALUE", Block: newValue.Blockly()}},
+		}
+	}
+	panic("Unimplemented!")
+}
+
+func (b *BinaryExpr) textCompare() blockly2.Block {
+	var fieldOp string
+	switch b.Operator {
+	case lex.TextEquals:
+		fieldOp = "EQUAL"
+	case lex.NotEquals:
+		fieldOp = "NEQ"
+	case lex.TextLessThan:
+		fieldOp = "LT"
+	case lex.TextGreaterThan:
+		fieldOp = "GT"
+	}
+	return blockly2.Block{
+		Type:   "text_compare",
+		Fields: []blockly2.Field{{Name: "OP", Value: fieldOp}},
+		Values: blockly2.MakeValues(b.Operands, "TEXT1", "TEXT2"),
+	}
+}
+
+func (b *BinaryExpr) relationalExpr() blockly2.Block {
+	var fieldOp string
+	switch b.Operator {
+	case lex.LessThan:
+		fieldOp = "LT"
+	case lex.LessThanEqual:
+		fieldOp = "LT"
+	case lex.GreatThan:
+		fieldOp = "GT"
+	case lex.GreaterThanEqual:
+		fieldOp = "GTE"
+	}
+	return blockly2.Block{
+		Type:   "math_compare",
+		Fields: []blockly2.Field{{Name: "OP", Value: fieldOp}},
+		Values: blockly2.MakeValues(b.Operands, "A", "B"),
+	}
+}
+
+func (b *BinaryExpr) textJoin() blockly2.Block {
+	return blockly2.Block{
+		Type:     "text_join",
+		Mutation: &blockly2.Mutation{ItemCount: len(b.Operands)},
+		Values:   blockly2.ValuesByPrefix("ADD", b.Operands),
+	}
+}
+
+func (b *BinaryExpr) pairExpr() blockly2.Block {
+	if len(b.Operands) != 2 {
+		b.Where.Error("Pair operator ':' received more than two operands")
+	}
+	return blockly2.Block{
+		Type:   "pair",
+		Values: blockly2.MakeValues(b.Operands, "KEY", "VALUE"),
+	}
+}
+
+func (b *BinaryExpr) boolExpr() blockly2.Block {
+	var fieldOp string
+	if b.Operator == lex.LogicAnd {
+		fieldOp = "AND"
+	} else {
+		fieldOp = "OR"
+	}
+	values := []blockly2.Value{
+		{Name: "A", Block: b.Operands[0].Blockly()},
+		{Name: "B", Block: b.Operands[1].Blockly()},
+	}
+	lenOperands := len(b.Operands)
+	if lenOperands > 2 {
+		for i := 2; i < lenOperands; i++ {
+			values = append(values, blockly2.Value{Name: "BOOL" + strconv.Itoa(i), Block: b.Operands[i].Blockly()})
+		}
+	}
+	return blockly2.Block{
+		Type:     "logic_operation",
+		Mutation: &blockly2.Mutation{ItemCount: lenOperands},
+		Values:   values,
+		Fields:   []blockly2.Field{{Name: "OP", Value: fieldOp}},
+	}
+}
+
+func (b *BinaryExpr) compareExpr() blockly2.Block {
+	var fieldOp string
+	if b.Operator == lex.Equals {
+		fieldOp = "EQ"
+	} else {
+		fieldOp = "NEQ"
+	}
+	return blockly2.Block{
+		Type:   "logic_compare",
+		Values: blockly2.MakeValues(b.Operands, "A", "B"),
+		Fields: []blockly2.Field{{Name: "OP", Value: fieldOp}},
+	}
+}
+
+func (b *BinaryExpr) bitwiseExpr() blockly2.Block {
+	var fieldOp string
+	switch b.Operator {
+	case lex.BitwiseAnd:
+		fieldOp = "BITAND"
+	case lex.BitwiseOr:
+		fieldOp = "BITIOR"
+	case lex.BitwiseXor:
+		fieldOp = "BITXOR"
+	}
+	return blockly2.Block{
+		Type:     "math_bitwise",
+		Values:   blockly2.ValuesByPrefix("NUM", b.Operands),
+		Mutation: &blockly2.Mutation{ItemCount: len(b.Operands)},
+		Fields:   []blockly2.Field{{Name: "OP", Value: fieldOp}},
+	}
+}
+
+func (b *BinaryExpr) simpleMathExpr() blockly2.Block {
+	var blockType string
+	switch b.Operator {
+	case lex.Dash:
+		blockType = "math_subtract"
+	case lex.Slash:
+		blockType = "math_division"
+	case lex.Power:
+		blockType = "math_power"
+	}
+	return blockly2.Block{
+		Type:   blockType,
+		Values: blockly2.MakeValues(b.Operands, "A", "B"),
+	}
+}
+
+func (b *BinaryExpr) addOrTimes() blockly2.Block {
+	var blockType string
+	if b.Operator == lex.Plus {
+		blockType = "math_add"
+	} else {
+		blockType = "math_multiply"
+	}
+	return blockly2.Block{
+		Type:     blockType,
+		Values:   blockly2.ValuesByPrefix("NUM", b.Operands),
+		Mutation: &blockly2.Mutation{ItemCount: len(b.Operands)},
+	}
+}
