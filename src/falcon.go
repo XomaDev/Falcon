@@ -1,7 +1,7 @@
 //go:build js && wasm
 // +build js,wasm
 
-// GOOS=js GOARCH=wasm go build -o /web/falcon.wasm
+// GOOS=js GOARCH=wasm go build -o web/falcon.wasm
 
 package main
 
@@ -11,6 +11,7 @@ import (
 	"Falcon/code/context"
 	"Falcon/code/diff"
 	"Falcon/code/lex"
+	designAnalysis "Falcon/design"
 	"encoding/xml"
 	"runtime/debug"
 	"strings"
@@ -119,6 +120,32 @@ func mergeSyntaxDiff(this js.Value, p []js.Value) any {
 	})
 }
 
+func convertSchemaToXml(this js.Value, p []js.Value) any {
+	return safeExec(func() js.Value {
+		if len(p) < 1 {
+			return js.ValueOf("No schema provided")
+		}
+		schemaString, err := designAnalysis.NewSchemaParser(p[0].String()).ConvertSchemaToXml()
+		if err != nil {
+			panic(err)
+		}
+		return js.ValueOf(schemaString)
+	})
+}
+
+func convertXmlToSchema(this js.Value, p []js.Value) any {
+	return safeExec(func() js.Value {
+		if len(p) < 1 {
+			return js.ValueOf("No schema provided")
+		}
+		schemaString, err := designAnalysis.NewXmlParser(p[0].String()).ConvertXmlToSchema()
+		if err != nil {
+			panic(err)
+		}
+		return js.ValueOf(schemaString)
+	})
+}
+
 func main() {
 	println("Hello from falcon.go!")
 
@@ -126,5 +153,7 @@ func main() {
 	js.Global().Set("mistToXml", js.FuncOf(mistToXml))
 	js.Global().Set("xmlToMist", js.FuncOf(xmlToMist))
 	js.Global().Set("mergeSyntaxDiff", js.FuncOf(mergeSyntaxDiff))
+	js.Global().Set("schemaToXml", js.FuncOf(convertSchemaToXml))
+	js.Global().Set("xmlToSchema", js.FuncOf(convertXmlToSchema))
 	<-c
 }
