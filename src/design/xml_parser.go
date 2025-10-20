@@ -16,11 +16,10 @@ func NewXmlParser(xmlContent string) *XmlParser {
 }
 
 func (p *XmlParser) ConvertXmlToSchema() (string, error) {
-	var root XmlRoot
-	if err := xml.Unmarshal([]byte(p.xmlContent), &root); err != nil {
+	var screen Component
+	if err := xml.Unmarshal([]byte(p.xmlContent), &screen); err != nil {
 		panic(err)
 	}
-	screen := root.Screen
 	var components []interface{}
 	for _, child := range screen.Children {
 		components = append(components, p.componentToJson(child))

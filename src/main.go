@@ -32,11 +32,16 @@ func designTest() {
 		panic(err)
 	}
 	xmlString := string(codeBytes)
-	result, err := designAnalysis.NewXmlParser(xmlString).ConvertXmlToSchema()
+	schemaString, err := designAnalysis.NewXmlParser(xmlString).ConvertXmlToSchema()
 	if err != nil {
 		panic(err)
 	}
-	println(result)
+	println(schemaString)
+	xmlString, err = designAnalysis.NewSchemaParser(schemaString).ConvertSchemaToXml()
+	if err != nil {
+		panic(err)
+	}
+	println(xmlString)
 }
 
 func xmlTest() {
