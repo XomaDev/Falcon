@@ -41,6 +41,7 @@ func designTest() {
 	if err != nil {
 		panic(err)
 	}
+	println("Produced XML: ")
 	println(xmlString)
 }
 

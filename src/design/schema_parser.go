@@ -1,6 +1,7 @@
 package design
 
 import (
+	"bytes"
 	"encoding/json"
 	"encoding/xml"
 )
@@ -31,12 +32,13 @@ func (p *SchemaParser) ConvertSchemaToXml() (string, error) {
 	root := Component{
 		XMLName:    xml.Name{Local: "Screen"},
 		Id:         screenId,
-		Type:       "Form",
+		Type:       "Screen",
 		Properties: filterDesignerProperties(properties),
 		Children:   xmlChildren,
 	}
-	result, err := xml.MarshalIndent(root, "", "  ")
-	return string(result), err
+	var buf bytes.Buffer
+	err = root.WriteXML(&buf, 0)
+	return buf.String(), err
 }
 
 func schemaComponentToXml(schemaJson map[string]interface{}) Component {
@@ -48,10 +50,6 @@ func schemaComponentToXml(schemaJson map[string]interface{}) Component {
 			xmlChildren = append(xmlChildren, schemaComponentToXml(schemaComponent.(map[string]interface{})))
 		}
 	}
-	if len(xmlChildren) == 0 {
-		xmlChildren = nil
-	}
-
 	return Component{
 		XMLName:    xml.Name{Local: compType},
 		Id:         schemaJson["$Name"].(string),

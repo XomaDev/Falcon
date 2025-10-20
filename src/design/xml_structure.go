@@ -1,6 +1,11 @@
 package design
 
-import "encoding/xml"
+import (
+	"bytes"
+	"encoding/xml"
+	"io"
+	"strings"
+)
 
 type XmlRoot struct {
 	XMLName xml.Name  `xml:"xml"`
@@ -52,30 +57,54 @@ func (c *Component) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	return nil
 }
 
-func (c *Component) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-	if c.XMLName.Local != "" {
-		start.Name = c.XMLName
-	} else {
-		start.Name.Local = c.Type
-	}
-	var attrs []xml.Attr
+// WriteXML manually converts Component structure to XML, a workaround for now, since
+// Go lang does not support self-closing tags
+func (c *Component) WriteXML(w io.Writer, indent int) error {
+	indentStr := strings.Repeat("  ", indent)
+
+	// Start tag
+	tag := indentStr + "<" + c.Type
 	if c.Id != "" {
-		attrs = append(attrs, xml.Attr{Name: xml.Name{Local: "id"}, Value: c.Id})
+		var buf bytes.Buffer
+		err := xml.EscapeText(&buf, []byte(c.Id))
+		if err != nil {
+			return err
+		}
+		tag += ` id="` + buf.String() + `"`
 	}
+
 	for k, v := range c.Properties {
 		if k == "id" || k == "type" {
 			continue
 		}
-		attrs = append(attrs, xml.Attr{Name: xml.Name{Local: k}, Value: v})
+		var buf bytes.Buffer
+		err := xml.EscapeText(&buf, []byte(v))
+		if err != nil {
+			return err
+		}
+		tag += ` ` + k + `="` + buf.String() + `"`
 	}
-	start.Attr = attrs
-	if err := e.EncodeToken(start); err != nil {
+
+	if len(c.Children) == 0 {
+		tag += "/>\n"
+		_, err := w.Write([]byte(tag))
 		return err
 	}
+
+	// Open tag
+	tag += ">\n"
+	if _, err := w.Write([]byte(tag)); err != nil {
+		return err
+	}
+
+	// Recursively write children
 	for _, child := range c.Children {
-		if err := e.Encode(&child); err != nil {
+		if err := child.WriteXML(w, indent+1); err != nil {
 			return err
 		}
 	}
-	return e.EncodeToken(xml.EndElement{Name: start.Name})
+
+	// Close tag
+	_, err := w.Write([]byte(indentStr + "</" + c.Type + ">\n"))
+	return err
 }
