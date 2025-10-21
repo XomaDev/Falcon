@@ -6,11 +6,12 @@
 package main
 
 import (
-	"Falcon/analysis"
-	"Falcon/ast/blockly"
-	"Falcon/context"
-	"Falcon/diff"
-	"Falcon/lex"
+	analysis2 "Falcon/code/analysis"
+	"Falcon/code/ast/blockly"
+	"Falcon/code/context"
+	"Falcon/code/diff"
+	"Falcon/code/lex"
+	designAnalysis "Falcon/design"
 	"encoding/xml"
 	"runtime/debug"
 	"strings"
@@ -63,7 +64,7 @@ func mistToXml(this js.Value, p []js.Value) any {
 		codeContext := &context.CodeContext{SourceCode: &sourceCode, FileName: "appinventor.live"}
 
 		tokens := lex.NewLexer(codeContext).Lex()
-		langParser := analysis.NewLangParser(tokens)
+		langParser := analysis2.NewLangParser(tokens)
 		langParser.SetComponentDefinitions(componentContextMap, reverseComponentMap)
 		expressions := langParser.ParseAll()
 
@@ -91,7 +92,7 @@ func xmlToMist(this js.Value, p []js.Value) any {
 			return js.ValueOf("No XML content provided")
 		}
 		xmlContent := p[0].String()
-		exprs := analysis.NewXMLParser(xmlContent).ParseBlockly()
+		exprs := analysis2.NewXMLParser(xmlContent).ParseBlockly()
 		var builder strings.Builder
 
 		for _, expr := range exprs {
@@ -119,6 +120,32 @@ func mergeSyntaxDiff(this js.Value, p []js.Value) any {
 	})
 }
 
+func convertSchemaToXml(this js.Value, p []js.Value) any {
+	return safeExec(func() js.Value {
+		if len(p) < 1 {
+			return js.ValueOf("No schema provided")
+		}
+		schemaString, err := designAnalysis.NewSchemaParser(p[0].String()).ConvertSchemaToXml()
+		if err != nil {
+			panic(err)
+		}
+		return js.ValueOf(schemaString)
+	})
+}
+
+func convertXmlToSchema(this js.Value, p []js.Value) any {
+	return safeExec(func() js.Value {
+		if len(p) < 1 {
+			return js.ValueOf("No schema provided")
+		}
+		schemaString, err := designAnalysis.NewXmlParser(p[0].String()).ConvertXmlToSchema()
+		if err != nil {
+			panic(err)
+		}
+		return js.ValueOf(schemaString)
+	})
+}
+
 func main() {
 	println("Hello from falcon.go!")
 
@@ -126,5 +153,7 @@ func main() {
 	js.Global().Set("mistToXml", js.FuncOf(mistToXml))
 	js.Global().Set("xmlToMist", js.FuncOf(xmlToMist))
 	js.Global().Set("mergeSyntaxDiff", js.FuncOf(mergeSyntaxDiff))
+	js.Global().Set("schemaToXml", js.FuncOf(convertSchemaToXml))
+	js.Global().Set("xmlToSchema", js.FuncOf(convertXmlToSchema))
 	<-c
 }

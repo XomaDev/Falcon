@@ -1,0 +1,13 @@
+<Screen id="Screen1" title="Calculator">
+  <Label Text="First number: "/>
+  <TextBox id="firstNumberTextBox" numbersOnly="true" hint="Enter first number"/>
+  <Label Text="Second number: "/>
+  <TextBox id="firstNumberTextBox" numbersOnly="true" hint="Enter second number"/>
+  <HorizontalArrangement>
+    <Button id="AddButton" Text="+"/>
+    <Button id="SubtractButton" Text="-"/>
+    <Button id="MultiplyButton" Text="*"/>
+    <Button id="DivideButton" Text="/"/>
+  </HorizontalArrangement>
+  <Label id="resultLabel" Text="Result will appear here"/>
+</Screen>
