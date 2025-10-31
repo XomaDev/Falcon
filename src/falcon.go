@@ -7,7 +7,7 @@ package main
 
 import (
 	analysis2 "Falcon/code/analysis"
-	"Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/context"
 	"Falcon/code/diff"
 	"Falcon/code/lex"
@@ -71,8 +71,8 @@ func mistToXml(this js.Value, p []js.Value) any {
 		var xmlCode strings.Builder
 
 		for _, expression := range expressions {
-			xmlBlock := blockly.XmlRoot{
-				Blocks: []blockly.Block{expression.Blockly()},
+			xmlBlock := ast.XmlRoot{
+				Blocks: []ast.Block{expression.Blockly()},
 				XMLNS:  "https://developers.google.com/blockly/xml",
 			}
 			bytes, _ := xml.MarshalIndent(xmlBlock, "", "  ")

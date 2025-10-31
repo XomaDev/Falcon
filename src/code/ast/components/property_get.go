@@ -1,7 +1,7 @@
 package components
 
 import (
-	"Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/sugar"
 )
 
@@ -20,17 +20,17 @@ func (p *PropertyGet) String() string {
 	return sugar.Format("%.%", p.ComponentName, p.Property)
 }
 
-func (p *PropertyGet) Blockly() blockly.Block {
-	return blockly.Block{
+func (p *PropertyGet) Blockly() ast.Block {
+	return ast.Block{
 		Type: "component_set_get",
-		Mutation: &blockly.Mutation{
+		Mutation: &ast.Mutation{
 			SetOrGet:      "get",
 			PropertyName:  p.Property,
 			IsGeneric:     false,
 			InstanceName:  p.ComponentName,
 			ComponentType: p.ComponentType,
 		},
-		Fields: []blockly.Field{
+		Fields: []ast.Field{
 			{Name: "COMPONENT_SELECTOR", Value: p.ComponentName},
 			{Name: "PROP", Value: p.Property},
 		},

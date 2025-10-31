@@ -1,7 +1,7 @@
 package control
 
 import (
-	"Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 )
 
 type Break struct {
@@ -17,8 +17,8 @@ func (b *Break) String() string {
 	return "break"
 }
 
-func (b *Break) Blockly() blockly.Block {
-	return blockly.Block{Type: "controls_break"}
+func (b *Break) Blockly() ast.Block {
+	return ast.Block{Type: "controls_break"}
 }
 
 func (b *Break) Continuous() bool {

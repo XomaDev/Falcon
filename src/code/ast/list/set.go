@@ -1,14 +1,14 @@
 package list
 
 import (
-	blockly2 "Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/sugar"
 )
 
 type Set struct {
-	List  blockly2.Expr
-	Index blockly2.Expr
-	Value blockly2.Expr
+	List  ast.Expr
+	Index ast.Expr
+	Value ast.Expr
 }
 
 func (s *Set) Yail() string {
@@ -30,10 +30,10 @@ func (s *Set) String() string {
 	return sugar.Format(pFormat, s.List.String(), s.Index.String(), s.Value.String())
 }
 
-func (s *Set) Blockly() blockly2.Block {
-	return blockly2.Block{
+func (s *Set) Blockly() ast.Block {
+	return ast.Block{
 		Type:   "lists_replace_item",
-		Values: blockly2.MakeValues([]blockly2.Expr{s.List, s.Index, s.Value}, "LIST", "NUM", "ITEM"),
+		Values: ast.MakeValues([]ast.Expr{s.List, s.Index, s.Value}, "LIST", "NUM", "ITEM"),
 	}
 }
 

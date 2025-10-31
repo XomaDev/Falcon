@@ -1,14 +1,14 @@
 package common
 
 import (
-	"Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/lex"
 	"Falcon/code/sugar"
 )
 
 type Question struct {
 	Where    *lex.Token
-	On       blockly.Expr
+	On       ast.Expr
 	Question string
 }
 
@@ -25,7 +25,7 @@ func (q *Question) String() string {
 	return sugar.Format(pFormat, q.On.String(), q.Question)
 }
 
-func (q *Question) Blockly() blockly.Block {
+func (q *Question) Blockly() ast.Block {
 	switch q.Question {
 	case "number", "base10", "hexa", "bin":
 		return q.mathQuestion()
@@ -53,42 +53,42 @@ func (q *Question) Consumable() bool {
 	return true
 }
 
-func (q *Question) listIsEmpty() blockly.Block {
-	return blockly.Block{
+func (q *Question) listIsEmpty() ast.Block {
+	return ast.Block{
 		Type:   "lists_is_empty",
-		Values: []blockly.Value{{Name: "LIST", Block: q.On.Blockly()}},
+		Values: []ast.Value{{Name: "LIST", Block: q.On.Blockly()}},
 	}
 }
 
-func (q *Question) textIsEmpty() blockly.Block {
-	return blockly.Block{
+func (q *Question) textIsEmpty() ast.Block {
+	return ast.Block{
 		Type:   "text_isEmpty",
-		Values: []blockly.Value{{Name: "VALUE", Block: q.On.Blockly()}},
+		Values: []ast.Value{{Name: "VALUE", Block: q.On.Blockly()}},
 	}
 }
 
-func (q *Question) dictQuestion() blockly.Block {
-	return blockly.Block{
+func (q *Question) dictQuestion() ast.Block {
+	return ast.Block{
 		Type:   "dictionaries_is_dict",
-		Values: []blockly.Value{{Name: "THING", Block: q.On.Blockly()}},
+		Values: []ast.Value{{Name: "THING", Block: q.On.Blockly()}},
 	}
 }
 
-func (q *Question) listQuestion() blockly.Block {
-	return blockly.Block{
+func (q *Question) listQuestion() ast.Block {
+	return ast.Block{
 		Type:   "lists_is_list",
-		Values: []blockly.Value{{Name: "ITEM", Block: q.On.Blockly()}},
+		Values: []ast.Value{{Name: "ITEM", Block: q.On.Blockly()}},
 	}
 }
 
-func (q *Question) textQuestion() blockly.Block {
-	return blockly.Block{
+func (q *Question) textQuestion() ast.Block {
+	return ast.Block{
 		Type:   "text_is_string",
-		Values: []blockly.Value{{Name: "ITEM", Block: q.On.Blockly()}},
+		Values: []ast.Value{{Name: "ITEM", Block: q.On.Blockly()}},
 	}
 }
 
-func (q *Question) mathQuestion() blockly.Block {
+func (q *Question) mathQuestion() ast.Block {
 	var fieldOp string
 	switch q.Question {
 	case "number":
@@ -100,9 +100,9 @@ func (q *Question) mathQuestion() blockly.Block {
 	case "bin":
 		fieldOp = "BINARY"
 	}
-	return blockly.Block{
+	return ast.Block{
 		Type:   "math_is_a_number",
-		Fields: []blockly.Field{{Name: "OP", Value: fieldOp}},
-		Values: []blockly.Value{{Name: "NUM", Block: q.On.Blockly()}},
+		Fields: []ast.Field{{Name: "OP", Value: fieldOp}},
+		Values: []ast.Value{{Name: "NUM", Block: q.On.Blockly()}},
 	}
 }

@@ -1,7 +1,7 @@
 package fundamentals
 
 import (
-	blockly2 "Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/sugar"
 )
 
@@ -23,16 +23,16 @@ func (b *Boolean) String() string {
 	return "false"
 }
 
-func (b *Boolean) Blockly() blockly2.Block {
+func (b *Boolean) Blockly() ast.Block {
 	var bText string
 	if b.Value {
 		bText = "TRUE"
 	} else {
 		bText = "FALSE"
 	}
-	return blockly2.Block{
+	return ast.Block{
 		Type:   "logic_boolean",
-		Fields: blockly2.FieldsFromMap(map[string]string{"BOOL": bText}),
+		Fields: ast.FieldsFromMap(map[string]string{"BOOL": bText}),
 	}
 }
 
@@ -45,7 +45,7 @@ func (b *Boolean) Consumable() bool {
 }
 
 type Not struct {
-	Expr blockly2.Expr
+	Expr ast.Expr
 }
 
 func (n *Not) Yail() string {
@@ -57,10 +57,10 @@ func (n *Not) String() string {
 	return sugar.Format("!%", n.Expr.String())
 }
 
-func (n *Not) Blockly() blockly2.Block {
-	return blockly2.Block{
+func (n *Not) Blockly() ast.Block {
+	return ast.Block{
 		Type:   "logic_negate",
-		Values: []blockly2.Value{{Name: "BOOL", Block: n.Expr.Blockly()}},
+		Values: []ast.Value{{Name: "BOOL", Block: n.Expr.Blockly()}},
 	}
 }
 

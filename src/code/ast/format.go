@@ -1,4 +1,4 @@
-package blockly
+package ast
 
 import (
 	"strings"

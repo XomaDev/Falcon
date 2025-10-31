@@ -1,7 +1,7 @@
 package fundamentals
 
 import (
-	"Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 )
 
 type Component struct {
@@ -17,11 +17,11 @@ func (c *Component) String() string {
 	return c.Name
 }
 
-func (c *Component) Blockly() blockly.Block {
-	return blockly.Block{
+func (c *Component) Blockly() ast.Block {
+	return ast.Block{
 		Type:     "component_component_block",
-		Mutation: &blockly.Mutation{InstanceName: c.Name, ComponentType: c.Type},
-		Fields:   []blockly.Field{{Name: "COMPONENT_SELECTOR", Value: c.Name}},
+		Mutation: &ast.Mutation{InstanceName: c.Name, ComponentType: c.Type},
+		Fields:   []ast.Field{{Name: "COMPONENT_SELECTOR", Value: c.Name}},
 	}
 }
 

@@ -1,7 +1,7 @@
 package components
 
 import (
-	"Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/sugar"
 )
 
@@ -9,7 +9,7 @@ type MethodCall struct {
 	ComponentName string
 	ComponentType string
 	Method        string
-	Args          []blockly.Expr
+	Args          []ast.Expr
 }
 
 func (m *MethodCall) Yail() string {
@@ -18,20 +18,20 @@ func (m *MethodCall) Yail() string {
 }
 
 func (m *MethodCall) String() string {
-	return sugar.Format("%.%(%)", m.ComponentName, m.Method, blockly.JoinExprs(", ", m.Args))
+	return sugar.Format("%.%(%)", m.ComponentName, m.Method, ast.JoinExprs(", ", m.Args))
 }
 
-func (m *MethodCall) Blockly() blockly.Block {
-	return blockly.Block{
+func (m *MethodCall) Blockly() ast.Block {
+	return ast.Block{
 		Type: "component_method",
-		Mutation: &blockly.Mutation{
+		Mutation: &ast.Mutation{
 			MethodName:    m.Method,
 			IsGeneric:     false,
 			InstanceName:  m.ComponentName,
 			ComponentType: m.ComponentType,
 		},
-		Fields: []blockly.Field{{Name: "COMPONENT_SELECTOR", Value: m.ComponentName}},
-		Values: blockly.ValuesByPrefix("ARG", m.Args),
+		Fields: []ast.Field{{Name: "COMPONENT_SELECTOR", Value: m.ComponentName}},
+		Values: ast.ValuesByPrefix("ARG", m.Args),
 	}
 }
 

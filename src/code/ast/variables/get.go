@@ -1,7 +1,7 @@
 package variables
 
 import (
-	blky "Falcon/code/ast/blockly"
+	blky "Falcon/code/ast"
 	"Falcon/code/lex"
 )
 

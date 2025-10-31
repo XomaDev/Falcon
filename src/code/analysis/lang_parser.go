@@ -1,7 +1,7 @@
 package analysis
 
 import (
-	blky "Falcon/code/ast/blockly"
+	blky "Falcon/code/ast"
 	"Falcon/code/ast/common"
 	"Falcon/code/ast/components"
 	"Falcon/code/ast/control"
@@ -388,7 +388,7 @@ func (p *LangParser) element() blky.Expr {
 			left = p.objectCall(left)
 			continue
 		//case l.RightArrow:
-		//left = &common.Convert{Where: p.next(), On: left, Name: p.name()}
+		//left = &common.Convert{Where: p.next(), On: left, BlocklyName: p.name()}
 		//continue
 		case l.Question:
 			left = &common.Question{Where: p.next(), On: left, Question: p.name()}

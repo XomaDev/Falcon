@@ -1,14 +1,14 @@
 package control
 
 import (
-	blockly2 "Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/sugar"
 )
 
 type SimpleIf struct {
-	Condition blockly2.Expr
-	Then      blockly2.Expr
-	Else      blockly2.Expr
+	Condition ast.Expr
+	Then      ast.Expr
+	Else      ast.Expr
 }
 
 func (s *SimpleIf) Yail() string {
@@ -20,10 +20,10 @@ func (s *SimpleIf) String() string {
 	return sugar.Format("if (%) % else %", s.Condition.String(), s.Then.String(), s.Else.String())
 }
 
-func (s *SimpleIf) Blockly() blockly2.Block {
-	return blockly2.Block{
+func (s *SimpleIf) Blockly() ast.Block {
+	return ast.Block{
 		Type:   "controls_choose",
-		Values: blockly2.MakeValues([]blockly2.Expr{s.Condition, s.Then, s.Else}, "TEST", "THENRETURN", "ELSERETURN"),
+		Values: ast.MakeValues([]ast.Expr{s.Condition, s.Then, s.Else}, "TEST", "THENRETURN", "ELSERETURN"),
 	}
 }
 

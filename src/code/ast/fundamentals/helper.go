@@ -1,7 +1,7 @@
 package fundamentals
 
 import (
-	"Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 )
 
 type HelperDropdown struct {
@@ -18,11 +18,11 @@ func (h *HelperDropdown) String() string {
 	return h.Key + "@" + h.Option
 }
 
-func (h *HelperDropdown) Blockly() blockly.Block {
-	return blockly.Block{
+func (h *HelperDropdown) Blockly() ast.Block {
+	return ast.Block{
 		Type:     "helpers_dropdown",
-		Mutation: &blockly.Mutation{Key: h.Key},
-		Fields:   []blockly.Field{{Name: "OPTION", Value: h.Option}},
+		Mutation: &ast.Mutation{Key: h.Key},
+		Fields:   []ast.Field{{Name: "OPTION", Value: h.Option}},
 	}
 }
 

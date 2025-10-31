@@ -1,7 +1,7 @@
 package list
 
 import (
-	"Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/lex"
 	"Falcon/code/sugar"
 	"strconv"
@@ -10,11 +10,11 @@ import (
 
 type Transformer struct {
 	Where       *lex.Token
-	List        blockly.Expr
+	List        ast.Expr
 	Name        string
-	Args        []blockly.Expr
+	Args        []ast.Expr
 	Names       []string
-	Transformer blockly.Expr
+	Transformer ast.Expr
 }
 
 func (t *Transformer) Yail() string {
@@ -60,13 +60,13 @@ func (t *Transformer) String() string {
 		return sugar.Format(pFormat,
 			t.List.String(),
 			t.Name,
-			blockly.JoinExprs(", ", t.Args),
+			ast.JoinExprs(", ", t.Args),
 			strings.Join(t.Names, ", "),
 			t.Transformer.String())
 	}
 }
 
-func (t *Transformer) Blockly() blockly.Block {
+func (t *Transformer) Blockly() ast.Block {
 	signature, ok := transformers[t.Name]
 	if !ok {
 		t.Where.Error("Unknown transformer '%'", t.Name)
@@ -110,67 +110,67 @@ func (t *Transformer) Consumable() bool {
 	return true
 }
 
-func (t *Transformer) max() blockly.Block {
-	return blockly.Block{
+func (t *Transformer) max() ast.Block {
+	return ast.Block{
 		Type: "lists_maximum_value",
-		Fields: []blockly.Field{
+		Fields: []ast.Field{
 			{Name: "VAR1", Value: t.Names[0]},
 			{Name: "VAR2", Value: t.Names[1]},
 		},
-		Values: []blockly.Value{
+		Values: []ast.Value{
 			{Name: "LIST", Block: t.List.Blockly()},
 			{Name: "COMPARE", Block: t.Transformer.Blockly()},
 		},
 	}
 }
 
-func (t *Transformer) min() blockly.Block {
-	return blockly.Block{
+func (t *Transformer) min() ast.Block {
+	return ast.Block{
 		Type: "lists_minimum_value",
-		Fields: []blockly.Field{
+		Fields: []ast.Field{
 			{Name: "VAR1", Value: t.Names[0]},
 			{Name: "VAR2", Value: t.Names[1]},
 		},
-		Values: []blockly.Value{
+		Values: []ast.Value{
 			{Name: "LIST", Block: t.List.Blockly()},
 			{Name: "COMPARE", Block: t.Transformer.Blockly()},
 		},
 	}
 }
 
-func (t *Transformer) listSortByKey() blockly.Block {
-	return blockly.Block{
+func (t *Transformer) listSortByKey() ast.Block {
+	return ast.Block{
 		Type:   "lists_sort_key",
-		Fields: []blockly.Field{{Name: "VAR", Value: t.Names[0]}},
-		Values: []blockly.Value{
+		Fields: []ast.Field{{Name: "VAR", Value: t.Names[0]}},
+		Values: []ast.Value{
 			{Name: "LIST", Block: t.List.Blockly()},
 			{Name: "KEY", Block: t.Transformer.Blockly()},
 		},
 	}
 }
 
-func (t *Transformer) listSort() blockly.Block {
-	return blockly.Block{
+func (t *Transformer) listSort() ast.Block {
+	return ast.Block{
 		Type: "lists_sort_comparator",
-		Fields: []blockly.Field{
+		Fields: []ast.Field{
 			{Name: "VAR1", Value: t.Names[0]},
 			{Name: "VAR2", Value: t.Names[1]},
 		},
-		Values: []blockly.Value{
+		Values: []ast.Value{
 			{Name: "LIST", Block: t.List.Blockly()},
 			{Name: "COMPARE", Block: t.Transformer.Blockly()},
 		},
 	}
 }
 
-func (t *Transformer) listReduce() blockly.Block {
-	return blockly.Block{
+func (t *Transformer) listReduce() ast.Block {
+	return ast.Block{
 		Type: "lists_reduce",
-		Fields: []blockly.Field{
+		Fields: []ast.Field{
 			{Name: "VAR1", Value: t.Names[0]},
 			{Name: "VAR2", Value: t.Names[1]},
 		},
-		Values: []blockly.Value{
+		Values: []ast.Value{
 			{Name: "LIST", Block: t.List.Blockly()},
 			{Name: "INITANSWER", Block: t.Args[0].Blockly()},
 			{Name: "COMBINE", Block: t.Transformer.Blockly()},
@@ -178,22 +178,22 @@ func (t *Transformer) listReduce() blockly.Block {
 	}
 }
 
-func (t *Transformer) listFilter() blockly.Block {
-	return blockly.Block{
+func (t *Transformer) listFilter() ast.Block {
+	return ast.Block{
 		Type:   "lists_filter",
-		Fields: []blockly.Field{{Name: "VAR", Value: t.Names[0]}},
-		Values: []blockly.Value{
+		Fields: []ast.Field{{Name: "VAR", Value: t.Names[0]}},
+		Values: []ast.Value{
 			{Name: "LIST", Block: t.List.Blockly()},
 			{Name: "TEST", Block: t.Transformer.Blockly()},
 		},
 	}
 }
 
-func (t *Transformer) listMap() blockly.Block {
-	return blockly.Block{
+func (t *Transformer) listMap() ast.Block {
+	return ast.Block{
 		Type:   "lists_map",
-		Fields: []blockly.Field{{Name: "VAR", Value: t.Names[0]}},
-		Values: []blockly.Value{
+		Fields: []ast.Field{{Name: "VAR", Value: t.Names[0]}},
+		Values: []ast.Value{
 			{Name: "LIST", Block: t.List.Blockly()},
 			{Name: "TO", Block: t.Transformer.Blockly()},
 		},

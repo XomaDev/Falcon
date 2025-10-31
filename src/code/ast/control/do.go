@@ -1,13 +1,13 @@
 package control
 
 import (
-	"Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/sugar"
 )
 
 type Do struct {
-	Body   []blockly.Expr
-	Result blockly.Expr
+	Body   []ast.Expr
+	Result ast.Expr
 }
 
 func (d *Do) Yail() string {
@@ -16,14 +16,14 @@ func (d *Do) Yail() string {
 }
 
 func (d *Do) String() string {
-	return sugar.Format("do {\n%} -> %", blockly.PadBody(d.Body), d.Result.String())
+	return sugar.Format("do {\n%} -> %", ast.PadBody(d.Body), d.Result.String())
 }
 
-func (d *Do) Blockly() blockly.Block {
-	return blockly.Block{
+func (d *Do) Blockly() ast.Block {
+	return ast.Block{
 		Type:       "controls_do_then_return",
-		Statements: []blockly.Statement{blockly.CreateStatement("STM", d.Body)},
-		Values:     []blockly.Value{{Name: "VALUE", Block: d.Result.Blockly()}},
+		Statements: []ast.Statement{ast.CreateStatement("STM", d.Body)},
+		Values:     []ast.Value{{Name: "VALUE", Block: d.Result.Blockly()}},
 	}
 }
 

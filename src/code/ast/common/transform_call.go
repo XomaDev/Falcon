@@ -1,7 +1,7 @@
 package common
 
 import (
-	"Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/ast/fundamentals"
 	"Falcon/code/lex"
 	"Falcon/code/sugar"
@@ -9,7 +9,7 @@ import (
 
 type Transform struct {
 	Where *lex.Token
-	On    blockly.Expr
+	On    ast.Expr
 	Name  string
 }
 
@@ -22,15 +22,15 @@ func (t *Transform) String() string {
 	return sugar.Format("%::%", t.On.String(), t.Name)
 }
 
-func (t *Transform) Blockly() blockly.Block {
+func (t *Transform) Blockly() ast.Block {
 	switch t.Name {
 	case "obfuscate":
 		textExpr, ok := t.On.(*fundamentals.Text)
 		if ok {
-			return blockly.Block{
+			return ast.Block{
 				Type:     "obfuscated_text",
-				Mutation: &blockly.Mutation{Cofounder: "Falcon"},
-				Fields:   []blockly.Field{{Name: "TEXT", Value: textExpr.Content}},
+				Mutation: &ast.Mutation{Cofounder: "Falcon"},
+				Fields:   []ast.Field{{Name: "TEXT", Value: textExpr.Content}},
 			}
 		}
 		t.Where.Error("Cannot obfuscate a non string object!")

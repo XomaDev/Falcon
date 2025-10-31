@@ -4,7 +4,7 @@ package main
 
 import (
 	codeAnalysis "Falcon/code/analysis"
-	"Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/context"
 	"Falcon/code/diff"
 	"Falcon/code/lex"
@@ -112,11 +112,11 @@ func analyzeSyntax() {
 
 	println("\n=== Blockly XML ===\n")
 
-	blocks := make([]blockly.Block, len(expressions))
+	blocks := make([]ast.Block, len(expressions))
 	for i, expression := range expressions {
 		blocks[i] = expression.Blockly()
 	}
-	xmlBlock := blockly.XmlRoot{
+	xmlBlock := ast.XmlRoot{
 		Blocks: blocks,
 		XMLNS:  "https://developers.google.com/blockly/xml",
 	}

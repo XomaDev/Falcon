@@ -1,14 +1,14 @@
 package variables
 
 import (
-	"Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"strings"
 )
 
 type VarResult struct {
 	Names  []string
-	Values []blockly.Expr
-	Result blockly.Expr
+	Values []ast.Expr
+	Result ast.Expr
 }
 
 func (v *VarResult) Yail() string {
@@ -22,7 +22,7 @@ func (v *VarResult) String() string {
 
 	var varLines []string
 	for i, name := range v.Names {
-		varLines = append(varLines, blockly.PadDirect(name+" = "+v.Values[i].String()))
+		varLines = append(varLines, ast.PadDirect(name+" = "+v.Values[i].String()))
 	}
 	builder.WriteString(strings.Join(varLines, ",\n"))
 	builder.WriteString("\n) -> ")
@@ -30,13 +30,13 @@ func (v *VarResult) String() string {
 	return builder.String()
 }
 
-func (v *VarResult) Blockly() blockly.Block {
-	return blockly.Block{
+func (v *VarResult) Blockly() ast.Block {
+	return ast.Block{
 		Type:     "local_declaration_expression",
-		Mutation: &blockly.Mutation{LocalNames: blockly.MakeLocalNames(v.Names...)},
-		Fields:   blockly.ToFields("VAR", v.Names),
-		Values: append(blockly.ValuesByPrefix("DECL", v.Values),
-			blockly.Value{Name: "RETURN", Block: v.Result.Blockly()}),
+		Mutation: &ast.Mutation{LocalNames: ast.MakeLocalNames(v.Names...)},
+		Fields:   ast.ToFields("VAR", v.Names),
+		Values: append(ast.ValuesByPrefix("DECL", v.Values),
+			ast.Value{Name: "RETURN", Block: v.Result.Blockly()}),
 	}
 }
 

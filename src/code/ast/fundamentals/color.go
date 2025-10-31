@@ -1,7 +1,7 @@
 package fundamentals
 
 import (
-	"Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/lex"
 )
 
@@ -46,14 +46,14 @@ func (c *Color) String() string {
 	return "color:" + c.Name
 }
 
-func (c *Color) Blockly() blockly.Block {
+func (c *Color) Blockly() ast.Block {
 	signature, ok := colorsCodes[c.Name]
 	if !ok {
 		c.Where.Error("Unknown color name '%'", c.Name)
 	}
-	return blockly.Block{
+	return ast.Block{
 		Type:   signature.BlockType,
-		Fields: []blockly.Field{{Name: "COLOR", Value: signature.Code}},
+		Fields: []ast.Field{{Name: "COLOR", Value: signature.Code}},
 	}
 }
 

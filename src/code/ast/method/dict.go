@@ -1,13 +1,13 @@
 package method
 
 import (
-	"Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 )
 
-func (c *Call) dictMethods(signature *Signature) blockly.Block {
-	switch signature.Name {
+func (c *Call) dictMethods(signature *Signature) ast.Block {
+	switch signature.BlocklyName {
 	case "dictionaries_length", "dictionaries_dict_to_alist":
-		return c.simpleOperand(signature.Name, "DICT")
+		return c.simpleOperand(signature.BlocklyName, "DICT")
 	case "dictionaries_lookup":
 		return c.dictGet()
 	case "dictionaries_set_pair":
@@ -27,79 +27,79 @@ func (c *Call) dictMethods(signature *Signature) blockly.Block {
 	case "dictionaries_getters":
 		return c.dictGetters()
 	default:
-		panic("Unknown text method " + signature.Name)
+		panic("Unknown text method " + signature.BlocklyName)
 	}
 }
 
-func (c *Call) dictGetters() blockly.Block {
+func (c *Call) dictGetters() ast.Block {
 	var fieldOp string
 	if c.Name == "values" {
 		fieldOp = "VALUES"
 	} else {
 		fieldOp = "KEYS"
 	}
-	return blockly.Block{
+	return ast.Block{
 		Type:   "dictionaries_getters",
-		Fields: []blockly.Field{{Name: "OP", Value: fieldOp}},
-		Values: []blockly.Value{{Name: "DICT", Block: c.On.Blockly()}},
+		Fields: []ast.Field{{Name: "OP", Value: fieldOp}},
+		Values: []ast.Value{{Name: "DICT", Block: c.On.Blockly()}},
 	}
 }
 
-func (c *Call) dictWalkTree() blockly.Block {
-	return blockly.Block{
+func (c *Call) dictWalkTree() ast.Block {
+	return ast.Block{
 		Type:   "dictionaries_walk_tree",
-		Values: blockly.MakeValueArgs(c.On, "DICT", c.Args, "PATH"),
+		Values: ast.MakeValueArgs(c.On, "DICT", c.Args, "PATH"),
 	}
 }
 
-func (c *Call) dictMergeInto() blockly.Block {
-	return blockly.Block{
+func (c *Call) dictMergeInto() ast.Block {
+	return ast.Block{
 		Type: "dictionaries_combine_dicts",
-		Values: []blockly.Value{
+		Values: []ast.Value{
 			{Name: "DICT1", Block: c.Args[0].Blockly()},
 			{Name: "DICT2", Block: c.On.Blockly()},
 		},
 	}
 }
 
-func (c *Call) dictContainsKey() blockly.Block {
-	return blockly.Block{
+func (c *Call) dictContainsKey() ast.Block {
+	return ast.Block{
 		Type:   "dictionaries_is_key_in",
-		Values: blockly.MakeValueArgs(c.On, "DICT", c.Args, "KEY"),
+		Values: ast.MakeValueArgs(c.On, "DICT", c.Args, "KEY"),
 	}
 }
 
-func (c *Call) dictSetAtPath() blockly.Block {
-	return blockly.Block{
+func (c *Call) dictSetAtPath() ast.Block {
+	return ast.Block{
 		Type:   "dictionaries_recursive_set",
-		Values: blockly.MakeValueArgs(c.On, "DICT", c.Args, "KEYS", "VALUE"),
+		Values: ast.MakeValueArgs(c.On, "DICT", c.Args, "KEYS", "VALUE"),
 	}
 }
 
-func (c *Call) dictGetAtPath() blockly.Block {
-	return blockly.Block{
+func (c *Call) dictGetAtPath() ast.Block {
+	return ast.Block{
 		Type:   "dictionaries_recursive_lookup",
-		Values: blockly.MakeValueArgs(c.On, "DICT", c.Args, "KEYS", "NOTFOUND"),
+		Values: ast.MakeValueArgs(c.On, "DICT", c.Args, "KEYS", "NOTFOUND"),
 	}
 }
 
-func (c *Call) dictDelete() blockly.Block {
-	return blockly.Block{
+func (c *Call) dictDelete() ast.Block {
+	return ast.Block{
 		Type:   "dictionaries_delete_pair",
-		Values: blockly.MakeValueArgs(c.On, "DICT", c.Args, "KEY"),
+		Values: ast.MakeValueArgs(c.On, "DICT", c.Args, "KEY"),
 	}
 }
 
-func (c *Call) dictSet() blockly.Block {
-	return blockly.Block{
+func (c *Call) dictSet() ast.Block {
+	return ast.Block{
 		Type:   "dictionaries_set_pair",
-		Values: blockly.MakeValueArgs(c.On, "DICT", c.Args, "KEY", "VALUE"),
+		Values: ast.MakeValueArgs(c.On, "DICT", c.Args, "KEY", "VALUE"),
 	}
 }
 
-func (c *Call) dictGet() blockly.Block {
-	return blockly.Block{
+func (c *Call) dictGet() ast.Block {
+	return ast.Block{
 		Type:   "dictionaries_lookup",
-		Values: blockly.MakeValueArgs(c.On, "DICT", c.Args, "KEY", "NOTFOUND"),
+		Values: ast.MakeValueArgs(c.On, "DICT", c.Args, "KEY", "NOTFOUND"),
 	}
 }

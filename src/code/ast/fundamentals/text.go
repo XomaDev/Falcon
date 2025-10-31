@@ -1,6 +1,8 @@
 package fundamentals
 
-import "Falcon/code/ast/blockly"
+import (
+	"Falcon/code/ast"
+)
 
 type Text struct {
 	Content string
@@ -16,10 +18,10 @@ func (t *Text) String() string {
 	return "\"" + t.Content + "\""
 }
 
-func (t *Text) Blockly() blockly.Block {
-	return blockly.Block{
+func (t *Text) Blockly() ast.Block {
+	return ast.Block{
 		Type:   "text",
-		Fields: blockly.FieldsFromMap(map[string]string{"TEXT": t.Content}),
+		Fields: ast.FieldsFromMap(map[string]string{"TEXT": t.Content}),
 	}
 }
 
