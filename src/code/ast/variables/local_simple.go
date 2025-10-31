@@ -12,8 +12,14 @@ type SimpleVar struct {
 }
 
 func (v *SimpleVar) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	yail := "(let ($local_"
+	yail += v.Name
+	yail += " "
+	yail += v.Value.Yail()
+	yail += "))"
+	yail += ast.PadBodyYail(v.Body)
+	yail += ")"
+	return yail
 }
 
 func (v *SimpleVar) String() string {

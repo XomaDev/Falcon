@@ -10,8 +10,12 @@ type Global struct {
 }
 
 func (g *Global) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	yail := "(def g$"
+	yail += g.Name
+	yail += " "
+	yail += g.Value.Yail()
+	yail += ")"
+	return yail
 }
 
 func (g *Global) String() string {

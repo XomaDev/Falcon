@@ -12,8 +12,18 @@ type Var struct {
 }
 
 func (v *Var) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	yail := "(let ( "
+	for k, name := range v.Names {
+		yail += "($local_"
+		yail += name
+		yail += " "
+		yail += v.Values[k].Yail()
+		yail += ") "
+	}
+	yail += ") "
+	yail += ast.PadBodyYail(v.Body)
+	yail += ")"
+	return yail
 }
 
 func (v *Var) String() string {

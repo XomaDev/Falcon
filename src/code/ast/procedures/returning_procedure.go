@@ -24,7 +24,7 @@ func (v *RetProcedure) Yail() string {
 }
 
 func (v *RetProcedure) String() string {
-	return sugar.Format("func %(%) =\n\t%", v.Name, strings.Join(v.Parameters, ", "), ast.Pad(v.Result))
+	return sugar.Format("func %(%) =\n\t%", v.Name, strings.Join(v.Parameters, ", "), ast.Pad(v.Result.String()))
 }
 
 func (v *RetProcedure) Blockly() ast.Block {

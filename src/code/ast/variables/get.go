@@ -12,8 +12,15 @@ type Get struct {
 }
 
 func (g *Get) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	var yail string
+	if g.Global {
+		yail = "(get-var g$"
+	} else {
+		yail += "(lexical-value $"
+	}
+	yail += g.Name
+	yail += ")"
+	return yail
 }
 
 func (g *Get) String() string {

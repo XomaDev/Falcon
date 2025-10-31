@@ -18,7 +18,7 @@ func (v *VoidProcedure) Yail() string {
 	yail += " "
 	yail += strings.Join(v.Parameters, "$param_")
 	yail += ")"
-	yail += ast.PadBody(v.Body)
+	yail += ast.PadBodyYail(v.Body)
 	yail += ")"
 	return yail
 }

@@ -4,8 +4,8 @@ import (
 	"strings"
 )
 
-func Pad(code Expr) string {
-	return "  " + strings.Replace(code.String(), "\n", "\n  ", -1) + "\n"
+func Pad(code string) string {
+	return "  " + strings.Replace(code, "\n", "\n  ", -1) + "\n"
 }
 
 func PadDirect(code string) string {
@@ -15,7 +15,15 @@ func PadDirect(code string) string {
 func PadBody(blocks []Expr) string {
 	var builder strings.Builder
 	for _, block := range blocks {
-		builder.WriteString(Pad(block))
+		builder.WriteString(Pad(block.String()))
+	}
+	return builder.String()
+}
+
+func PadBodyYail(blocks []Expr) string {
+	var builder strings.Builder
+	for _, block := range blocks {
+		builder.WriteString(Pad(block.Yail()))
 	}
 	return builder.String()
 }
