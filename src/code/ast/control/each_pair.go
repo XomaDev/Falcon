@@ -2,6 +2,9 @@ package control
 
 import (
 	"Falcon/code/ast"
+	"Falcon/code/ast/fundamentals"
+	"Falcon/code/ast/list"
+	"Falcon/code/ast/variables"
 	"Falcon/code/sugar"
 )
 
@@ -13,8 +16,24 @@ type EachPair struct {
 }
 
 func (e *EachPair) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	getKey := list.Get{
+		List:  &variables.Get{Global: false, Name: "item"},
+		Index: &fundamentals.Number{Content: "1"},
+	}
+	getValue := list.Get{
+		List:  &variables.Get{Global: false, Name: "item"},
+		Index: &fundamentals.Number{Content: "2"},
+	}
+	setKey := "( " + e.KeyName + " " + getKey.Yail() + ")"
+	setValue := "( " + e.ValueName + " " + getValue.Yail() + ")"
+
+	yail := "(foreach $item "
+	yail += "(let ( " + setKey + " " + setValue + ")"
+	yail += ast.PadBodyYail(e.Body)
+	yail += ") "
+	yail += e.Iterable.Yail()
+	yail += ") "
+	return yail
 }
 
 func (e *EachPair) String() string {

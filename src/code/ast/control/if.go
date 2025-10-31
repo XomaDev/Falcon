@@ -12,8 +12,27 @@ type If struct {
 }
 
 func (i *If) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	yail := ""
+	for k, cond := range i.Conditions {
+		if k != 0 {
+			yail += " (begin "
+		}
+		yail += "(if "
+		yail += cond.Yail()
+		yail += "(begin "
+		yail += ast.PadBodyYail(i.Bodies[k])
+		yail += ")"
+	}
+	if i.ElseBody != nil {
+		yail += " (begin "
+		yail += ast.PadBodyYail(i.ElseBody)
+		yail += ")"
+	}
+	for k := 0; k < len(i.Conditions)-1; k++ {
+		yail += "))"
+	}
+	yail += ")"
+	return yail
 }
 
 func (i *If) String() string {

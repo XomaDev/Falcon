@@ -12,8 +12,14 @@ type Each struct {
 }
 
 func (e *Each) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	yail := "(foreach $"
+	yail += e.IName
+	yail += " (begin "
+	yail += ast.PadBodyYail(e.Body)
+	yail += ") "
+	yail += e.Iterable.String()
+	yail += ")"
+	return yail
 }
 
 func (e *Each) String() string {

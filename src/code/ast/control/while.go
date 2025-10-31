@@ -11,8 +11,12 @@ type While struct {
 }
 
 func (w *While) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	yail := "(while "
+	yail += w.Condition.Yail()
+	yail += " (begin "
+	yail += ast.PadBodyYail(w.Body)
+	yail += "))"
+	return yail
 }
 
 func (w *While) String() string {

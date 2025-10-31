@@ -11,8 +11,12 @@ type Do struct {
 }
 
 func (d *Do) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	yail := "(begin "
+	yail += ast.PadBody(d.Body)
+	yail += " "
+	yail += d.Result.Yail()
+	yail += ")"
+	return yail
 }
 
 func (d *Do) String() string {

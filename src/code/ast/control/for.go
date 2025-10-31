@@ -14,8 +14,18 @@ type For struct {
 }
 
 func (f *For) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	yail := "(forrange "
+	yail += f.IName
+	yail += " (begin "
+	yail += ast.PadBodyYail(f.Body)
+	yail += ") "
+	yail += f.From.Yail()
+	yail += " "
+	yail += f.To.Yail()
+	yail += " "
+	yail += f.By.Yail()
+	yail += ")"
+	return yail
 }
 
 func (f *For) String() string {

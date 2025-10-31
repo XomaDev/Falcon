@@ -12,8 +12,7 @@ type SimpleIf struct {
 }
 
 func (s *SimpleIf) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	return "(if " + s.Condition.Yail() + " " + s.Then.Yail() + " " + s.Else.Yail() + ")"
 }
 
 func (s *SimpleIf) String() string {

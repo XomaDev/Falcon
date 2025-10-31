@@ -9,8 +9,7 @@ type Break struct {
 }
 
 func (b *Break) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	return "(*yail-break* #f)"
 }
 
 func (b *Break) String() string {
