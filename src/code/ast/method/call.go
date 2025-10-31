@@ -14,11 +14,6 @@ type Call struct {
 	Args  []blockly2.Expr
 }
 
-func (c *Call) Yail() string {
-	//TODO implement me
-	panic("implement me")
-}
-
 type Signature struct {
 	Module     string
 	Name       string
@@ -93,7 +88,35 @@ func (c *Call) String() string {
 	return sugar.Format(pFormat, c.On.String(), c.Name, blockly2.JoinExprs(", ", c.Args))
 }
 
+func (c *Call) Yail() string {
+	signature := c.getSignature()
+	switch signature.Module {
+	case "text":
+		return c.textMethodsYail(signature)
+	//case "list":
+	//	return c.listMethods(signature)
+	//case "dict":
+	//	return c.dictMethods(signature)
+	default:
+		panic("Unknown module " + signature.Module)
+	}
+}
+
 func (c *Call) Blockly() blockly2.Block {
+	signature := c.getSignature()
+	switch signature.Module {
+	case "text":
+		return c.textMethods(signature)
+	case "list":
+		return c.listMethods(signature)
+	case "dict":
+		return c.dictMethods(signature)
+	default:
+		panic("Unknown module " + signature.Module)
+	}
+}
+
+func (c *Call) getSignature() *Signature {
 	signature, ok := signatures[c.Name]
 	if !ok {
 		c.Where.Error("Cannot find method .%", c.Name)
@@ -111,16 +134,7 @@ func (c *Call) Blockly() blockly2.Block {
 				strconv.Itoa(minArgs), strconv.Itoa(gotArgLen), c.Name)
 		}
 	}
-	switch signature.Module {
-	case "text":
-		return c.textMethods(signature)
-	case "list":
-		return c.listMethods(signature)
-	case "dict":
-		return c.dictMethods(signature)
-	default:
-		panic("Unknown module " + signature.Module)
-	}
+	return signature
 }
 
 func (c *Call) Continuous() bool {
