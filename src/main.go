@@ -19,9 +19,9 @@ func main() {
 	println("Hello from Falcon!\n")
 
 	//diffTest()
-	//analyzeSyntax()
+	analyzeSyntax()
 	//xmlTest()
-	designTest()
+	//designTest()
 }
 
 func designTest() {
@@ -108,6 +108,12 @@ func analyzeSyntax() {
 	println(langParser.GetComponentDefinitionsCode())
 	for _, expression := range expressions {
 		println(expression.String())
+	}
+
+	println("\n=== YAIL ===\n")
+
+	for _, expression := range expressions {
+		println(expression.Yail())
 	}
 
 	println("\n=== Blockly XML ===\n")

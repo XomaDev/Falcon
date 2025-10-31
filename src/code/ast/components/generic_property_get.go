@@ -12,7 +12,14 @@ type GenericPropertyGet struct {
 }
 
 func (g *GenericPropertyGet) Yail() string {
-
+	yail := "(get-property-and-check "
+	yail += g.Component.Yail()
+	yail += " '"
+	yail += g.ComponentType
+	yail += " '"
+	yail += g.Property
+	yail += ")"
+	return yail
 }
 
 func (g *GenericPropertyGet) String() string {
