@@ -13,8 +13,14 @@ type RetProcedure struct {
 }
 
 func (v *RetProcedure) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	yail := "(def ("
+	yail += v.Name
+	yail += " "
+	yail += strings.Join(v.Parameters, "$param_")
+	yail += ") "
+	yail += v.Result.Yail()
+	yail += ")"
+	return yail
 }
 
 func (v *RetProcedure) String() string {

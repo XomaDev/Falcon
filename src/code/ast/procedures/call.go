@@ -13,8 +13,12 @@ type Call struct {
 }
 
 func (v *Call) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	yail := "((get-var "
+	yail += v.Name
+	yail += ") "
+	yail += ast.JoinYailExprs(" ", v.Arguments)
+	yail += ")"
+	return yail
 }
 
 func (v *Call) String() string {
