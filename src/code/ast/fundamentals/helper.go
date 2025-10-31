@@ -9,6 +9,11 @@ type HelperDropdown struct {
 	Option string
 }
 
+func (h *HelperDropdown) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (h *HelperDropdown) String() string {
 	return h.Key + "@" + h.Option
 }

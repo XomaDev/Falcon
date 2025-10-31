@@ -9,6 +9,10 @@ type Component struct {
 	Type string
 }
 
+func (c *Component) Yail() string {
+	return "(get-component " + c.Name + ")"
+}
+
 func (c *Component) String() string {
 	return c.Name
 }

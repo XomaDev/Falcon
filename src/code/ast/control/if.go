@@ -11,6 +11,11 @@ type If struct {
 	ElseBody   []blockly2.Expr
 }
 
+func (i *If) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (i *If) String() string {
 	var builder strings.Builder
 

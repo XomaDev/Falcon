@@ -14,6 +14,11 @@ type BinaryExpr struct {
 	Operator lex.Type
 }
 
+func (b *BinaryExpr) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (b *BinaryExpr) String() string {
 	return blockly2.JoinExprs(" "+*b.Where.Content+" ", b.Operands)
 }

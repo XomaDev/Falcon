@@ -11,6 +11,11 @@ type VarResult struct {
 	Result blockly.Expr
 }
 
+func (v *VarResult) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (v *VarResult) String() string {
 	var builder strings.Builder
 	builder.WriteString("compute(\n")

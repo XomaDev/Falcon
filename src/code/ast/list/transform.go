@@ -17,6 +17,11 @@ type Transformer struct {
 	Transformer blockly.Expr
 }
 
+func (t *Transformer) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 type Signature struct {
 	ArgSize  int
 	NameSize int

@@ -12,6 +12,11 @@ type VoidProcedure struct {
 	Body       []blockly.Expr
 }
 
+func (v *VoidProcedure) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (v *VoidProcedure) String() string {
 	return sugar.Format("func %(%) {\n%}", v.Name, strings.Join(v.Parameters, ", "), blockly.PadBody(v.Body))
 }

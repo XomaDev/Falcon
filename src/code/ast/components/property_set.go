@@ -12,6 +12,11 @@ type PropertySet struct {
 	Value         blockly2.Expr
 }
 
+func (p *PropertySet) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (p *PropertySet) String() string {
 	return sugar.Format("%.% = %", p.ComponentName, p.Property, p.Value.String())
 }

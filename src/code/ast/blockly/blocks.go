@@ -74,6 +74,7 @@ type Arg struct {
 
 type Expr interface {
 	String() string
+	Yail() string
 	Blockly() Block
 	Continuous() bool
 	Consumable() bool

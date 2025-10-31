@@ -14,6 +14,11 @@ type Call struct {
 	Args  []blockly2.Expr
 }
 
+func (c *Call) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 type Signature struct {
 	Module     string
 	Name       string

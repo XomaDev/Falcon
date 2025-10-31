@@ -14,6 +14,11 @@ type Event struct {
 	Body          []blockly2.Expr
 }
 
+func (e *Event) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (e *Event) String() string {
 	pFormat := "when %.%(%) {\n%}"
 	return sugar.Format(pFormat, e.ComponentName, e.Event, strings.Join(e.Parameters, ", "), blockly2.PadBody(e.Body))

@@ -11,6 +11,11 @@ type PropertyGet struct {
 	Property      string
 }
 
+func (p *PropertyGet) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (p *PropertyGet) String() string {
 	return sugar.Format("%.%", p.ComponentName, p.Property)
 }

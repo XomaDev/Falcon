@@ -10,6 +10,11 @@ type While struct {
 	Body      []blockly2.Expr
 }
 
+func (w *While) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (w *While) String() string {
 	return sugar.Format("while % {\n%}", w.Condition.String(), blockly2.PadBody(w.Body))
 }

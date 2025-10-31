@@ -10,6 +10,11 @@ type Get struct {
 	Index blockly2.Expr
 }
 
+func (g *Get) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (g *Get) String() string {
 	pFormat := "%[%]"
 	if !g.List.Continuous() {

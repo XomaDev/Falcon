@@ -12,6 +12,11 @@ type GenericPropertySet struct {
 	Value         blockly2.Expr
 }
 
+func (g *GenericPropertySet) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (g *GenericPropertySet) String() string {
 	return sugar.Format("set(%, %, %, %)", g.ComponentType, g.Component.String(), g.Property, g.Value.String())
 

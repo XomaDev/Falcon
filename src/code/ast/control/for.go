@@ -13,6 +13,11 @@ type For struct {
 	Body  []blockly2.Expr
 }
 
+func (f *For) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (f *For) String() string {
 	return sugar.Format("for %: % to % by % {\n%}",
 		f.IName, f.From.String(), f.To.String(), f.By.String(), blockly2.PadBody(f.Body))

@@ -10,11 +10,22 @@ type Color struct {
 	Name  string
 }
 
+func (c *Color) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 type Signature struct {
 	Code      string
 	BlockType string
 }
 
+// TODO:
+//
+//	There are a lot more possible colors!
+//	When parsing from XML blockly, it contains a hexadecimal,
+//	So we do not need this table at all.
+//	Invent a new way to use hex in the language, perhaps color(#ffffff) or something like that
 var colorsCodes = map[string]Signature{
 	"white":     {Code: "#ffffff", BlockType: "color_white"},
 	"black":     {Code: "#000000", BlockType: "color_black"},

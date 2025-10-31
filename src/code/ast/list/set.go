@@ -11,6 +11,11 @@ type Set struct {
 	Value blockly2.Expr
 }
 
+func (s *Set) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (s *Set) String() string {
 	pFormat := "%[%] = %"
 	if !s.List.Continuous() {

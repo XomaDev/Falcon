@@ -12,6 +12,11 @@ type RetProcedure struct {
 	Result     blockly.Expr
 }
 
+func (v *RetProcedure) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (v *RetProcedure) String() string {
 	return sugar.Format("func %(%) =\n\t%", v.Name, strings.Join(v.Parameters, ", "), blockly.Pad(v.Result))
 }

@@ -11,6 +11,11 @@ type Each struct {
 	Body     []blockly2.Expr
 }
 
+func (e *Each) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (e *Each) String() string {
 	return sugar.Format("each % -> % {\n%}", e.IName, e.Iterable.String(), blockly2.PadBody(e.Body))
 }

@@ -8,6 +8,11 @@ type Break struct {
 	// Hola Amigo!
 }
 
+func (b *Break) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (b *Break) String() string {
 	return "break"
 }

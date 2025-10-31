@@ -111,3 +111,11 @@ func JoinExprs(separator string, expressions []Expr) string {
 	}
 	return strings.Join(exprStrings, separator)
 }
+
+func JoinYailExprs(separator string, expressions []Expr) string {
+	exprStrings := make([]string, len(expressions))
+	for i, expr := range expressions {
+		exprStrings[i] = expr.Yail()
+	}
+	return strings.Join(exprStrings, separator)
+}

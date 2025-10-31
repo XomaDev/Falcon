@@ -9,6 +9,11 @@ type Global struct {
 	Value blky.Expr
 }
 
+func (g *Global) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (g *Global) String() string {
 	return "global " + g.Name + " = " + g.Value.String()
 }

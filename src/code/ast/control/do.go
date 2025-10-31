@@ -10,6 +10,11 @@ type Do struct {
 	Result blockly.Expr
 }
 
+func (d *Do) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (d *Do) String() string {
 	return sugar.Format("do {\n%} -> %", blockly.PadBody(d.Body), d.Result.String())
 }

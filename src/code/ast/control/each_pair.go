@@ -12,6 +12,11 @@ type EachPair struct {
 	Body      []blockly2.Expr
 }
 
+func (e *EachPair) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (e *EachPair) String() string {
 	return sugar.Format("each %::% -> % {\n%}", e.KeyName, e.ValueName, e.Iterable.String(), blockly2.PadBody(e.Body))
 }

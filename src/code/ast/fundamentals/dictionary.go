@@ -1,23 +1,33 @@
 package fundamentals
 
 import (
-	blockly2 "Falcon/code/ast/blockly"
+	"Falcon/code/ast/blockly"
 	"Falcon/code/sugar"
+	"strings"
 )
 
 type Dictionary struct {
-	Elements []blockly2.Expr
+	Elements []blockly.Expr
+}
+
+func (d *Dictionary) Yail() string {
+	yail := "(call-yail-primitive make-yail-dictionary (*list-for-runtime* "
+	yail += blockly.JoinYailExprs(" ", d.Elements)
+	yail += ") '("
+	yail += strings.Repeat("pair ", len(d.Elements))
+	yail += ") \"make a dictionary\")"
+	return yail
 }
 
 func (d *Dictionary) String() string {
-	return sugar.Format("{ % }", blockly2.JoinExprs(", ", d.Elements))
+	return sugar.Format("{ % }", blockly.JoinExprs(", ", d.Elements))
 }
 
-func (d *Dictionary) Blockly() blockly2.Block {
-	return blockly2.Block{
+func (d *Dictionary) Blockly() blockly.Block {
+	return blockly.Block{
 		Type:     "dictionaries_create_with",
-		Mutation: &blockly2.Mutation{ItemCount: len(d.Elements)},
-		Values:   blockly2.ValuesByPrefix("ADD", d.Elements),
+		Mutation: &blockly.Mutation{ItemCount: len(d.Elements)},
+		Values:   blockly.ValuesByPrefix("ADD", d.Elements),
 	}
 }
 
@@ -32,12 +42,16 @@ func (d *Dictionary) Consumable() bool {
 type WalkAll struct {
 }
 
+func (w *WalkAll) Yail() string {
+	return "(static-field com.google.appinventor.components.runtime.util.YailDictionary 'ALL)"
+}
+
 func (w *WalkAll) String() string {
 	return "walkAll"
 }
 
-func (w *WalkAll) Blockly() blockly2.Block {
-	return blockly2.Block{Type: "dictionaries_walk_all"}
+func (w *WalkAll) Blockly() blockly.Block {
+	return blockly.Block{Type: "dictionaries_walk_all"}
 }
 
 func (w *WalkAll) Continuous() bool {

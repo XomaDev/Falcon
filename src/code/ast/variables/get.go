@@ -11,6 +11,11 @@ type Get struct {
 	Name   string
 }
 
+func (g *Get) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (g *Get) String() string {
 	if g.Global {
 		return "this." + g.Name

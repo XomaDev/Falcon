@@ -1,21 +1,23 @@
 package fundamentals
 
-import (
-	blockly2 "Falcon/code/ast/blockly"
-)
+import "Falcon/code/ast/blockly"
 
 type Number struct {
 	Content string
+}
+
+func (n *Number) Yail() string {
+	return n.Content
 }
 
 func (n *Number) String() string {
 	return n.Content
 }
 
-func (n *Number) Blockly() blockly2.Block {
-	return blockly2.Block{
+func (n *Number) Blockly() blockly.Block {
+	return blockly.Block{
 		Type:   "math_number",
-		Fields: blockly2.FieldsFromMap(map[string]string{"NUM": n.Content}),
+		Fields: blockly.FieldsFromMap(map[string]string{"NUM": n.Content}),
 	}
 }
 

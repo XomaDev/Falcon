@@ -12,6 +12,11 @@ type Call struct {
 	Returning  bool
 }
 
+func (v *Call) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (v *Call) String() string {
 	return sugar.Format("%(%)", v.Name, blockly.JoinExprs(", ", v.Arguments))
 }

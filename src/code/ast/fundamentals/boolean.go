@@ -9,6 +9,13 @@ type Boolean struct {
 	Value bool
 }
 
+func (b *Boolean) Yail() string {
+	if b.Value {
+		return "#t"
+	}
+	return "#f"
+}
+
 func (b *Boolean) String() string {
 	if b.Value {
 		return "true"
@@ -39,6 +46,11 @@ func (b *Boolean) Consumable() bool {
 
 type Not struct {
 	Expr blockly2.Expr
+}
+
+func (n *Not) Yail() string {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (n *Not) String() string {

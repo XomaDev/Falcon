@@ -12,6 +12,11 @@ type GenericMethodCall struct {
 	Args          []blockly.Expr
 }
 
+func (g *GenericMethodCall) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (g *GenericMethodCall) String() string {
 	return sugar.Format("call(%, %, %, %)", g.ComponentType, g.Component.String(), g.Method, blockly.JoinExprs(", ", g.Args))
 }

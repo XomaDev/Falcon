@@ -38,6 +38,11 @@ type FuncCall struct {
 	Args  []blockly2.Expr
 }
 
+func (f *FuncCall) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (f *FuncCall) String() string {
 	return sugar.Format("%(%)", f.Name, blockly2.JoinExprs(", ", f.Args))
 }

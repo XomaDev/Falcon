@@ -12,6 +12,11 @@ type Question struct {
 	Question string
 }
 
+func (q *Question) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (q *Question) String() string {
 	pFormat := "% ? %"
 	if !q.On.Continuous() {

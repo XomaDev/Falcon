@@ -12,6 +12,11 @@ type MethodCall struct {
 	Args          []blockly.Expr
 }
 
+func (m *MethodCall) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (m *MethodCall) String() string {
 	return sugar.Format("%.%(%)", m.ComponentName, m.Method, blockly.JoinExprs(", ", m.Args))
 }

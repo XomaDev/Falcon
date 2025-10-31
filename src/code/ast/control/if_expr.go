@@ -11,6 +11,11 @@ type SimpleIf struct {
 	Else      blockly2.Expr
 }
 
+func (s *SimpleIf) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (s *SimpleIf) String() string {
 	return sugar.Format("if (%) % else %", s.Condition.String(), s.Then.String(), s.Else.String())
 }

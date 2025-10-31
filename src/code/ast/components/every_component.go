@@ -9,6 +9,11 @@ type EveryComponent struct {
 	Type string
 }
 
+func (e *EveryComponent) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (e *EveryComponent) String() string {
 	return sugar.Format("every(%)", e.Type)
 }

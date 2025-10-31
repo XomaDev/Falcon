@@ -6,6 +6,11 @@ import (
 
 type EmptySocket struct{}
 
+func (e *EmptySocket) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (e *EmptySocket) String() string {
 	return "undefined"
 }

@@ -11,6 +11,11 @@ type Var struct {
 	Body   []blockly.Expr
 }
 
+func (v *Var) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (v *Var) String() string {
 	var builder strings.Builder
 	builder.WriteString("local(\n")

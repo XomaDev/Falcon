@@ -11,6 +11,11 @@ type SimpleVar struct {
 	Body  []blockly.Expr
 }
 
+func (v *SimpleVar) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (v *SimpleVar) String() string {
 	var builder strings.Builder
 	builder.WriteString("local ")

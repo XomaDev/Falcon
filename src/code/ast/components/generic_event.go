@@ -13,6 +13,11 @@ type GenericEvent struct {
 	Body          []blockly2.Expr
 }
 
+func (e *GenericEvent) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (e *GenericEvent) String() string {
 	pFormat := "when any %.%(%) {\n%}"
 	return sugar.Format(pFormat, e.ComponentType, e.Event, strings.Join(e.Parameters, ", "), blockly2.PadBody(e.Body))

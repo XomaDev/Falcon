@@ -11,6 +11,11 @@ type GenericPropertyGet struct {
 	Property      string
 }
 
+func (g *GenericPropertyGet) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (g *GenericPropertyGet) String() string {
 	return sugar.Format("get(%, %, %)", g.ComponentType, g.Component.String(), g.Property)
 }

@@ -13,6 +13,11 @@ type Transform struct {
 	Name  string
 }
 
+func (t *Transform) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (t *Transform) String() string {
 	return sugar.Format("%::%", t.On.String(), t.Name)
 }
