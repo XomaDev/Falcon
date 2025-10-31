@@ -14,8 +14,18 @@ type GenericEvent struct {
 }
 
 func (e *GenericEvent) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	yail := "(define-generic-event "
+	yail += e.ComponentType
+	yail += " "
+	yail += e.Event
+	yail += " ("
+	for _, p := range e.Parameters {
+		yail += "$" + p + " "
+	}
+	yail += ") (set-this-form) "
+	yail += ast.PadBodyYail(e.Body)
+	yail += ")"
+	return yail
 }
 
 func (e *GenericEvent) String() string {

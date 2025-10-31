@@ -13,8 +13,15 @@ type PropertySet struct {
 }
 
 func (p *PropertySet) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	yail := "(set-and-coerce-property! '"
+	yail += p.ComponentType
+	yail += " '"
+	yail += p.Property
+	yail += " "
+	yail += p.Value.Yail()
+	yail += " '"
+	yail += ")"
+	return yail
 }
 
 func (p *PropertySet) String() string {

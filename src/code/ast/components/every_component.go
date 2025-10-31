@@ -10,8 +10,7 @@ type EveryComponent struct {
 }
 
 func (e *EveryComponent) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	return "(get-all-components " + e.Type + ")"
 }
 
 func (e *EveryComponent) String() string {

@@ -15,8 +15,18 @@ type Event struct {
 }
 
 func (e *Event) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	yail := "(define-event "
+	yail += e.ComponentName
+	yail += " "
+	yail += e.Event
+	yail += " ("
+	for _, p := range e.Parameters {
+		yail += "$" + p + " "
+	}
+	yail += ") (set-this-form) "
+	yail += ast.PadBodyYail(e.Body)
+	yail += ")"
+	return yail
 }
 
 func (e *Event) String() string {

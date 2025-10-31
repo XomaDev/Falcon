@@ -12,8 +12,7 @@ type GenericPropertyGet struct {
 }
 
 func (g *GenericPropertyGet) Yail() string {
-	//TODO implement me
-	panic("implement me")
+
 }
 
 func (g *GenericPropertyGet) String() string {

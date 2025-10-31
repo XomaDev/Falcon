@@ -12,8 +12,12 @@ type PropertyGet struct {
 }
 
 func (p *PropertyGet) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	yail := "(get-property '"
+	yail += p.ComponentName
+	yail += " '"
+	yail += p.Property
+	yail += ")"
+	return yail
 }
 
 func (p *PropertyGet) String() string {

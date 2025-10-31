@@ -3,6 +3,7 @@ package components
 import (
 	"Falcon/code/ast"
 	"Falcon/code/sugar"
+	"strings"
 )
 
 type MethodCall struct {
@@ -13,8 +14,19 @@ type MethodCall struct {
 }
 
 func (m *MethodCall) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	yail := "(call-component-method "
+	//TODO ??? there seems to be some special casing for Block
+	yail += "'"
+	yail += m.ComponentName
+	yail += " '"
+	yail += m.Method
+	yail += " (*list-for-runtime*"
+	yail += ast.JoinYailExprs(" ", m.Args)
+	yail += ") '("
+	yail += strings.Repeat("any ", len(m.Args))
+	yail += "))"
+	yail += "))"
+	return yail
 }
 
 func (m *MethodCall) String() string {

@@ -3,6 +3,7 @@ package components
 import (
 	"Falcon/code/ast"
 	"Falcon/code/sugar"
+	"strings"
 )
 
 type GenericMethodCall struct {
@@ -13,8 +14,18 @@ type GenericMethodCall struct {
 }
 
 func (g *GenericMethodCall) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	yail := "(call-component-type-method "
+	yail += g.Component.Yail()
+	yail += " '"
+	yail += g.ComponentType
+	yail += " '"
+	yail += g.Method
+	yail += " (*list-for-runtime* "
+	yail += ast.JoinYailExprs(" ", g.Args)
+	yail += ") '("
+	yail += strings.Repeat("any ", len(g.Args))
+	yail += "))"
+	return yail
 }
 
 func (g *GenericMethodCall) String() string {

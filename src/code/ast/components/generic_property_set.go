@@ -13,8 +13,17 @@ type GenericPropertySet struct {
 }
 
 func (g *GenericPropertySet) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	yail := "(set-and-coerce-property-and-check! "
+	yail += g.Component.Yail()
+	yail += " '"
+	yail += g.ComponentType
+	yail += " '"
+	yail += g.Property
+	yail += " "
+	yail += ast.PadDirect(g.Value.Yail())
+	yail += " '"
+	yail += "any)"
+	return yail
 }
 
 func (g *GenericPropertySet) String() string {
