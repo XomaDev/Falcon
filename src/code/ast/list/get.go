@@ -11,11 +11,8 @@ type Get struct {
 }
 
 func (g *Get) Yail() string {
-	yail := "(call-yail-primitive yail-list-get-item (*list-for-runtime* "
-	yail += g.List.Yail() // TODO handled differently if list is empty
-	yail += " " + g.Index.Yail()
-	yail += ") '(list number) \"select list item\")"
-	return yail
+	args := []ast.Expr{g.List, g.Index}
+	return ast.PrimitiveCall("yail-list-get-item", "setListItem", args, "list number")
 }
 
 func (g *Get) String() string {

@@ -11,12 +11,7 @@ type List struct {
 }
 
 func (l *List) Yail() string {
-	yail := "(call-yail-primitive make-yail-list (*list-for-runtime* "
-	yail += ast.JoinYailExprs(" ", l.Elements)
-	yail += ") '("
-	yail += strings.Repeat("any ", len(l.Elements))
-	yail += ") \"make a list\")"
-	return yail
+	return ast.PrimitiveCall("make-yail-list", "make a list", l.Elements, strings.Repeat("any ", len(l.Elements)))
 }
 
 func (l *List) String() string {

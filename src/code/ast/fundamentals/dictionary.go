@@ -11,12 +11,12 @@ type Dictionary struct {
 }
 
 func (d *Dictionary) Yail() string {
-	yail := "(call-yail-primitive make-yail-dictionary (*list-for-runtime* "
-	yail += ast.JoinYailExprs(" ", d.Elements)
-	yail += ") '("
-	yail += strings.Repeat("pair ", len(d.Elements))
-	yail += ") \"make a dictionary\")"
-	return yail
+	return ast.PrimitiveCall(
+		"make-yail-dictionary",
+		"make a dictionary",
+		d.Elements,
+		strings.Repeat("pair ", len(d.Elements)),
+	)
 }
 
 func (d *Dictionary) String() string {
