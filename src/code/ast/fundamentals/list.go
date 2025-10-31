@@ -1,23 +1,28 @@
 package fundamentals
 
 import (
-	blockly2 "Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/sugar"
+	"strings"
 )
 
 type List struct {
-	Elements []blockly2.Expr
+	Elements []ast.Expr
+}
+
+func (l *List) Yail() string {
+	return ast.PrimitiveCall("make-yail-list", "make a list", l.Elements, strings.Repeat("any ", len(l.Elements)))
 }
 
 func (l *List) String() string {
-	return sugar.Format("[%]", blockly2.JoinExprs(", ", l.Elements))
+	return sugar.Format("[%]", ast.JoinExprs(", ", l.Elements))
 }
 
-func (l *List) Blockly() blockly2.Block {
-	return blockly2.Block{
+func (l *List) Blockly() ast.Block {
+	return ast.Block{
 		Type:     "lists_create_with",
-		Mutation: &blockly2.Mutation{ItemCount: len(l.Elements)},
-		Values:   blockly2.ValuesByPrefix("ADD", l.Elements),
+		Mutation: &ast.Mutation{ItemCount: len(l.Elements)},
+		Values:   ast.ValuesByPrefix("ADD", l.Elements),
 	}
 }
 

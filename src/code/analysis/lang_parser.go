@@ -1,19 +1,19 @@
 package analysis
 
 import (
-	blky "Falcon/ast/blockly"
-	"Falcon/ast/common"
-	"Falcon/ast/components"
-	"Falcon/ast/control"
-	"Falcon/ast/fundamentals"
-	"Falcon/ast/list"
-	"Falcon/ast/method"
-	"Falcon/ast/procedures"
-	"Falcon/ast/variables"
-	"Falcon/sugar"
+	blky "Falcon/code/ast"
+	"Falcon/code/ast/common"
+	"Falcon/code/ast/components"
+	"Falcon/code/ast/control"
+	"Falcon/code/ast/fundamentals"
+	"Falcon/code/ast/list"
+	"Falcon/code/ast/method"
+	"Falcon/code/ast/procedures"
+	"Falcon/code/ast/variables"
+	"Falcon/code/sugar"
 	"strings"
 )
-import l "Falcon/lex"
+import l "Falcon/code/lex"
 
 type NameResolver struct {
 	Procedures        map[string]Procedure
@@ -388,7 +388,7 @@ func (p *LangParser) element() blky.Expr {
 			left = p.objectCall(left)
 			continue
 		//case l.RightArrow:
-		//left = &common.Convert{Where: p.next(), On: left, Name: p.name()}
+		//left = &common.Convert{Where: p.next(), On: left, BlocklyName: p.name()}
 		//continue
 		case l.Question:
 			left = &common.Question{Where: p.next(), On: left, Question: p.name()}

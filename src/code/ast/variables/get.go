@@ -1,7 +1,7 @@
 package variables
 
 import (
-	blky "Falcon/code/ast/blockly"
+	blky "Falcon/code/ast"
 	"Falcon/code/lex"
 )
 
@@ -9,6 +9,18 @@ type Get struct {
 	Where  *lex.Token
 	Global bool
 	Name   string
+}
+
+func (g *Get) Yail() string {
+	var yail string
+	if g.Global {
+		yail = "(get-var g$"
+	} else {
+		yail += "(lexical-value $"
+	}
+	yail += g.Name
+	yail += ")"
+	return yail
 }
 
 func (g *Get) String() string {

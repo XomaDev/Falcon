@@ -1,19 +1,24 @@
 package common
 
 import (
-	blockly2 "Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 )
 
 type EmptySocket struct{}
+
+func (e *EmptySocket) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
 
 func (e *EmptySocket) String() string {
 	return "undefined"
 }
 
-func (e *EmptySocket) Blockly() blockly2.Block {
-	return blockly2.Block{
+func (e *EmptySocket) Blockly() ast.Block {
+	return ast.Block{
 		Type:   "math_number",
-		Fields: blockly2.FieldsFromMap(map[string]string{"NUM": "0"}),
+		Fields: ast.FieldsFromMap(map[string]string{"NUM": "0"}),
 	}
 }
 

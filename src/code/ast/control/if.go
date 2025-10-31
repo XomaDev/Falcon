@@ -1,14 +1,38 @@
 package control
 
 import (
-	blockly2 "Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"strings"
 )
 
 type If struct {
-	Conditions []blockly2.Expr
-	Bodies     [][]blockly2.Expr
-	ElseBody   []blockly2.Expr
+	Conditions []ast.Expr
+	Bodies     [][]ast.Expr
+	ElseBody   []ast.Expr
+}
+
+func (i *If) Yail() string {
+	yail := ""
+	for k, cond := range i.Conditions {
+		if k != 0 {
+			yail += " (begin "
+		}
+		yail += "(if "
+		yail += cond.Yail()
+		yail += "(begin "
+		yail += ast.PadBodyYail(i.Bodies[k])
+		yail += ")"
+	}
+	if i.ElseBody != nil {
+		yail += " (begin "
+		yail += ast.PadBodyYail(i.ElseBody)
+		yail += ")"
+	}
+	for k := 0; k < len(i.Conditions)-1; k++ {
+		yail += "))"
+	}
+	yail += ")"
+	return yail
 }
 
 func (i *If) String() string {
@@ -21,7 +45,7 @@ func (i *If) String() string {
 	for {
 		builder.WriteString(i.Conditions[currI].String())
 		builder.WriteString(" {\n")
-		builder.WriteString(blockly2.PadBody(i.Bodies[currI]))
+		builder.WriteString(ast.PadBody(i.Bodies[currI]))
 		builder.WriteString("}")
 		currI++
 		if currI < numConditions {
@@ -32,28 +56,28 @@ func (i *If) String() string {
 	}
 	if i.ElseBody != nil {
 		builder.WriteString(" else {\n")
-		builder.WriteString(blockly2.PadBody(i.ElseBody))
+		builder.WriteString(ast.PadBody(i.ElseBody))
 		builder.WriteString("}")
 	}
 	return builder.String()
 }
 
-func (i *If) Blockly() blockly2.Block {
-	conditions := blockly2.ValuesByPrefix("IF", i.Conditions)
-	bodies := blockly2.ToStatements("DO", i.Bodies)
+func (i *If) Blockly() ast.Block {
+	conditions := ast.ValuesByPrefix("IF", i.Conditions)
+	bodies := ast.ToStatements("DO", i.Bodies)
 
 	numbElifs := len(i.Conditions) - 1
 	var numbElse int
 
 	if i.ElseBody != nil {
-		bodies = append(bodies, blockly2.CreateStatement("ELSE", i.ElseBody))
+		bodies = append(bodies, ast.CreateStatement("ELSE", i.ElseBody))
 		numbElse = 1
 	} else {
 		numbElifs = 0
 	}
-	return blockly2.Block{
+	return ast.Block{
 		Type:       "controls_if",
-		Mutation:   &blockly2.Mutation{ElseIfCount: numbElifs, ElseCount: numbElse},
+		Mutation:   &ast.Mutation{ElseIfCount: numbElifs, ElseCount: numbElse},
 		Values:     conditions,
 		Statements: bodies,
 	}

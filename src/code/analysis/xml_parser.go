@@ -1,7 +1,7 @@
 package analysis
 
 import (
-	blky "Falcon/code/ast/blockly"
+	blky "Falcon/code/ast"
 	common2 "Falcon/code/ast/common"
 	components2 "Falcon/code/ast/components"
 	control2 "Falcon/code/ast/control"

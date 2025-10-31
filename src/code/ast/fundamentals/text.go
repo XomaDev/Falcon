@@ -1,21 +1,27 @@
 package fundamentals
 
 import (
-	blockly2 "Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 )
 
 type Text struct {
 	Content string
 }
 
+// Yail TODO fix escaping problem
+func (t *Text) Yail() string {
+	return "\"" + t.Content + "\""
+}
+
+// String TODO fix escaping problem
 func (t *Text) String() string {
 	return "\"" + t.Content + "\""
 }
 
-func (t *Text) Blockly() blockly2.Block {
-	return blockly2.Block{
+func (t *Text) Blockly() ast.Block {
+	return ast.Block{
 		Type:   "text",
-		Fields: blockly2.FieldsFromMap(map[string]string{"TEXT": t.Content}),
+		Fields: ast.FieldsFromMap(map[string]string{"TEXT": t.Content}),
 	}
 }
 

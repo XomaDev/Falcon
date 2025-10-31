@@ -1,33 +1,42 @@
 package procedures
 
 import (
-	"Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/sugar"
 )
 
 type Call struct {
 	Name       string
 	Parameters []string
-	Arguments  []blockly.Expr
+	Arguments  []ast.Expr
 	Returning  bool
 }
 
-func (v *Call) String() string {
-	return sugar.Format("%(%)", v.Name, blockly.JoinExprs(", ", v.Arguments))
+func (v *Call) Yail() string {
+	yail := "((get-var "
+	yail += v.Name
+	yail += ") "
+	yail += ast.JoinYailExprs(" ", v.Arguments)
+	yail += ")"
+	return yail
 }
 
-func (v *Call) Blockly() blockly.Block {
+func (v *Call) String() string {
+	return sugar.Format("%(%)", v.Name, ast.JoinExprs(", ", v.Arguments))
+}
+
+func (v *Call) Blockly() ast.Block {
 	var blockType string
 	if v.Returning {
 		blockType = "procedures_callreturn"
 	} else {
 		blockType = "procedures_callnoreturn"
 	}
-	return blockly.Block{
+	return ast.Block{
 		Type:     blockType,
-		Mutation: &blockly.Mutation{Name: v.Name, Args: blockly.ToArgs(v.Parameters)},
-		Fields:   []blockly.Field{{Name: "PROCNAME", Value: v.Name}},
-		Values:   blockly.ValuesByPrefix("ARG", v.Arguments),
+		Mutation: &ast.Mutation{Name: v.Name, Args: ast.ToArgs(v.Parameters)},
+		Fields:   []ast.Field{{Name: "PROCNAME", Value: v.Name}},
+		Values:   ast.ValuesByPrefix("ARG", v.Arguments),
 	}
 }
 

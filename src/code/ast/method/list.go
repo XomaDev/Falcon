@@ -1,16 +1,16 @@
 package method
 
 import (
-	blockly2 "Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 )
 
-func (c *Call) listMethods(signature *Signature) blockly2.Block {
-	switch signature.Name {
+func (c *Call) listMethods(signature *Signature) ast.Block {
+	switch signature.BlocklyName {
 	case "lists_length", "lists_pick_random_item", "lists_reverse", "lists_to_csv_row",
 		"lists_to_csv_table", "lists_sort", "lists_but_first", "lists_but_last":
-		return c.simpleOperand(signature.Name, "LIST")
+		return c.simpleOperand(signature.BlocklyName, "LIST")
 	case "dictionaries_alist_to_dict":
-		return c.simpleOperand(signature.Name, "PAIRS")
+		return c.simpleOperand(signature.BlocklyName, "PAIRS")
 	case "lists_add_items":
 		return c.listAdd()
 	case "lists_is_in":
@@ -30,70 +30,70 @@ func (c *Call) listMethods(signature *Signature) blockly2.Block {
 	case "lists_slice":
 		return c.listSlice()
 	default:
-		panic("Unknown list method " + signature.Name)
+		panic("Unknown list method " + signature.BlocklyName)
 	}
 }
 
-func (c *Call) listSlice() blockly2.Block {
-	return blockly2.Block{
+func (c *Call) listSlice() ast.Block {
+	return ast.Block{
 		Type:   "lists_slice",
-		Values: blockly2.MakeValueArgs(c.On, "LIST", c.Args, "INDEX1", "INDEX2"),
+		Values: ast.MakeValueArgs(c.On, "LIST", c.Args, "INDEX1", "INDEX2"),
 	}
 }
 
-func (c *Call) listJoin() blockly2.Block {
-	return blockly2.Block{
+func (c *Call) listJoin() ast.Block {
+	return ast.Block{
 		Type:   "lists_join_with_separator",
-		Values: blockly2.MakeValueArgs(c.On, "LIST", c.Args, "SEPARATOR"),
+		Values: ast.MakeValueArgs(c.On, "LIST", c.Args, "SEPARATOR"),
 	}
 }
 
-func (c *Call) listLookupInPairs() blockly2.Block {
-	return blockly2.Block{
+func (c *Call) listLookupInPairs() ast.Block {
+	return ast.Block{
 		Type:   "lists_lookup_in_pairs",
-		Values: blockly2.MakeValueArgs(c.On, "LIST", c.Args, "KEY", "NOTFOUND"),
+		Values: ast.MakeValueArgs(c.On, "LIST", c.Args, "KEY", "NOTFOUND"),
 	}
 }
 
-func (c *Call) listAppendList() blockly2.Block {
-	return blockly2.Block{
+func (c *Call) listAppendList() ast.Block {
+	return ast.Block{
 		Type:   "lists_append_list",
-		Values: blockly2.MakeValueArgs(c.On, "LIST0", c.Args, "LIST1"),
+		Values: ast.MakeValueArgs(c.On, "LIST0", c.Args, "LIST1"),
 	}
 }
 
-func (c *Call) listRemoveAt() blockly2.Block {
-	return blockly2.Block{
+func (c *Call) listRemoveAt() ast.Block {
+	return ast.Block{
 		Type:   "lists_remove_item",
-		Values: blockly2.MakeValueArgs(c.On, "LIST", c.Args, "INDEX"),
+		Values: ast.MakeValueArgs(c.On, "LIST", c.Args, "INDEX"),
 	}
 }
 
-func (c *Call) listInsertItem() blockly2.Block {
-	return blockly2.Block{
+func (c *Call) listInsertItem() ast.Block {
+	return ast.Block{
 		Type:   "lists_insert_item",
-		Values: blockly2.MakeValueArgs(c.On, "LIST", c.Args, "INDEX", "ITEM"),
+		Values: ast.MakeValueArgs(c.On, "LIST", c.Args, "INDEX", "ITEM"),
 	}
 }
 
-func (c *Call) listIndexOf() blockly2.Block {
-	return blockly2.Block{
+func (c *Call) listIndexOf() ast.Block {
+	return ast.Block{
 		Type:   "lists_position_in",
-		Values: blockly2.MakeValueArgs(c.On, "LIST", c.Args, "ITEM"),
+		Values: ast.MakeValueArgs(c.On, "LIST", c.Args, "ITEM"),
 	}
 }
 
-func (c *Call) listContainsItem() blockly2.Block {
-	return blockly2.Block{
+func (c *Call) listContainsItem() ast.Block {
+	return ast.Block{
 		Type:   "lists_is_in",
-		Values: blockly2.MakeValueArgs(c.On, "LIST", c.Args, "ITEM"),
+		Values: ast.MakeValueArgs(c.On, "LIST", c.Args, "ITEM"),
 	}
 }
 
-func (c *Call) listAdd() blockly2.Block {
-	return blockly2.Block{
+func (c *Call) listAdd() ast.Block {
+	return ast.Block{
 		Type:     "lists_add_items",
-		Mutation: &blockly2.Mutation{ItemCount: len(c.Args)},
-		Values:   blockly2.ValueArgsByPrefix(c.On, "LIST", "ITEM", c.Args),
+		Mutation: &ast.Mutation{ItemCount: len(c.Args)},
+		Values:   ast.ValueArgsByPrefix(c.On, "LIST", "ITEM", c.Args),
 	}
 }

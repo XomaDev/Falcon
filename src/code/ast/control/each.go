@@ -1,26 +1,37 @@
 package control
 
 import (
-	blockly2 "Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/sugar"
 )
 
 type Each struct {
 	IName    string
-	Iterable blockly2.Expr
-	Body     []blockly2.Expr
+	Iterable ast.Expr
+	Body     []ast.Expr
+}
+
+func (e *Each) Yail() string {
+	yail := "(foreach $"
+	yail += e.IName
+	yail += " (begin "
+	yail += ast.PadBodyYail(e.Body)
+	yail += ") "
+	yail += e.Iterable.String()
+	yail += ")"
+	return yail
 }
 
 func (e *Each) String() string {
-	return sugar.Format("each % -> % {\n%}", e.IName, e.Iterable.String(), blockly2.PadBody(e.Body))
+	return sugar.Format("each % -> % {\n%}", e.IName, e.Iterable.String(), ast.PadBody(e.Body))
 }
 
-func (e *Each) Blockly() blockly2.Block {
-	return blockly2.Block{
+func (e *Each) Blockly() ast.Block {
+	return ast.Block{
 		Type:       "controls_forEach",
-		Fields:     []blockly2.Field{{Name: "VAR", Value: e.IName}},
-		Values:     []blockly2.Value{{Name: "LIST", Block: e.Iterable.Blockly()}},
-		Statements: []blockly2.Statement{blockly2.CreateStatement("DO", e.Body)},
+		Fields:     []ast.Field{{Name: "VAR", Value: e.IName}},
+		Values:     []ast.Value{{Name: "LIST", Block: e.Iterable.Blockly()}},
+		Statements: []ast.Statement{ast.CreateStatement("DO", e.Body)},
 	}
 }
 
