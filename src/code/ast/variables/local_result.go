@@ -13,7 +13,7 @@ type VarResult struct {
 
 func (v *VarResult) String() string {
 	var builder strings.Builder
-	builder.WriteString("local(\n")
+	builder.WriteString("compute(\n")
 
 	var varLines []string
 	for i, name := range v.Names {

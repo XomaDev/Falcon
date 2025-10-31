@@ -104,6 +104,7 @@ func (s *SyntaxDiff) Merge() string {
 			// append machine word
 			s.mergedWords.WriteString(mWord)
 			s.mIndex++
+			//s.hIndex += 2
 		}
 	}
 	// drain all remaining mWords
