@@ -12,8 +12,14 @@ type Set struct {
 }
 
 func (s *Set) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	yail := "(call-yail-primitive yail-list-set-item! (*list-for-runtime* "
+	yail += s.List.Yail()
+	yail += " "
+	yail += s.Index.Yail()
+	yail += " "
+	yail += s.Value.Yail()
+	yail += ") '(list number any) \"replace list item\")"
+	return yail
 }
 
 func (s *Set) String() string {

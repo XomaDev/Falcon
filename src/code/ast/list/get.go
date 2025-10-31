@@ -11,8 +11,11 @@ type Get struct {
 }
 
 func (g *Get) Yail() string {
-	//TODO implement me
-	panic("implement me")
+	yail := "(call-yail-primitive yail-list-get-item (*list-for-runtime* "
+	yail += g.List.Yail() // TODO handled differently if list is empty
+	yail += " " + g.Index.Yail()
+	yail += ") '(list number) \"select list item\")"
+	return yail
 }
 
 func (g *Get) String() string {
