@@ -26,7 +26,7 @@ func main() {
 
 func designTest() {
 	xmlFile := "Screen1.aiml"
-	xmlPath := "/home/melon/GolandProjects/Falcon/" + xmlFile
+	xmlPath := "/home/ekina/GolandProjects/Falcon/" + xmlFile
 	codeBytes, err := os.ReadFile(xmlPath)
 	if err != nil {
 		panic(err)
