@@ -1,0 +1,50 @@
+package components
+
+import (
+	"Falcon/lang/code/ast"
+	"Falcon/lang/code/sugar"
+)
+
+type PropertyGet struct {
+	ComponentName string
+	ComponentType string
+	Property      string
+}
+
+func (p *PropertyGet) Yail() string {
+	yail := "(get-property '"
+	yail += p.ComponentName
+	yail += " '"
+	yail += p.Property
+	yail += ")"
+	return yail
+}
+
+func (p *PropertyGet) String() string {
+	return sugar.Format("%.%", p.ComponentName, p.Property)
+}
+
+func (p *PropertyGet) Blockly() ast.Block {
+	return ast.Block{
+		Type: "component_set_get",
+		Mutation: &ast.Mutation{
+			SetOrGet:      "get",
+			PropertyName:  p.Property,
+			IsGeneric:     false,
+			InstanceName:  p.ComponentName,
+			ComponentType: p.ComponentType,
+		},
+		Fields: []ast.Field{
+			{Name: "COMPONENT_SELECTOR", Value: p.ComponentName},
+			{Name: "PROP", Value: p.Property},
+		},
+	}
+}
+
+func (p *PropertyGet) Continuous() bool {
+	return false
+}
+
+func (p *PropertyGet) Consumable() bool {
+	return true
+}

@@ -3,13 +3,13 @@
 package main
 
 import (
-	codeAnalysis "Falcon/code/analysis"
-	"Falcon/code/ast"
-	"Falcon/code/context"
-	"Falcon/code/diff"
-	"Falcon/code/lex"
+	"Falcon/lang/code/analysis"
+	"Falcon/lang/code/ast"
+	"Falcon/lang/code/context"
+	"Falcon/lang/code/diff"
+	"Falcon/lang/code/lex"
+	"Falcon/lang/design"
 
-	designAnalysis "Falcon/design"
 	"encoding/xml"
 	"os"
 	"strings"
@@ -26,18 +26,18 @@ func main() {
 
 func designTest() {
 	xmlFile := "Screen1.aiml"
-	xmlPath := "/home/melon/GolandProjects/Falcon/" + xmlFile
+	xmlPath := "/home/ekina/GolandProjects/Falcon/testing/" + xmlFile
 	codeBytes, err := os.ReadFile(xmlPath)
 	if err != nil {
 		panic(err)
 	}
 	xmlString := string(codeBytes)
-	schemaString, err := designAnalysis.NewXmlParser(xmlString).ConvertXmlToSchema()
+	schemaString, err := design.NewXmlParser(xmlString).ConvertXmlToSchema()
 	if err != nil {
 		panic(err)
 	}
 	println(schemaString)
-	xmlString, err = designAnalysis.NewSchemaParser(schemaString).ConvertSchemaToXml()
+	xmlString, err = design.NewSchemaParser(schemaString).ConvertSchemaToXml()
 	if err != nil {
 		panic(err)
 	}
@@ -47,13 +47,13 @@ func designTest() {
 
 func xmlTest() {
 	xmlFile := "xml.txt"
-	xmlPath := "/home/ekina/GolandProjects/Falcon/" + xmlFile
+	xmlPath := "/home/ekina/GolandProjects/Falcon/testing/" + xmlFile
 	codeBytes, err := os.ReadFile(xmlPath)
 	if err != nil {
 		panic(err)
 	}
 	xmlString := string(codeBytes)
-	exprs := codeAnalysis.NewXMLParser(xmlString).ParseBlockly()
+	exprs := analysis.NewXMLParser(xmlString).ParseBlockly()
 	var machineSourceCode strings.Builder
 	for _, expr := range exprs {
 		machineSourceCode.WriteString(expr.String())
@@ -66,14 +66,14 @@ func diffTest() {
 	diff0 := "diff0.mist"
 	diff1 := "diff1.mist"
 
-	diff0Path := "/home/ekina/GolandProjects/Falcon/" + diff0
+	diff0Path := "/home/ekina/GolandProjects/Falcon/testing/" + diff0
 	codeBytes, err := os.ReadFile(diff0Path)
 	if err != nil {
 		panic(err)
 	}
 	diff0Code := string(codeBytes)
 
-	diff1Path := "/home/ekina/GolandProjects/Falcon/" + diff1
+	diff1Path := "/home/ekina/GolandProjects/Falcon/testing/" + diff1
 	codeBytes, err = os.ReadFile(diff1Path)
 	if err != nil {
 		panic(err)
@@ -86,7 +86,7 @@ func diffTest() {
 
 func analyzeSyntax() {
 	fileName := "hi.mist"
-	filePath := "/home/ekina/GolandProjects/Falcon/" + fileName
+	filePath := "/home/ekina/GolandProjects/Falcon/testing/" + fileName
 	codeBytes, err := os.ReadFile(filePath)
 	if err != nil {
 		panic(err)
@@ -103,7 +103,7 @@ func analyzeSyntax() {
 	println("\n=== AST ===\n")
 
 	// conversion of Falcon -> Blockly XML
-	langParser := codeAnalysis.NewLangParser(tokens)
+	langParser := analysis.NewLangParser(tokens)
 	expressions := langParser.ParseAll()
 	println(langParser.GetComponentDefinitionsCode())
 	for _, expression := range expressions {
@@ -133,7 +133,7 @@ func analyzeSyntax() {
 	println()
 
 	// reconversion of Blockly XML -> Falcon
-	exprs := codeAnalysis.NewXMLParser(xmlContent).ParseBlockly()
+	exprs := analysis.NewXMLParser(xmlContent).ParseBlockly()
 	var machineSourceCode strings.Builder
 	for _, expr := range exprs {
 		machineSourceCode.WriteString(expr.String())

@@ -1,0 +1,49 @@
+package components
+
+import (
+	ast2 "Falcon/lang/code/ast"
+	"Falcon/lang/code/sugar"
+)
+
+type GenericPropertyGet struct {
+	Component     ast2.Expr
+	ComponentType string
+	Property      string
+}
+
+func (g *GenericPropertyGet) Yail() string {
+	yail := "(get-property-and-check "
+	yail += g.Component.Yail()
+	yail += " '"
+	yail += g.ComponentType
+	yail += " '"
+	yail += g.Property
+	yail += ")"
+	return yail
+}
+
+func (g *GenericPropertyGet) String() string {
+	return sugar.Format("get(%, %, %)", g.ComponentType, g.Component.String(), g.Property)
+}
+
+func (g *GenericPropertyGet) Blockly() ast2.Block {
+	return ast2.Block{
+		Type: "component_set_get",
+		Mutation: &ast2.Mutation{
+			SetOrGet:      "get",
+			PropertyName:  g.Property,
+			IsGeneric:     true,
+			ComponentType: g.ComponentType,
+		},
+		Fields: []ast2.Field{{Name: "PROP", Value: g.Property}},
+		Values: []ast2.Value{{Name: "COMPONENT", Block: g.Component.Blockly()}},
+	}
+}
+
+func (g *GenericPropertyGet) Continuous() bool {
+	return false
+}
+
+func (g *GenericPropertyGet) Consumable() bool {
+	return true
+}

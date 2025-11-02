@@ -1,0 +1,35 @@
+package control
+
+import (
+	ast2 "Falcon/lang/code/ast"
+	"Falcon/lang/code/sugar"
+)
+
+type SimpleIf struct {
+	Condition ast2.Expr
+	Then      ast2.Expr
+	Else      ast2.Expr
+}
+
+func (s *SimpleIf) Yail() string {
+	return "(if " + s.Condition.Yail() + " " + s.Then.Yail() + " " + s.Else.Yail() + ")"
+}
+
+func (s *SimpleIf) String() string {
+	return sugar.Format("if (%) % else %", s.Condition.String(), s.Then.String(), s.Else.String())
+}
+
+func (s *SimpleIf) Blockly() ast2.Block {
+	return ast2.Block{
+		Type:   "controls_choose",
+		Values: ast2.MakeValues([]ast2.Expr{s.Condition, s.Then, s.Else}, "TEST", "THENRETURN", "ELSERETURN"),
+	}
+}
+
+func (s *SimpleIf) Continuous() bool {
+	return false
+}
+
+func (s *SimpleIf) Consumable() bool {
+	return true
+}
