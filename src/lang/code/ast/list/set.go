@@ -1,19 +1,19 @@
 package list
 
 import (
-	ast2 "Falcon/lang/code/ast"
+	"Falcon/lang/code/ast"
 	"Falcon/lang/code/sugar"
 )
 
 type Set struct {
-	List  ast2.Expr
-	Index ast2.Expr
-	Value ast2.Expr
+	List  ast.Expr
+	Index ast.Expr
+	Value ast.Expr
 }
 
 func (s *Set) Yail() string {
-	args := []ast2.Expr{s.List, s.Index, s.Value}
-	return ast2.PrimitiveCall("yail-list-set-item!", "replaceListItem", args, "list number any")
+	args := []ast.Expr{s.List, s.Index, s.Value}
+	return ast.PrimitiveCall("yail-list-set-item!", "replaceListItem", args, "list number any")
 }
 
 func (s *Set) String() string {
@@ -24,10 +24,10 @@ func (s *Set) String() string {
 	return sugar.Format(pFormat, s.List.String(), s.Index.String(), s.Value.String())
 }
 
-func (s *Set) Blockly() ast2.Block {
-	return ast2.Block{
+func (s *Set) Blockly() ast.Block {
+	return ast.Block{
 		Type:   "lists_replace_item",
-		Values: ast2.MakeValues([]ast2.Expr{s.List, s.Index, s.Value}, "LIST", "NUM", "ITEM"),
+		Values: ast.MakeValues([]ast.Expr{s.List, s.Index, s.Value}, "LIST", "NUM", "ITEM"),
 	}
 }
 

@@ -1,16 +1,16 @@
 package components
 
 import (
-	ast2 "Falcon/lang/code/ast"
+	"Falcon/lang/code/ast"
 	"Falcon/lang/code/sugar"
 	"strings"
 )
 
 type GenericMethodCall struct {
-	Component     ast2.Expr
+	Component     ast.Expr
 	ComponentType string
 	Method        string
-	Args          []ast2.Expr
+	Args          []ast.Expr
 }
 
 func (g *GenericMethodCall) Yail() string {
@@ -21,7 +21,7 @@ func (g *GenericMethodCall) Yail() string {
 	yail += " '"
 	yail += g.Method
 	yail += " (*list-for-runtime* "
-	yail += ast2.JoinYailExprs(" ", g.Args)
+	yail += ast.JoinYailExprs(" ", g.Args)
 	yail += ") '("
 	yail += strings.Repeat("any ", len(g.Args))
 	yail += "))"
@@ -29,18 +29,18 @@ func (g *GenericMethodCall) Yail() string {
 }
 
 func (g *GenericMethodCall) String() string {
-	return sugar.Format("call(%, %, %, %)", g.ComponentType, g.Component.String(), g.Method, ast2.JoinExprs(", ", g.Args))
+	return sugar.Format("call(%, %, %, %)", g.ComponentType, g.Component.String(), g.Method, ast.JoinExprs(", ", g.Args))
 }
 
-func (g *GenericMethodCall) Blockly() ast2.Block {
-	return ast2.Block{
+func (g *GenericMethodCall) Blockly() ast.Block {
+	return ast.Block{
 		Type: "component_method",
-		Mutation: &ast2.Mutation{
+		Mutation: &ast.Mutation{
 			MethodName:    g.Method,
 			IsGeneric:     true,
 			ComponentType: g.ComponentType,
 		},
-		Values: ast2.ValueArgsByPrefix(g.Component, "COMPONENT", "ARG", g.Args),
+		Values: ast.ValueArgsByPrefix(g.Component, "COMPONENT", "ARG", g.Args),
 	}
 }
 

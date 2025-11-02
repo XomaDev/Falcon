@@ -1,7 +1,7 @@
 package method
 
 import (
-	ast2 "Falcon/lang/code/ast"
+	"Falcon/lang/code/ast"
 	"Falcon/lang/code/lex"
 	"Falcon/lang/code/sugar"
 	"strconv"
@@ -10,9 +10,9 @@ import (
 
 type Call struct {
 	Where *lex.Token
-	On    ast2.Expr
+	On    ast.Expr
 	Name  string
-	Args  []ast2.Expr
+	Args  []ast.Expr
 }
 
 type Signature struct {
@@ -102,7 +102,7 @@ func (c *Call) String() string {
 	if !c.On.Continuous() {
 		pFormat = "(%).%(%)"
 	}
-	return sugar.Format(pFormat, c.On.String(), c.Name, ast2.JoinExprs(", ", c.Args))
+	return sugar.Format(pFormat, c.On.String(), c.Name, ast.JoinExprs(", ", c.Args))
 }
 
 func (c *Call) Yail() string {
@@ -116,10 +116,10 @@ func (c *Call) Yail() string {
 	default:
 		argTypes = signature.YailArgTypes
 	}
-	return ast2.PrimitiveCall(signature.YailName, c.Name, c.Args, argTypes)
+	return ast.PrimitiveCall(signature.YailName, c.Name, c.Args, argTypes)
 }
 
-func (c *Call) Blockly() ast2.Block {
+func (c *Call) Blockly() ast.Block {
 	signature := c.getSignature()
 	switch signature.Module {
 	case "text":
@@ -166,6 +166,6 @@ func (c *Call) Consumable() bool {
 	return signature.Consumable
 }
 
-func (c *Call) simpleOperand(blockType string, valueName string) ast2.Block {
-	return ast2.Block{Type: blockType, Values: []ast2.Value{{Name: valueName, Block: c.On.Blockly()}}}
+func (c *Call) simpleOperand(blockType string, valueName string) ast.Block {
+	return ast.Block{Type: blockType, Values: []ast.Value{{Name: valueName, Block: c.On.Blockly()}}}
 }

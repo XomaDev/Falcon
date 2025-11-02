@@ -1,18 +1,18 @@
 package control
 
 import (
-	ast2 "Falcon/lang/code/ast"
+	"Falcon/lang/code/ast"
 	"Falcon/lang/code/sugar"
 )
 
 type Do struct {
-	Body   []ast2.Expr
-	Result ast2.Expr
+	Body   []ast.Expr
+	Result ast.Expr
 }
 
 func (d *Do) Yail() string {
 	yail := "(begin "
-	yail += ast2.PadBody(d.Body)
+	yail += ast.PadBody(d.Body)
 	yail += " "
 	yail += d.Result.Yail()
 	yail += ")"
@@ -20,14 +20,14 @@ func (d *Do) Yail() string {
 }
 
 func (d *Do) String() string {
-	return sugar.Format("do {\n%} -> %", ast2.PadBody(d.Body), d.Result.String())
+	return sugar.Format("do {\n%} -> %", ast.PadBody(d.Body), d.Result.String())
 }
 
-func (d *Do) Blockly() ast2.Block {
-	return ast2.Block{
+func (d *Do) Blockly() ast.Block {
+	return ast.Block{
 		Type:       "controls_do_then_return",
-		Statements: []ast2.Statement{ast2.CreateStatement("STM", d.Body)},
-		Values:     []ast2.Value{{Name: "VALUE", Block: d.Result.Blockly()}},
+		Statements: []ast.Statement{ast.CreateStatement("STM", d.Body)},
+		Values:     []ast.Value{{Name: "VALUE", Block: d.Result.Blockly()}},
 	}
 }
 

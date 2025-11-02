@@ -1,14 +1,14 @@
 package variables
 
 import (
-	ast2 "Falcon/lang/code/ast"
+	"Falcon/lang/code/ast"
 	"strings"
 )
 
 type Var struct {
 	Names  []string
-	Values []ast2.Expr
-	Body   []ast2.Expr
+	Values []ast.Expr
+	Body   []ast.Expr
 }
 
 func (v *Var) Yail() string {
@@ -21,7 +21,7 @@ func (v *Var) Yail() string {
 		yail += ") "
 	}
 	yail += ") "
-	yail += ast2.PadBodyYail(v.Body)
+	yail += ast.PadBodyYail(v.Body)
 	yail += ")"
 	return yail
 }
@@ -32,22 +32,22 @@ func (v *Var) String() string {
 
 	var varLines []string
 	for i, name := range v.Names {
-		varLines = append(varLines, ast2.PadDirect(name+" = "+v.Values[i].String()))
+		varLines = append(varLines, ast.PadDirect(name+" = "+v.Values[i].String()))
 	}
 	builder.WriteString(strings.Join(varLines, ",\n"))
 	builder.WriteString("\n) {\n")
-	builder.WriteString(ast2.PadBody(v.Body))
+	builder.WriteString(ast.PadBody(v.Body))
 	builder.WriteString("}")
 	return builder.String()
 }
 
-func (v *Var) Blockly() ast2.Block {
-	return ast2.Block{
+func (v *Var) Blockly() ast.Block {
+	return ast.Block{
 		Type:       "local_declaration_statement",
-		Mutation:   &ast2.Mutation{LocalNames: ast2.MakeLocalNames(v.Names...)},
-		Fields:     ast2.ToFields("VAR", v.Names),
-		Values:     ast2.ValuesByPrefix("DECL", v.Values),
-		Statements: []ast2.Statement{ast2.CreateStatement("STACK", v.Body)},
+		Mutation:   &ast.Mutation{LocalNames: ast.MakeLocalNames(v.Names...)},
+		Fields:     ast.ToFields("VAR", v.Names),
+		Values:     ast.ValuesByPrefix("DECL", v.Values),
+		Statements: []ast.Statement{ast.CreateStatement("STACK", v.Body)},
 	}
 }
 

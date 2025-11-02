@@ -1,15 +1,15 @@
 package components
 
 import (
-	ast2 "Falcon/lang/code/ast"
+	"Falcon/lang/code/ast"
 	"Falcon/lang/code/sugar"
 )
 
 type GenericPropertySet struct {
-	Component     ast2.Expr
+	Component     ast.Expr
 	ComponentType string
 	Property      string
-	Value         ast2.Expr
+	Value         ast.Expr
 }
 
 func (g *GenericPropertySet) Yail() string {
@@ -20,7 +20,7 @@ func (g *GenericPropertySet) Yail() string {
 	yail += " '"
 	yail += g.Property
 	yail += " "
-	yail += ast2.PadDirect(g.Value.Yail())
+	yail += ast.PadDirect(g.Value.Yail())
 	yail += " '"
 	yail += "any)"
 	return yail
@@ -31,17 +31,17 @@ func (g *GenericPropertySet) String() string {
 
 }
 
-func (g *GenericPropertySet) Blockly() ast2.Block {
-	return ast2.Block{
+func (g *GenericPropertySet) Blockly() ast.Block {
+	return ast.Block{
 		Type: "component_set_get",
-		Mutation: &ast2.Mutation{
+		Mutation: &ast.Mutation{
 			SetOrGet:      "set",
 			PropertyName:  g.Property,
 			IsGeneric:     true,
 			ComponentType: g.ComponentType,
 		},
-		Fields: []ast2.Field{{Name: "PROP", Value: g.Property}},
-		Values: ast2.MakeValues([]ast2.Expr{g.Component, g.Value}, "COMPONENT", "VALUE"),
+		Fields: []ast.Field{{Name: "PROP", Value: g.Property}},
+		Values: ast.MakeValues([]ast.Expr{g.Component, g.Value}, "COMPONENT", "VALUE"),
 	}
 }
 

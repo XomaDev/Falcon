@@ -1,12 +1,12 @@
 package components
 
 import (
-	ast2 "Falcon/lang/code/ast"
+	"Falcon/lang/code/ast"
 	"Falcon/lang/code/sugar"
 )
 
 type GenericPropertyGet struct {
-	Component     ast2.Expr
+	Component     ast.Expr
 	ComponentType string
 	Property      string
 }
@@ -26,17 +26,17 @@ func (g *GenericPropertyGet) String() string {
 	return sugar.Format("get(%, %, %)", g.ComponentType, g.Component.String(), g.Property)
 }
 
-func (g *GenericPropertyGet) Blockly() ast2.Block {
-	return ast2.Block{
+func (g *GenericPropertyGet) Blockly() ast.Block {
+	return ast.Block{
 		Type: "component_set_get",
-		Mutation: &ast2.Mutation{
+		Mutation: &ast.Mutation{
 			SetOrGet:      "get",
 			PropertyName:  g.Property,
 			IsGeneric:     true,
 			ComponentType: g.ComponentType,
 		},
-		Fields: []ast2.Field{{Name: "PROP", Value: g.Property}},
-		Values: []ast2.Value{{Name: "COMPONENT", Block: g.Component.Blockly()}},
+		Fields: []ast.Field{{Name: "PROP", Value: g.Property}},
+		Values: []ast.Value{{Name: "COMPONENT", Block: g.Component.Blockly()}},
 	}
 }
 

@@ -1,33 +1,33 @@
 package control
 
 import (
-	ast2 "Falcon/lang/code/ast"
+	"Falcon/lang/code/ast"
 	"Falcon/lang/code/sugar"
 )
 
 type While struct {
-	Condition ast2.Expr
-	Body      []ast2.Expr
+	Condition ast.Expr
+	Body      []ast.Expr
 }
 
 func (w *While) Yail() string {
 	yail := "(while "
 	yail += w.Condition.Yail()
 	yail += " (begin "
-	yail += ast2.PadBodyYail(w.Body)
+	yail += ast.PadBodyYail(w.Body)
 	yail += "))"
 	return yail
 }
 
 func (w *While) String() string {
-	return sugar.Format("while % {\n%}", w.Condition.String(), ast2.PadBody(w.Body))
+	return sugar.Format("while % {\n%}", w.Condition.String(), ast.PadBody(w.Body))
 }
 
-func (w *While) Blockly() ast2.Block {
-	return ast2.Block{
+func (w *While) Blockly() ast.Block {
+	return ast.Block{
 		Type:       "controls_while",
-		Values:     []ast2.Value{{Name: "TEST", Block: w.Condition.Blockly()}},
-		Statements: []ast2.Statement{ast2.CreateStatement("DO", w.Body)},
+		Values:     []ast.Value{{Name: "TEST", Block: w.Condition.Blockly()}},
+		Statements: []ast.Statement{ast.CreateStatement("DO", w.Body)},
 	}
 }
 
