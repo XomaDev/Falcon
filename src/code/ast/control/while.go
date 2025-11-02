@@ -1,24 +1,33 @@
 package control
 
 import (
-	blockly2 "Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/sugar"
 )
 
 type While struct {
-	Condition blockly2.Expr
-	Body      []blockly2.Expr
+	Condition ast.Expr
+	Body      []ast.Expr
+}
+
+func (w *While) Yail() string {
+	yail := "(while "
+	yail += w.Condition.Yail()
+	yail += " (begin "
+	yail += ast.PadBodyYail(w.Body)
+	yail += "))"
+	return yail
 }
 
 func (w *While) String() string {
-	return sugar.Format("while % {\n%}", w.Condition.String(), blockly2.PadBody(w.Body))
+	return sugar.Format("while % {\n%}", w.Condition.String(), ast.PadBody(w.Body))
 }
 
-func (w *While) Blockly() blockly2.Block {
-	return blockly2.Block{
+func (w *While) Blockly() ast.Block {
+	return ast.Block{
 		Type:       "controls_while",
-		Values:     []blockly2.Value{{Name: "TEST", Block: w.Condition.Blockly()}},
-		Statements: []blockly2.Statement{blockly2.CreateStatement("DO", w.Body)},
+		Values:     []ast.Value{{Name: "TEST", Block: w.Condition.Blockly()}},
+		Statements: []ast.Statement{ast.CreateStatement("DO", w.Body)},
 	}
 }
 

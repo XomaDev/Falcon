@@ -1,7 +1,7 @@
 package fundamentals
 
 import (
-	"Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/lex"
 )
 
@@ -10,11 +10,22 @@ type Color struct {
 	Name  string
 }
 
+func (c *Color) Yail() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 type Signature struct {
 	Code      string
 	BlockType string
 }
 
+// TODO:
+//
+//	There are a lot more possible colors!
+//	When parsing from XML blockly, it contains a hexadecimal,
+//	So we do not need this table at all.
+//	Invent a new way to use hex in the language, perhaps color(#ffffff) or something like that
 var colorsCodes = map[string]Signature{
 	"white":     {Code: "#ffffff", BlockType: "color_white"},
 	"black":     {Code: "#000000", BlockType: "color_black"},
@@ -35,14 +46,14 @@ func (c *Color) String() string {
 	return "color:" + c.Name
 }
 
-func (c *Color) Blockly() blockly.Block {
+func (c *Color) Blockly() ast.Block {
 	signature, ok := colorsCodes[c.Name]
 	if !ok {
 		c.Where.Error("Unknown color name '%'", c.Name)
 	}
-	return blockly.Block{
+	return ast.Block{
 		Type:   signature.BlockType,
-		Fields: []blockly.Field{{Name: "COLOR", Value: signature.Code}},
+		Fields: []ast.Field{{Name: "COLOR", Value: signature.Code}},
 	}
 }
 

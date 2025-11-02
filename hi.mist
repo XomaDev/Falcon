@@ -1,6 +1,9 @@
-@Button { Button1 }
+local personality = {
+  "food": "Masala Dosa",
+  "fruit": "Mango",
+  "animal": "The Royal Bengal Tiger"
+}
 
-when Button1.Click {
-  println("Hello")
-  Button1
+each key::value -> personality {
+   println("My favourite " _ key _ " is " _ value)
 }

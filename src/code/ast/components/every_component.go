@@ -1,12 +1,16 @@
 package components
 
 import (
-	blky "Falcon/code/ast/blockly"
+	blky "Falcon/code/ast"
 	"Falcon/code/sugar"
 )
 
 type EveryComponent struct {
 	Type string
+}
+
+func (e *EveryComponent) Yail() string {
+	return "(get-all-components " + e.Type + ")"
 }
 
 func (e *EveryComponent) String() string {

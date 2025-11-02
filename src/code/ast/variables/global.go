@@ -1,12 +1,21 @@
 package variables
 
 import (
-	blky "Falcon/code/ast/blockly"
+	blky "Falcon/code/ast"
 )
 
 type Global struct {
 	Name  string
 	Value blky.Expr
+}
+
+func (g *Global) Yail() string {
+	yail := "(def g$"
+	yail += g.Name
+	yail += " "
+	yail += g.Value.Yail()
+	yail += ")"
+	return yail
 }
 
 func (g *Global) String() string {

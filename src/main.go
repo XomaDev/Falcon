@@ -4,7 +4,7 @@ package main
 
 import (
 	codeAnalysis "Falcon/code/analysis"
-	"Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/context"
 	"Falcon/code/diff"
 	"Falcon/code/lex"
@@ -19,9 +19,9 @@ func main() {
 	println("Hello from Falcon!\n")
 
 	//diffTest()
-	//analyzeSyntax()
+	analyzeSyntax()
 	//xmlTest()
-	designTest()
+	//designTest()
 }
 
 func designTest() {
@@ -110,13 +110,19 @@ func analyzeSyntax() {
 		println(expression.String())
 	}
 
+	println("\n=== YAIL ===\n")
+
+	for _, expression := range expressions {
+		println(expression.Yail())
+	}
+
 	println("\n=== Blockly XML ===\n")
 
-	blocks := make([]blockly.Block, len(expressions))
+	blocks := make([]ast.Block, len(expressions))
 	for i, expression := range expressions {
 		blocks[i] = expression.Blockly()
 	}
-	xmlBlock := blockly.XmlRoot{
+	xmlBlock := ast.XmlRoot{
 		Blocks: blocks,
 		XMLNS:  "https://developers.google.com/blockly/xml",
 	}

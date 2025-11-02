@@ -1,31 +1,42 @@
 package components
 
 import (
-	"Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/sugar"
 )
 
 type GenericPropertyGet struct {
-	Component     blockly.Expr
+	Component     ast.Expr
 	ComponentType string
 	Property      string
+}
+
+func (g *GenericPropertyGet) Yail() string {
+	yail := "(get-property-and-check "
+	yail += g.Component.Yail()
+	yail += " '"
+	yail += g.ComponentType
+	yail += " '"
+	yail += g.Property
+	yail += ")"
+	return yail
 }
 
 func (g *GenericPropertyGet) String() string {
 	return sugar.Format("get(%, %, %)", g.ComponentType, g.Component.String(), g.Property)
 }
 
-func (g *GenericPropertyGet) Blockly() blockly.Block {
-	return blockly.Block{
+func (g *GenericPropertyGet) Blockly() ast.Block {
+	return ast.Block{
 		Type: "component_set_get",
-		Mutation: &blockly.Mutation{
+		Mutation: &ast.Mutation{
 			SetOrGet:      "get",
 			PropertyName:  g.Property,
 			IsGeneric:     true,
 			ComponentType: g.ComponentType,
 		},
-		Fields: []blockly.Field{{Name: "PROP", Value: g.Property}},
-		Values: []blockly.Value{{Name: "COMPONENT", Block: g.Component.Blockly()}},
+		Fields: []ast.Field{{Name: "PROP", Value: g.Property}},
+		Values: []ast.Value{{Name: "COMPONENT", Block: g.Component.Blockly()}},
 	}
 }
 

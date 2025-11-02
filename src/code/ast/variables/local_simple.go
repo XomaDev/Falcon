@@ -1,14 +1,25 @@
 package variables
 
 import (
-	"Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"strings"
 )
 
 type SimpleVar struct {
 	Name  string
-	Value blockly.Expr
-	Body  []blockly.Expr
+	Value ast.Expr
+	Body  []ast.Expr
+}
+
+func (v *SimpleVar) Yail() string {
+	yail := "(let ($local_"
+	yail += v.Name
+	yail += " "
+	yail += v.Value.Yail()
+	yail += "))"
+	yail += ast.PadBodyYail(v.Body)
+	yail += ")"
+	return yail
 }
 
 func (v *SimpleVar) String() string {
@@ -18,20 +29,20 @@ func (v *SimpleVar) String() string {
 	builder.WriteString(" = ")
 	builder.WriteString(v.Value.String())
 	builder.WriteString("\n")
-	builder.WriteString(blockly.JoinExprs("\n", v.Body))
+	builder.WriteString(ast.JoinExprs("\n", v.Body))
 	return builder.String()
 }
 
-func (v *SimpleVar) Blockly() blockly.Block {
-	var statements []blockly.Statement
+func (v *SimpleVar) Blockly() ast.Block {
+	var statements []ast.Statement
 	if len(v.Body) > 0 {
-		statements = []blockly.Statement{blockly.CreateStatement("STACK", v.Body)}
+		statements = []ast.Statement{ast.CreateStatement("STACK", v.Body)}
 	}
-	return blockly.Block{
+	return ast.Block{
 		Type:       "local_declaration_statement",
-		Mutation:   &blockly.Mutation{LocalNames: blockly.MakeLocalNames(v.Name)},
-		Fields:     []blockly.Field{{Name: "VAR0", Value: v.Name}},
-		Values:     []blockly.Value{{Name: "DECL0", Block: v.Value.Blockly()}},
+		Mutation:   &ast.Mutation{LocalNames: ast.MakeLocalNames(v.Name)},
+		Fields:     []ast.Field{{Name: "VAR0", Value: v.Name}},
+		Values:     []ast.Value{{Name: "DECL0", Block: v.Value.Blockly()}},
 		Statements: statements,
 	}
 }

@@ -1,30 +1,46 @@
 package components
 
 import (
-	"Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/sugar"
+	"strings"
 )
 
 type GenericMethodCall struct {
-	Component     blockly.Expr
+	Component     ast.Expr
 	ComponentType string
 	Method        string
-	Args          []blockly.Expr
+	Args          []ast.Expr
+}
+
+func (g *GenericMethodCall) Yail() string {
+	yail := "(call-component-type-method "
+	yail += g.Component.Yail()
+	yail += " '"
+	yail += g.ComponentType
+	yail += " '"
+	yail += g.Method
+	yail += " (*list-for-runtime* "
+	yail += ast.JoinYailExprs(" ", g.Args)
+	yail += ") '("
+	yail += strings.Repeat("any ", len(g.Args))
+	yail += "))"
+	return yail
 }
 
 func (g *GenericMethodCall) String() string {
-	return sugar.Format("call(%, %, %, %)", g.ComponentType, g.Component.String(), g.Method, blockly.JoinExprs(", ", g.Args))
+	return sugar.Format("call(%, %, %, %)", g.ComponentType, g.Component.String(), g.Method, ast.JoinExprs(", ", g.Args))
 }
 
-func (g *GenericMethodCall) Blockly() blockly.Block {
-	return blockly.Block{
+func (g *GenericMethodCall) Blockly() ast.Block {
+	return ast.Block{
 		Type: "component_method",
-		Mutation: &blockly.Mutation{
+		Mutation: &ast.Mutation{
 			MethodName:    g.Method,
 			IsGeneric:     true,
 			ComponentType: g.ComponentType,
 		},
-		Values: blockly.ValueArgsByPrefix(g.Component, "COMPONENT", "ARG", g.Args),
+		Values: ast.ValueArgsByPrefix(g.Component, "COMPONENT", "ARG", g.Args),
 	}
 }
 

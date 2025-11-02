@@ -1,7 +1,7 @@
 package common
 
 import (
-	blockly2 "Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/ast/fundamentals"
 	"Falcon/code/ast/variables"
 	"Falcon/code/lex"
@@ -35,14 +35,19 @@ var mathConversions = map[string]string{
 type FuncCall struct {
 	Where *lex.Token
 	Name  string
-	Args  []blockly2.Expr
+	Args  []ast.Expr
+}
+
+func (f *FuncCall) Yail() string {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (f *FuncCall) String() string {
-	return sugar.Format("%(%)", f.Name, blockly2.JoinExprs(", ", f.Args))
+	return sugar.Format("%(%)", f.Name, ast.JoinExprs(", ", f.Args))
 }
 
-func (f *FuncCall) Blockly() blockly2.Block {
+func (f *FuncCall) Blockly() ast.Block {
 	switch f.Name {
 	case "root", "abs", "neg", "log", "exp", "round", "ceil", "floor",
 		"sin", "cos", "tan", "asin", "acos", "atan", "degrees", "radians",
@@ -126,19 +131,19 @@ func (f *FuncCall) Consumable() bool {
 	return true
 }
 
-func (f *FuncCall) everyComponent() blockly2.Block {
+func (f *FuncCall) everyComponent() ast.Block {
 	compType, ok := f.Args[0].(*variables.Get)
 	if !ok || compType.Global {
 		f.Where.Error("Expected a component type for every() 1st argument!")
 	}
-	return blockly2.Block{
+	return ast.Block{
 		Type:     "component_all_component_block",
-		Mutation: &blockly2.Mutation{ComponentType: compType.Name},
-		Fields:   []blockly2.Field{{Name: "COMPONENT_SELECTOR", Value: compType.Name}},
+		Mutation: &ast.Mutation{ComponentType: compType.Name},
+		Fields:   []ast.Field{{Name: "COMPONENT_SELECTOR", Value: compType.Name}},
 	}
 }
 
-func (f *FuncCall) genericCall() blockly2.Block {
+func (f *FuncCall) genericCall() ast.Block {
 	// arg[0] 	 compType
 	// arg[1] 	 component (any object)
 	// arg[2] 	 method name
@@ -151,18 +156,18 @@ func (f *FuncCall) genericCall() blockly2.Block {
 	if !ok || vGet.Global {
 		f.Where.Error("Expected a method name for call() 3rd argument!")
 	}
-	return blockly2.Block{
+	return ast.Block{
 		Type: "component_method",
-		Mutation: &blockly2.Mutation{
+		Mutation: &ast.Mutation{
 			MethodName:    vGet.Name,
 			IsGeneric:     true,
 			ComponentType: compType.Name,
 		},
-		Values: blockly2.ValueArgsByPrefix(f.Args[1], "COMPONENT", "ARG", f.Args[3:]),
+		Values: ast.ValueArgsByPrefix(f.Args[1], "COMPONENT", "ARG", f.Args[3:]),
 	}
 }
 
-func (f *FuncCall) genericGet() blockly2.Block {
+func (f *FuncCall) genericGet() ast.Block {
 	f.assertArgLen(3)
 	compType, ok := f.Args[0].(*variables.Get)
 	if !ok || compType.Global {
@@ -172,20 +177,20 @@ func (f *FuncCall) genericGet() blockly2.Block {
 	if !ok || vGet.Global {
 		f.Where.Error("Expected a property type for get() 3rd argument!")
 	}
-	return blockly2.Block{
+	return ast.Block{
 		Type: "component_set_get",
-		Mutation: &blockly2.Mutation{
+		Mutation: &ast.Mutation{
 			SetOrGet:      "get",
 			PropertyName:  vGet.Name,
 			IsGeneric:     true,
 			ComponentType: compType.Name,
 		},
-		Fields: []blockly2.Field{{Name: "PROP", Value: vGet.Name}},
-		Values: []blockly2.Value{{Name: "COMPONENT", Block: f.Args[1].Blockly()}},
+		Fields: []ast.Field{{Name: "PROP", Value: vGet.Name}},
+		Values: []ast.Value{{Name: "COMPONENT", Block: f.Args[1].Blockly()}},
 	}
 }
 
-func (f *FuncCall) genericSet() blockly2.Block {
+func (f *FuncCall) genericSet() ast.Block {
 	f.assertArgLen(4)
 	compType, ok := f.Args[0].(*variables.Get)
 	if !ok || compType.Global {
@@ -195,92 +200,92 @@ func (f *FuncCall) genericSet() blockly2.Block {
 	if !ok || vGet.Global {
 		f.Where.Error("Expected a property type for set() 3rd argument!")
 	}
-	return blockly2.Block{
+	return ast.Block{
 		Type: "component_set_get",
-		Mutation: &blockly2.Mutation{
+		Mutation: &ast.Mutation{
 			SetOrGet:      "set",
 			PropertyName:  vGet.Name,
 			IsGeneric:     true,
 			ComponentType: compType.Name,
 		},
-		Fields: []blockly2.Field{{Name: "PROP", Value: vGet.Name}},
-		Values: blockly2.MakeValues([]blockly2.Expr{f.Args[1], f.Args[3]}, "COMPONENT", "VALUE"),
+		Fields: []ast.Field{{Name: "PROP", Value: vGet.Name}},
+		Values: ast.MakeValues([]ast.Expr{f.Args[1], f.Args[3]}, "COMPONENT", "VALUE"),
 	}
 }
 
-func (f *FuncCall) splitColor() blockly2.Block {
-	return blockly2.Block{
+func (f *FuncCall) splitColor() ast.Block {
+	return ast.Block{
 		Type:   "color_make_color",
-		Values: blockly2.MakeValues(f.Args, "COLOR"),
+		Values: ast.MakeValues(f.Args, "COLOR"),
 	}
 }
 
-func (f *FuncCall) makeColor() blockly2.Block {
-	return blockly2.Block{
+func (f *FuncCall) makeColor() ast.Block {
+	return ast.Block{
 		Type:   "color_make_color",
-		Values: blockly2.MakeValues(f.Args, "COLORLIST"),
+		Values: ast.MakeValues(f.Args, "COLORLIST"),
 	}
 }
 
-func (f *FuncCall) copyDict() blockly2.Block {
-	return blockly2.Block{
+func (f *FuncCall) copyDict() ast.Block {
+	return ast.Block{
 		Type:   "dictionaries_copy",
-		Values: blockly2.MakeValues(f.Args, "DICT"),
+		Values: ast.MakeValues(f.Args, "DICT"),
 	}
 }
 
-func (f *FuncCall) copyList() blockly2.Block {
-	return blockly2.Block{
+func (f *FuncCall) copyList() ast.Block {
+	return ast.Block{
 		Type:   "lists_copy",
-		Values: blockly2.MakeValues(f.Args, "LIST"),
+		Values: ast.MakeValues(f.Args, "LIST"),
 	}
 }
 
-func (f *FuncCall) ctrlSimpleBlock(blockType string) blockly2.Block {
-	return blockly2.Block{Type: blockType}
+func (f *FuncCall) ctrlSimpleBlock(blockType string) ast.Block {
+	return ast.Block{Type: blockType}
 }
 
-func (f *FuncCall) closeScreenWithPlainText() blockly2.Block {
+func (f *FuncCall) closeScreenWithPlainText() ast.Block {
 	f.assertArgLen(1)
-	return blockly2.Block{
+	return ast.Block{
 		Type:   "controls_closeScreenWithPlainText",
-		Values: blockly2.MakeValues(f.Args, "TEXT"),
+		Values: ast.MakeValues(f.Args, "TEXT"),
 	}
 }
 
-func (f *FuncCall) closeScreenWithValue() blockly2.Block {
+func (f *FuncCall) closeScreenWithValue() ast.Block {
 	f.assertArgLen(1)
-	return blockly2.Block{
+	return ast.Block{
 		Type:   "controls_closeScreenWithValue",
-		Values: blockly2.MakeValues(f.Args, "SCREEN"),
+		Values: ast.MakeValues(f.Args, "SCREEN"),
 	}
 }
 
-func (f *FuncCall) openScreenWithValue() blockly2.Block {
+func (f *FuncCall) openScreenWithValue() ast.Block {
 	f.assertArgLen(2)
-	return blockly2.Block{
+	return ast.Block{
 		Type:   "controls_openAnotherScreenWithStartValue",
-		Values: blockly2.MakeValues(f.Args, "SCREENNAME", "STARTVALUE"),
+		Values: ast.MakeValues(f.Args, "SCREENNAME", "STARTVALUE"),
 	}
 }
 
-func (f *FuncCall) openScreen() blockly2.Block {
+func (f *FuncCall) openScreen() ast.Block {
 	f.assertArgLen(1)
-	return blockly2.Block{
+	return ast.Block{
 		Type:   "controls_openAnotherScreen",
-		Values: blockly2.MakeValues(f.Args, "SCREEN"),
+		Values: ast.MakeValues(f.Args, "SCREEN"),
 	}
 }
 
-func (f *FuncCall) println() blockly2.Block {
+func (f *FuncCall) println() ast.Block {
 	f.assertArgLen(1)
-	return blockly2.Block{
+	return ast.Block{
 		Type:   "controls_eval_but_ignore",
-		Values: blockly2.MakeValues(f.Args, "VALUE"),
+		Values: ast.MakeValues(f.Args, "VALUE"),
 	}
 }
 
-func (f *FuncCall) mathConversions() blockly2.Block {
+func (f *FuncCall) mathConversions() ast.Block {
 	f.assertArgLen(1)
 	fieldOp, ok := mathConversions[f.Name]
 	if !ok {
@@ -297,30 +302,30 @@ func (f *FuncCall) mathConversions() blockly2.Block {
 	default:
 		blockType = "math_single"
 	}
-	return blockly2.Block{
+	return ast.Block{
 		Type:   blockType,
-		Fields: []blockly2.Field{{Name: "OP", Value: fieldOp}},
-		Values: []blockly2.Value{{Name: "NUM", Block: f.Args[0].Blockly()}},
+		Fields: []ast.Field{{Name: "OP", Value: fieldOp}},
+		Values: []ast.Value{{Name: "NUM", Block: f.Args[0].Blockly()}},
 	}
 }
 
-func (f *FuncCall) formatDecimal() blockly2.Block {
+func (f *FuncCall) formatDecimal() ast.Block {
 	f.assertArgLen(2)
-	return blockly2.Block{
+	return ast.Block{
 		Type:   "math_format_as_decimal",
-		Values: blockly2.MakeValues(f.Args, "NUM", "PLACES"),
+		Values: ast.MakeValues(f.Args, "NUM", "PLACES"),
 	}
 }
 
-func (f *FuncCall) atan2() blockly2.Block {
+func (f *FuncCall) atan2() ast.Block {
 	f.assertArgLen(2)
-	return blockly2.Block{
+	return ast.Block{
 		Type:   "math_atan2",
-		Values: blockly2.MakeValues(f.Args, "Y", "X"),
+		Values: ast.MakeValues(f.Args, "Y", "X"),
 	}
 }
 
-func (f *FuncCall) mathDivide() blockly2.Block {
+func (f *FuncCall) mathDivide() ast.Block {
 	f.assertArgLen(2)
 	var fieldOp string
 	switch f.Name {
@@ -331,22 +336,22 @@ func (f *FuncCall) mathDivide() blockly2.Block {
 	case "quot":
 		fieldOp = "QUOTIENT"
 	}
-	return blockly2.Block{
+	return ast.Block{
 		Type:   "math_divide",
-		Fields: []blockly2.Field{{Name: "OP", Value: fieldOp}},
-		Values: blockly2.MakeValues(f.Args, "DIVIDEND", "DIVISOR"),
+		Fields: []ast.Field{{Name: "OP", Value: fieldOp}},
+		Values: ast.MakeValues(f.Args, "DIVIDEND", "DIVISOR"),
 	}
 }
 
-func (f *FuncCall) modeOf() blockly2.Block {
+func (f *FuncCall) modeOf() ast.Block {
 	f.assertArgLen(1)
-	return blockly2.Block{
+	return ast.Block{
 		Type:   "math_mode_of_list",
-		Values: blockly2.MakeValues(f.Args, "LIST"),
+		Values: ast.MakeValues(f.Args, "LIST"),
 	}
 }
 
-func (f *FuncCall) mathOnList() blockly2.Block {
+func (f *FuncCall) mathOnList() ast.Block {
 	f.assertArgLen(1)
 	var fieldOp string
 	switch f.Name {
@@ -363,14 +368,14 @@ func (f *FuncCall) mathOnList() blockly2.Block {
 	case "stdErrOf":
 		fieldOp = "SE"
 	}
-	return blockly2.Block{
+	return ast.Block{
 		Type:   "math_on_list2",
-		Fields: []blockly2.Field{{Name: "OP", Value: fieldOp}},
-		Values: blockly2.MakeValues(f.Args, "LIST"),
+		Fields: []ast.Field{{Name: "OP", Value: fieldOp}},
+		Values: ast.MakeValues(f.Args, "LIST"),
 	}
 }
 
-func (f *FuncCall) minOrMax() blockly2.Block {
+func (f *FuncCall) minOrMax() ast.Block {
 	argSize := len(f.Args)
 	if argSize == 0 {
 		f.Where.Error("No arguments provided for %()", f.Name)
@@ -382,36 +387,36 @@ func (f *FuncCall) minOrMax() blockly2.Block {
 	case "max":
 		fieldOp = "MAX"
 	}
-	return blockly2.Block{
+	return ast.Block{
 		Type:     "math_on_list",
-		Fields:   []blockly2.Field{{Name: "OP", Value: fieldOp}},
-		Mutation: &blockly2.Mutation{ItemCount: argSize},
-		Values:   blockly2.ValuesByPrefix("NUM", f.Args),
+		Fields:   []ast.Field{{Name: "OP", Value: fieldOp}},
+		Mutation: &ast.Mutation{ItemCount: argSize},
+		Values:   ast.ValuesByPrefix("NUM", f.Args),
 	}
 }
 
-func (f *FuncCall) setRandSeed() blockly2.Block {
+func (f *FuncCall) setRandSeed() ast.Block {
 	f.assertArgLen(1)
-	return blockly2.Block{
+	return ast.Block{
 		Type:   "math_random_set_seed",
-		Values: blockly2.MakeValues(f.Args, "NUM"),
+		Values: ast.MakeValues(f.Args, "NUM"),
 	}
 }
 
-func (f *FuncCall) randFloat() blockly2.Block {
+func (f *FuncCall) randFloat() ast.Block {
 	f.assertArgLen(0)
-	return blockly2.Block{Type: "math_random_float"}
+	return ast.Block{Type: "math_random_float"}
 }
 
-func (f *FuncCall) randInt() blockly2.Block {
+func (f *FuncCall) randInt() ast.Block {
 	f.assertArgLen(2)
-	return blockly2.Block{
+	return ast.Block{
 		Type:   "math_random_int",
-		Values: blockly2.MakeValues(f.Args, "FROM", "TO"),
+		Values: ast.MakeValues(f.Args, "FROM", "TO"),
 	}
 }
 
-func (f *FuncCall) mathRadix() blockly2.Block {
+func (f *FuncCall) mathRadix() ast.Block {
 	f.assertArgLen(1)
 	var fieldOp string
 	switch f.Name {
@@ -428,9 +433,9 @@ func (f *FuncCall) mathRadix() blockly2.Block {
 	if !ok {
 		f.Where.Error("Expected a numeric string argument for %()", f.Name)
 	}
-	return blockly2.Block{
+	return ast.Block{
 		Type: "math_number_radix",
-		Fields: []blockly2.Field{
+		Fields: []ast.Field{
 			{Name: "OP", Value: fieldOp},
 			{Name: "NUM", Value: textExpr.Content},
 		},
