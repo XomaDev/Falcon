@@ -18,12 +18,13 @@ import (
 const DefaultRendezvous = "https://rendezvous.appinventor.mit.edu/rendezvous/"
 
 type Repl struct {
-	code       string
-	sha1Digest string
-	rendezvous string
-	pollTimes  int
-	onConnect  func(c *webrtc.DataChannel)
-	onMessage  func(message webrtc.DataChannelMessage)
+	code         string
+	sha1Digest   string
+	rendezvous   string
+	pollTimes    int
+	onConnect    func(c *webrtc.DataChannel)
+	onDisconnect func(graceful bool)
+	onMessage    func(message webrtc.DataChannelMessage)
 
 	peer    *webrtc.PeerConnection
 	channel *webrtc.DataChannel
@@ -34,6 +35,7 @@ func NewRepl(
 	rendezvous string,
 	pollTimes int,
 	onConnect func(c *webrtc.DataChannel),
+	onDisconnect func(canRecover bool),
 	onMessage func(message webrtc.DataChannelMessage)) *Repl {
 	// SHA1 Digest on the code
 	sha1Hasher := sha1.New()
@@ -44,8 +46,9 @@ func NewRepl(
 		rendezvous: rendezvous,
 		pollTimes:  pollTimes,
 
-		onConnect: onConnect,
-		onMessage: onMessage,
+		onConnect:    onConnect,
+		onDisconnect: onDisconnect,
+		onMessage:    onMessage,
 	}
 }
 
@@ -74,6 +77,22 @@ func (r *Repl) Connect() error {
 		resp.Body.Close()
 		time.Sleep(time.Second)
 	}
+	r.peer.OnConnectionStateChange(func(s webrtc.PeerConnectionState) {
+		switch s {
+		case webrtc.PeerConnectionStateFailed:
+			fmt.Println("Connection Failed! Closing peer connection.")
+			r.peer.Close()
+		case webrtc.PeerConnectionStateDisconnected:
+			// The connection may recover
+			fmt.Println("Connection Disconnected. Waiting to see if it recovers...")
+			r.onDisconnect(false)
+		case webrtc.PeerConnectionStateClosed:
+			// The connection was closed gracefully (on demand)
+			r.onDisconnect(true)
+		default:
+			fmt.Println("Unknown connection state: " + s.String())
+		}
+	})
 	// TODO:
 	//  Listen for changes in network status
 	return nil
