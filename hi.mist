@@ -1,6 +1,0 @@
-@Button { Button1 }
-
-when Button1.Click {
-  println("Hello")
-  Button1
-}
