@@ -1,7 +1,7 @@
 package analysis
 
 import (
-	blky "Falcon/code/ast/blockly"
+	"Falcon/code/ast"
 	"Falcon/code/ast/common"
 	"Falcon/code/ast/components"
 	"Falcon/code/ast/control"
@@ -61,8 +61,8 @@ func (p *LangParser) GetComponentDefinitionsCode() string {
 	return definitions.String()
 }
 
-func (p *LangParser) ParseAll() []blky.Expr {
-	var expressions []blky.Expr
+func (p *LangParser) ParseAll() []ast.Expr {
+	var expressions []ast.Expr
 	if p.notEOF() {
 		p.defineStatements()
 	}
@@ -92,7 +92,7 @@ func (p *LangParser) defineStatements() {
 	}
 }
 
-func (p *LangParser) parse() blky.Expr {
+func (p *LangParser) parse() ast.Expr {
 	switch p.peek().Type {
 	case l.If:
 		return p.ifExpr()
@@ -125,7 +125,7 @@ func (p *LangParser) parse() blky.Expr {
 	}
 }
 
-func (p *LangParser) genericEvent() blky.Expr {
+func (p *LangParser) genericEvent() ast.Expr {
 	componentType := p.componentType()
 	p.expect(l.Dot)
 	eventName := p.name()
@@ -142,7 +142,7 @@ func (p *LangParser) genericEvent() blky.Expr {
 	}
 }
 
-func (p *LangParser) event() blky.Expr {
+func (p *LangParser) event() ast.Expr {
 	component := p.component()
 	p.expect(l.Dot)
 	eventName := p.name()
@@ -160,7 +160,7 @@ func (p *LangParser) event() blky.Expr {
 	}
 }
 
-func (p *LangParser) funcSmt() blky.Expr {
+func (p *LangParser) funcSmt() ast.Expr {
 	p.skip()
 	name := p.name()
 	var parameters = p.parameters()
@@ -173,18 +173,18 @@ func (p *LangParser) funcSmt() blky.Expr {
 	}
 }
 
-func (p *LangParser) globVar() blky.Expr {
+func (p *LangParser) globVar() ast.Expr {
 	p.skip()
 	name := p.name()
 	p.expect(l.Assign)
 	return &variables.Global{Name: name, Value: p.parse()}
 }
 
-func (p *LangParser) varExpr() blky.Expr {
+func (p *LangParser) varExpr() ast.Expr {
 	p.skip()
 
 	var varNames []string
-	var varValues []blky.Expr
+	var varValues []ast.Expr
 	if p.consume(l.OpenCurve) {
 		// a result local var
 		for p.notEOF() && !p.isNext(l.CloseCurve) {
@@ -218,7 +218,7 @@ func (p *LangParser) whileExpr() *control.While {
 	return &control.While{Condition: condition, Body: body}
 }
 
-func (p *LangParser) eachExpr() blky.Expr {
+func (p *LangParser) eachExpr() ast.Expr {
 	p.skip()
 	keyName := p.name()
 	if p.consume(l.DoubleColon) {
@@ -252,13 +252,13 @@ func (p *LangParser) forExpr() *control.For {
 	}
 }
 
-func (p *LangParser) ifExpr() blky.Expr {
+func (p *LangParser) ifExpr() ast.Expr {
 	p.skip()
 	if p.isNext(l.OpenCurve) {
 		return p.simpleIf()
 	}
-	var conditions []blky.Expr
-	var bodies [][]blky.Expr
+	var conditions []ast.Expr
+	var bodies [][]ast.Expr
 
 	conditions = append(conditions, p.expr(0))
 	bodies = append(bodies, p.body())
@@ -267,7 +267,7 @@ func (p *LangParser) ifExpr() blky.Expr {
 		conditions = append(conditions, p.expr(0))
 		bodies = append(bodies, p.body())
 	}
-	var elseBody []blky.Expr
+	var elseBody []ast.Expr
 	if p.notEOF() && p.consume(l.Else) {
 		elseBody = p.body()
 	}
@@ -284,15 +284,15 @@ func (p *LangParser) simpleIf() *control.SimpleIf {
 	return &control.SimpleIf{Condition: condition, Then: then, Else: elze}
 }
 
-func (p *LangParser) body() []blky.Expr {
+func (p *LangParser) body() []ast.Expr {
 	p.expect(l.OpenCurly)
 	expressions := p.bodyUntilCurly()
 	p.expect(l.CloseCurly)
 	return expressions
 }
 
-func (p *LangParser) bodyUntilCurly() []blky.Expr {
-	var expressions []blky.Expr
+func (p *LangParser) bodyUntilCurly() []ast.Expr {
+	var expressions []ast.Expr
 	if p.isNext(l.CloseCurly) {
 		return expressions
 	}
@@ -302,7 +302,7 @@ func (p *LangParser) bodyUntilCurly() []blky.Expr {
 	return expressions
 }
 
-func (p *LangParser) expr(minPrecedence int) blky.Expr {
+func (p *LangParser) expr(minPrecedence int) ast.Expr {
 	left := p.element()
 	for p.notEOF() {
 		opToken := p.peek()
@@ -314,7 +314,7 @@ func (p *LangParser) expr(minPrecedence int) blky.Expr {
 			break
 		}
 		p.skip()
-		var right blky.Expr
+		var right ast.Expr
 		if opToken.HasFlag(l.PreserveOrder) {
 			right = p.element()
 		} else {
@@ -322,14 +322,14 @@ func (p *LangParser) expr(minPrecedence int) blky.Expr {
 		}
 		if rBinExpr, ok := right.(*common.BinaryExpr); ok && rBinExpr.CanRepeat(opToken.Type) {
 			// for NoPreserveOrder: merge binary expr with same operator (towards right)
-			rBinExpr.Operands = append([]blky.Expr{left}, rBinExpr.Operands...)
+			rBinExpr.Operands = append([]ast.Expr{left}, rBinExpr.Operands...)
 			left = rBinExpr
 		} else if lBinExpr, ok := left.(*common.BinaryExpr); ok && lBinExpr.CanRepeat(opToken.Type) {
 			// for PreserveOder: merge binary expr with same operator (towards left)
 			lBinExpr.Operands = append(lBinExpr.Operands, right)
 		} else {
 			// a new binary node
-			left = &common.BinaryExpr{Where: opToken, Operands: []blky.Expr{left, right}, Operator: opToken.Type}
+			left = &common.BinaryExpr{Where: opToken, Operands: []ast.Expr{left, right}, Operator: opToken.Type}
 		}
 	}
 	return left
@@ -368,7 +368,7 @@ func precedenceOf(flag l.Flag) int {
 	}
 }
 
-func (p *LangParser) element() blky.Expr {
+func (p *LangParser) element() ast.Expr {
 	left := p.term()
 	for p.notEOF() {
 		pe := p.peek()
@@ -408,7 +408,7 @@ func (p *LangParser) element() blky.Expr {
 	return left
 }
 
-func (p *LangParser) componentCall(compName string, compType string) blky.Expr {
+func (p *LangParser) componentCall(compName string, compType string) ast.Expr {
 	p.expect(l.Dot)
 	resource := p.name()
 	if p.isNext(l.OpenCurve) {
@@ -430,7 +430,7 @@ func (p *LangParser) componentCall(compName string, compType string) blky.Expr {
 	return &components.PropertyGet{ComponentName: compName, ComponentType: compType, Property: resource}
 }
 
-func (p *LangParser) helperDropdown(keyExpr blky.Expr) blky.Expr {
+func (p *LangParser) helperDropdown(keyExpr ast.Expr) ast.Expr {
 	where := p.next()
 	if key, ok := keyExpr.(*variables.Get); ok {
 		return &fundamentals.HelperDropdown{Key: key.Name, Option: p.name()}
@@ -439,12 +439,12 @@ func (p *LangParser) helperDropdown(keyExpr blky.Expr) blky.Expr {
 	panic("")
 }
 
-func (p *LangParser) objectCall(object blky.Expr) blky.Expr {
+func (p *LangParser) objectCall(object ast.Expr) ast.Expr {
 	p.skip()
 	where := p.next()
 	name := *where.Content
 
-	var args []blky.Expr
+	var args []ast.Expr
 	if p.isNext(l.OpenCurve) {
 		args = p.arguments()
 		if !p.isNext(l.OpenCurly) {
@@ -475,7 +475,7 @@ func (p *LangParser) objectCall(object blky.Expr) blky.Expr {
 		Transformer: transformer}
 }
 
-func (p *LangParser) term() blky.Expr {
+func (p *LangParser) term() ast.Expr {
 	token := p.next()
 	switch token.Type {
 	case l.Undefined:
@@ -521,7 +521,7 @@ func (p *LangParser) term() blky.Expr {
 
 func (p *LangParser) computeExpr() *variables.VarResult {
 	var varNames []string
-	var varValues []blky.Expr
+	var varValues []ast.Expr
 	p.expect(l.OpenCurve)
 
 	// a result local var
@@ -550,7 +550,7 @@ func (p *LangParser) doExpr() *control.Do {
 }
 
 func (p *LangParser) dictionary() *fundamentals.Dictionary {
-	var elements []blky.Expr
+	var elements []ast.Expr
 	if !p.consume(l.CloseCurly) {
 		for p.notEOF() {
 			elements = append(elements, p.expr(0))
@@ -564,7 +564,7 @@ func (p *LangParser) dictionary() *fundamentals.Dictionary {
 }
 
 func (p *LangParser) list() *fundamentals.List {
-	var elements []blky.Expr
+	var elements []ast.Expr
 	if !p.consume(l.CloseSquare) {
 		for p.notEOF() {
 			elements = append(elements, p.expr(0))
@@ -592,9 +592,9 @@ func (p *LangParser) parameters() []string {
 	return parameters
 }
 
-func (p *LangParser) arguments() []blky.Expr {
+func (p *LangParser) arguments() []ast.Expr {
 	p.expect(l.OpenCurve)
-	var args []blky.Expr
+	var args []ast.Expr
 	if p.consume(l.CloseCurve) {
 		return args
 	}
@@ -608,7 +608,7 @@ func (p *LangParser) arguments() []blky.Expr {
 	return args
 }
 
-func (p *LangParser) value(t *l.Token) blky.Expr {
+func (p *LangParser) value(t *l.Token) ast.Expr {
 	switch t.Type {
 	case l.True, l.False:
 		return &fundamentals.Boolean{Value: t.Type == l.True}
