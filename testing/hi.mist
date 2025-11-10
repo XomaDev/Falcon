@@ -1,6 +1,1 @@
-local personality = {
-  "food": "Masala Dosa",
-  "fruit": "Mango",
-  "animal": "The Royal Bengal Tiger"
-}
-println(personality.get("food", 0))
+println(#ffffff)

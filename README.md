@@ -20,6 +20,8 @@ This page assumes you have some experience in Programming and App Inventor.
 	- `[1, 2, 3, 4, ...]`
 - Dictionary
 	- `{"Animal": "Royal Bengal Tiger", "country": "India"}`
+- Color
+    - `#ffffff`
 
 
 ## Operators
@@ -197,12 +199,6 @@ do {
 ```
 
 The `result` expression in `do`, is executed outside the body (outer scope).
-
-## Colors
-
-`color:color_name` returns int of a specified color.
-
-`white`, `black`, `red`, `pink`, `orange`, `yellow`, `green`, `cyan`, `blue`, `magenta`, `lightGray`, `gray`, `darkGray` are the supported color types.
 
 ## Functions
 

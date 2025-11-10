@@ -1,49 +1,49 @@
 package analysis
 
 import (
-	ast2 "Falcon/code/ast"
-	common2 "Falcon/code/ast/common"
-	components2 "Falcon/code/ast/components"
-	control2 "Falcon/code/ast/control"
-	fundamentals2 "Falcon/code/ast/fundamentals"
-	list2 "Falcon/code/ast/list"
+	"Falcon/code/ast"
+	"Falcon/code/ast/common"
+	"Falcon/code/ast/components"
+	"Falcon/code/ast/control"
+	"Falcon/code/ast/fundamentals"
+	"Falcon/code/ast/list"
 	"Falcon/code/ast/method"
-	procedures2 "Falcon/code/ast/procedures"
-	variables2 "Falcon/code/ast/variables"
-	lex2 "Falcon/code/lex"
+	"Falcon/code/ast/procedures"
+	"Falcon/code/ast/variables"
+	"Falcon/code/lex"
 	"encoding/xml"
 	"strconv"
 	"strings"
 )
 
 type ValueMap struct {
-	valueMap map[string]ast2.Expr
+	valueMap map[string]ast.Expr
 }
 
-func (v *ValueMap) getUnsafe(name string) ast2.Expr {
+func (v *ValueMap) getUnsafe(name string) ast.Expr {
 	return v.valueMap[name]
 }
 
-func (v *ValueMap) get(name string) ast2.Expr {
+func (v *ValueMap) get(name string) ast.Expr {
 	value := v.valueMap[name]
 	if value == nil {
-		return &common2.EmptySocket{}
+		return &common.EmptySocket{}
 	}
 	return value
 }
 
 type StatementMap struct {
-	statementMap map[string][]ast2.Expr
+	statementMap map[string][]ast.Expr
 }
 
-func (s *StatementMap) getUnsafe(name string) []ast2.Expr {
+func (s *StatementMap) getUnsafe(name string) []ast.Expr {
 	return s.statementMap[name]
 }
 
-func (s *StatementMap) get(name string) []ast2.Expr {
+func (s *StatementMap) get(name string) []ast.Expr {
 	value := s.statementMap[name]
 	if value == nil {
-		return []ast2.Expr{}
+		return []ast.Expr{}
 	}
 	return value
 }
@@ -56,58 +56,58 @@ func NewXMLParser(xmlContent string) *XMLParser {
 	return &XMLParser{xmlContent: xmlContent}
 }
 
-func (p *XMLParser) ParseBlockly() []ast2.Expr {
+func (p *XMLParser) ParseBlockly() []ast.Expr {
 	return p.parseAllBlocks(p.decodeXML())
 }
 
-func (p *XMLParser) decodeXML() []ast2.Block {
+func (p *XMLParser) decodeXML() []ast.Block {
 	decoder := xml.NewDecoder(strings.NewReader(p.xmlContent))
 	decoder.Strict = false
 	decoder.DefaultSpace = ""
 
-	var root ast2.XmlRoot
+	var root ast.XmlRoot
 	if err := decoder.Decode(&root); err != nil {
 		panic(err)
 	}
 	return root.Blocks
 }
 
-func (p *XMLParser) parseAllBlocks(allBlocks []ast2.Block) []ast2.Expr {
-	var parsedBlocks []ast2.Expr
+func (p *XMLParser) parseAllBlocks(allBlocks []ast.Block) []ast.Expr {
+	var parsedBlocks []ast.Expr
 	for i := range allBlocks {
 		parsedBlocks = append(parsedBlocks, p.parseBlock(allBlocks[i]))
 	}
 	return parsedBlocks
 }
 
-func (p *XMLParser) singleExpr(block ast2.Block) ast2.Expr {
+func (p *XMLParser) singleExpr(block ast.Block) ast.Expr {
 	if len(block.Values) == 0 {
-		return &common2.EmptySocket{}
+		return &common.EmptySocket{}
 	}
 	return p.parseBlock(block.Values[0].Block)
 }
 
-func (p *XMLParser) parseBlock(block ast2.Block) ast2.Expr {
+func (p *XMLParser) parseBlock(block ast.Block) ast.Expr {
 	switch block.Type {
 	case "controls_if":
 		return p.ctrlIf(block)
 	case "controls_forRange":
 		return p.ctrlForRange(block)
 	case "controls_forEach":
-		return &control2.Each{
+		return &control.Each{
 			IName:    block.SingleField(),
 			Iterable: p.singleExpr(block),
 			Body:     p.optSingleBody(block)}
 	case "controls_for_each_dict":
 		return p.ctrlForEachDict(block)
 	case "controls_while":
-		return &control2.While{
+		return &control.While{
 			Condition: p.singleExpr(block),
 			Body:      p.optSingleBody(block)}
 	case "controls_choose":
 		return p.ctrlChoose(block)
 	case "controls_do_then_return":
-		return &control2.Do{Body: p.optSingleBody(block), Result: p.singleExpr(block)}
+		return &control.Do{Body: p.optSingleBody(block), Result: p.singleExpr(block)}
 	case "controls_eval_but_ignore":
 		return makeFuncCall("println", p.singleExpr(block))
 	case "controls_openAnotherScreen":
@@ -127,23 +127,23 @@ func (p *XMLParser) parseBlock(block ast2.Block) ast2.Expr {
 	case "controls_closeScreenWithPlainText":
 		return makeFuncCall("closeScreenWithPlainText", p.singleExpr(block))
 	case "controls_break":
-		return &control2.Break{}
+		return &control.Break{}
 
 	case "logic_boolean", "logic_true", "logic_false":
-		return &fundamentals2.Boolean{Value: block.SingleField() == "TRUE"}
+		return &fundamentals.Boolean{Value: block.SingleField() == "TRUE"}
 	case "logic_negate":
-		return &fundamentals2.Not{Expr: p.singleExpr(block)}
+		return &fundamentals.Not{Expr: p.singleExpr(block)}
 	case "logic_compare", "logic_operation":
 		return p.logicExpr(block)
 
 	case "text":
-		return &fundamentals2.Text{Content: block.SingleField()}
+		return &fundamentals.Text{Content: block.SingleField()}
 	case "text_join":
 		return p.makeBinary("_", p.fromMinVals(block.Values, 1))
 	case "text_length":
 		return p.makePropCall("textLen", p.singleExpr(block))
 	case "text_isEmpty":
-		return p.makeQuestion(lex2.Text, block, "emptyText")
+		return p.makeQuestion(lex.Text, block, "emptyText")
 	case "text_trim":
 		return p.makePropCall("trim", p.singleExpr(block))
 	case "text_reverse":
@@ -169,10 +169,10 @@ func (p *XMLParser) parseBlock(block ast2.Block) ast2.Expr {
 	case "text_replace_mappings":
 		return p.textReplaceMap(block)
 	case "text_is_string":
-		return p.makeQuestion(lex2.Text, block, "text")
+		return p.makeQuestion(lex.Text, block, "text")
 
 	case "math_number":
-		return &fundamentals2.Number{Content: block.SingleField()}
+		return &fundamentals.Number{Content: block.SingleField()}
 	case "math_compare", "math_bitwise":
 		return p.mathExpr(block)
 	case "math_add":
@@ -215,7 +215,7 @@ func (p *XMLParser) parseBlock(block ast2.Block) ast2.Expr {
 		return p.mathConvertNumber(block)
 
 	case "lists_create_with":
-		return &fundamentals2.List{Elements: p.fromMinVals(block.Values, 0)}
+		return &fundamentals.List{Elements: p.fromMinVals(block.Values, 0)}
 	case "lists_add_items":
 		return p.listAddItem(block)
 	case "lists_is_in":
@@ -223,7 +223,7 @@ func (p *XMLParser) parseBlock(block ast2.Block) ast2.Expr {
 	case "lists_length":
 		return p.makePropCall("listLength", p.singleExpr(block))
 	case "lists_is_empty":
-		return p.makeQuestion(lex2.OpenSquare, block, "emptyList")
+		return p.makeQuestion(lex.OpenSquare, block, "emptyList")
 	case "lists_pick_random_item":
 		return p.makePropCall("random", p.singleExpr(block))
 	case "lists_position_in":
@@ -247,7 +247,7 @@ func (p *XMLParser) parseBlock(block ast2.Block) ast2.Expr {
 	case "lists_sort":
 		return p.makePropCall("sort", p.singleExpr(block))
 	case "lists_is_list":
-		return p.makeQuestion(lex2.OpenSquare, block, "list")
+		return p.makeQuestion(lex.OpenSquare, block, "list")
 	case "lists_from_csv_row":
 		return p.makePropCall("csvRowToList", p.singleExpr(block))
 	case "lists_from_csv_table":
@@ -280,7 +280,7 @@ func (p *XMLParser) parseBlock(block ast2.Block) ast2.Expr {
 	case "pair":
 		return p.dictPair(block)
 	case "dictionaries_create_with":
-		return &fundamentals2.Dictionary{Elements: p.fromMinVals(block.Values, 0)}
+		return &fundamentals.Dictionary{Elements: p.fromMinVals(block.Values, 0)}
 	case "dictionaries_lookup":
 		return p.dictLookup(block)
 	case "dictionaries_set_pair":
@@ -308,41 +308,41 @@ func (p *XMLParser) parseBlock(block ast2.Block) ast2.Expr {
 	case "dictionaries_walk_tree":
 		return p.dictWalkTree(block)
 	case "dictionaries_walk_all":
-		return &fundamentals2.WalkAll{}
+		return &fundamentals.WalkAll{}
 	case "dictionaries_is_dict":
-		return p.makeQuestion(lex2.OpenCurly, block, "dict")
+		return p.makeQuestion(lex.OpenCurly, block, "dict")
 
 	case "color_black":
-		return p.makeColor("black")
+		return p.makeColor(block)
 	case "color_white":
-		return p.makeColor("white")
+		return p.makeColor(block)
 	case "color_red":
-		return p.makeColor("red")
+		return p.makeColor(block)
 	case "color_pink":
-		return p.makeColor("pink")
+		return p.makeColor(block)
 	case "color_orange":
-		return p.makeColor("orange")
+		return p.makeColor(block)
 	case "color_yellow":
-		return p.makeColor("yellow")
+		return p.makeColor(block)
 	case "color_green":
-		return p.makeColor("green")
+		return p.makeColor(block)
 	case "color_cyan":
-		return p.makeColor("cyan")
+		return p.makeColor(block)
 	case "color_blue":
-		return p.makeColor("blue")
+		return p.makeColor(block)
 	case "color_magenta":
-		return p.makeColor("magenta")
+		return p.makeColor(block)
 	case "color_light_gray":
-		return p.makeColor("light_gray")
+		return p.makeColor(block)
 	case "color_dark_gray":
-		return p.makeColor("dark_gray")
+		return p.makeColor(block)
 	case "color_make_color":
 		return makeFuncCall("makeColor", p.singleExpr(block))
 	case "color_split_color":
 		return makeFuncCall("splitColor", p.singleExpr(block))
 
 	case "global_declaration":
-		return &variables2.Global{Name: block.SingleField(), Value: p.singleExpr(block)}
+		return &variables.Global{Name: block.SingleField(), Value: p.singleExpr(block)}
 	case "lexical_variable_get":
 		return p.variableGet(block)
 	case "lexical_variable_set":
@@ -358,12 +358,12 @@ func (p *XMLParser) parseBlock(block ast2.Block) ast2.Expr {
 		return p.procedureCall(block)
 
 	case "helpers_assets":
-		return &fundamentals2.Text{Content: block.SingleField()}
+		return &fundamentals.Text{Content: block.SingleField()}
 	case "helpers_dropdown":
-		return &fundamentals2.HelperDropdown{Key: block.Mutation.Key, Option: block.SingleField()}
+		return &fundamentals.HelperDropdown{Key: block.Mutation.Key, Option: block.SingleField()}
 
 	case "component_component_block":
-		return &fundamentals2.Component{Name: block.SingleField(), Type: block.Mutation.ComponentType}
+		return &fundamentals.Component{Name: block.SingleField(), Type: block.Mutation.ComponentType}
 	case "component_set_get":
 		return p.componentProp(block)
 	case "component_event":
@@ -371,16 +371,16 @@ func (p *XMLParser) parseBlock(block ast2.Block) ast2.Expr {
 	case "component_method":
 		return p.componentMethod(block)
 	case "component_all_component_block":
-		return &components2.EveryComponent{Type: block.Mutation.ComponentType}
+		return &components.EveryComponent{Type: block.Mutation.ComponentType}
 	default:
 		panic("Unsupported block type: " + block.Type)
 	}
 }
 
-func (p *XMLParser) componentMethod(block ast2.Block) ast2.Expr {
+func (p *XMLParser) componentMethod(block ast.Block) ast.Expr {
 	if block.Mutation.IsGeneric {
 		pVals := p.makeValueMap(block.Values)
-		var callArgs []ast2.Expr
+		var callArgs []ast.Expr
 
 		for i := 0; ; i++ {
 			aArg := pVals.getUnsafe("ARG" + strconv.Itoa(i))
@@ -389,14 +389,14 @@ func (p *XMLParser) componentMethod(block ast2.Block) ast2.Expr {
 			}
 			callArgs = append(callArgs, aArg)
 		}
-		return &components2.GenericMethodCall{
+		return &components.GenericMethodCall{
 			Component:     pVals.get("COMPONENT"),
 			ComponentType: block.Mutation.ComponentType,
 			Method:        block.Mutation.MethodName,
 			Args:          callArgs,
 		}
 	}
-	return &components2.MethodCall{
+	return &components.MethodCall{
 		ComponentName: block.Mutation.InstanceName,
 		ComponentType: block.Mutation.ComponentType,
 		Method:        block.Mutation.MethodName,
@@ -404,17 +404,17 @@ func (p *XMLParser) componentMethod(block ast2.Block) ast2.Expr {
 	}
 }
 
-func (p *XMLParser) componentEvent(block ast2.Block) ast2.Expr {
+func (p *XMLParser) componentEvent(block ast.Block) ast.Expr {
 	// TODO: supply parameters to events later
 	if block.Mutation.IsGeneric {
-		return &components2.GenericEvent{
+		return &components.GenericEvent{
 			ComponentType: block.Mutation.ComponentType,
 			Event:         block.Mutation.EventName,
 			Parameters:    make([]string, 0),
 			Body:          p.optSingleBody(block),
 		}
 	}
-	return &components2.Event{
+	return &components.Event{
 		ComponentName: block.Mutation.InstanceName,
 		ComponentType: block.Mutation.ComponentType,
 		Event:         block.Mutation.EventName,
@@ -423,7 +423,7 @@ func (p *XMLParser) componentEvent(block ast2.Block) ast2.Expr {
 	}
 }
 
-func (p *XMLParser) componentProp(block ast2.Block) ast2.Expr {
+func (p *XMLParser) componentProp(block ast.Block) ast.Expr {
 	pFields := p.makeFieldMap(block.Fields)
 	property := pFields["PROP"]
 	isSet := block.Mutation.SetOrGet == "set"
@@ -431,14 +431,14 @@ func (p *XMLParser) componentProp(block ast2.Block) ast2.Expr {
 	if block.Mutation.IsGeneric {
 		pVals := p.makeValueMap(block.Values)
 		if isSet {
-			return &components2.GenericPropertySet{
+			return &components.GenericPropertySet{
 				Component:     pVals.get("COMPONENT"),
 				ComponentType: block.Mutation.ComponentType,
 				Property:      property,
 				Value:         pVals.get("VALUE"),
 			}
 		}
-		return &components2.GenericPropertyGet{
+		return &components.GenericPropertyGet{
 			Component:     pVals.get("COMPONENT"),
 			ComponentType: block.Mutation.ComponentType,
 			Property:      property,
@@ -446,28 +446,28 @@ func (p *XMLParser) componentProp(block ast2.Block) ast2.Expr {
 	}
 
 	if isSet {
-		return &components2.PropertySet{
+		return &components.PropertySet{
 			ComponentName: pFields["COMPONENT_SELECTOR"],
 			ComponentType: block.Mutation.ComponentType,
 			Property:      property,
 			Value:         p.singleExpr(block),
 		}
 	}
-	return &components2.PropertyGet{
+	return &components.PropertyGet{
 		ComponentName: pFields["COMPONENT_SELECTOR"],
 		ComponentType: block.Mutation.ComponentType,
 		Property:      property,
 	}
 }
 
-func (p *XMLParser) ctrlChoose(block ast2.Block) ast2.Expr {
+func (p *XMLParser) ctrlChoose(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return &control2.SimpleIf{Condition: pVals.get("TEST"), Then: pVals.get("THENRETURN"), Else: pVals.get("ELSERETURN")}
+	return &control.SimpleIf{Condition: pVals.get("TEST"), Then: pVals.get("THENRETURN"), Else: pVals.get("ELSERETURN")}
 }
 
-func (p *XMLParser) ctrlForEachDict(block ast2.Block) ast2.Expr {
+func (p *XMLParser) ctrlForEachDict(block ast.Block) ast.Expr {
 	pFields := p.makeFieldMap(block.Fields)
-	return &control2.EachPair{
+	return &control.EachPair{
 		KeyName:   pFields["KEY"],
 		ValueName: pFields["VALUE"],
 		Iterable:  p.singleExpr(block),
@@ -475,9 +475,9 @@ func (p *XMLParser) ctrlForEachDict(block ast2.Block) ast2.Expr {
 	}
 }
 
-func (p *XMLParser) ctrlForRange(block ast2.Block) ast2.Expr {
+func (p *XMLParser) ctrlForRange(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return &control2.For{
+	return &control.For{
 		IName: block.SingleField(),
 		From:  pVals.get("START"),
 		To:    pVals.get("END"),
@@ -486,20 +486,20 @@ func (p *XMLParser) ctrlForRange(block ast2.Block) ast2.Expr {
 	}
 }
 
-func (p *XMLParser) ctrlIf(block ast2.Block) ast2.Expr {
+func (p *XMLParser) ctrlIf(block ast.Block) ast.Expr {
 	conditions := p.fromVals(block.Values)
 	statementMap := p.makeStatementMap(block.Statements)
 
-	var bodies [][]ast2.Expr
+	var bodies [][]ast.Expr
 	elseBody := statementMap.getUnsafe("ELSE")
 
 	for i := range conditions {
 		bodies = append(bodies, statementMap.get("DO"+strconv.Itoa(i)))
 	}
-	return &control2.If{Conditions: conditions, Bodies: bodies, ElseBody: elseBody}
+	return &control.If{Conditions: conditions, Bodies: bodies, ElseBody: elseBody}
 }
 
-func (p *XMLParser) logicExpr(block ast2.Block) ast2.Expr {
+func (p *XMLParser) logicExpr(block ast.Block) ast.Expr {
 	var pOperation string
 	switch block.SingleField() {
 	case "EQ":
@@ -516,8 +516,8 @@ func (p *XMLParser) logicExpr(block ast2.Block) ast2.Expr {
 	return p.makeBinary(pOperation, p.fromMinVals(block.Values, 2))
 }
 
-func (p *XMLParser) procedureCall(block ast2.Block) ast2.Expr {
-	var mutArgsNames []ast2.Arg
+func (p *XMLParser) procedureCall(block ast.Block) ast.Expr {
+	var mutArgsNames []ast.Arg
 	if block.Mutation != nil {
 		mutArgsNames = block.Mutation.Args
 	}
@@ -527,7 +527,7 @@ func (p *XMLParser) procedureCall(block ast2.Block) ast2.Expr {
 	}
 	procedureName := block.SingleField()
 	args := p.fromVals(block.Values)
-	return &procedures2.Call{
+	return &procedures.Call{
 		Name:       procedureName,
 		Parameters: paramNames,
 		Arguments:  args,
@@ -535,9 +535,9 @@ func (p *XMLParser) procedureCall(block ast2.Block) ast2.Expr {
 	}
 }
 
-func (p *XMLParser) returnProcedure(block ast2.Block) ast2.Expr {
+func (p *XMLParser) returnProcedure(block ast.Block) ast.Expr {
 	procedureName := p.makeFieldMap(block.Fields)["NAME"]
-	var mutArgs []ast2.Arg
+	var mutArgs []ast.Arg
 	if block.Mutation != nil {
 		mutArgs = block.Mutation.Args
 	}
@@ -545,16 +545,16 @@ func (p *XMLParser) returnProcedure(block ast2.Block) ast2.Expr {
 	for i := range mutArgs {
 		paramNames[i] = mutArgs[i].Name
 	}
-	return &procedures2.RetProcedure{
+	return &procedures.RetProcedure{
 		Name:       procedureName,
 		Parameters: paramNames,
 		Result:     p.singleExpr(block),
 	}
 }
 
-func (p *XMLParser) voidProcedure(block ast2.Block) ast2.Expr {
+func (p *XMLParser) voidProcedure(block ast.Block) ast.Expr {
 	procedureName := p.makeFieldMap(block.Fields)["NAME"]
-	var mutArgs []ast2.Arg
+	var mutArgs []ast.Arg
 	if block.Mutation != nil {
 		mutArgs = block.Mutation.Args
 	}
@@ -562,45 +562,45 @@ func (p *XMLParser) voidProcedure(block ast2.Block) ast2.Expr {
 	for i := range mutArgs {
 		paramNames[i] = mutArgs[i].Name
 	}
-	return &procedures2.VoidProcedure{
+	return &procedures.VoidProcedure{
 		Name:       procedureName,
 		Parameters: paramNames,
 		Body:       p.optSingleBody(block),
 	}
 }
 
-func (p *XMLParser) variableSmts(block ast2.Block) ast2.Expr {
+func (p *XMLParser) variableSmts(block ast.Block) ast.Expr {
 	numOfVars := len(block.Mutation.LocalNames)
 	fieldMap := p.makeFieldMap(block.Fields)
 	valueMap := p.makeValueMap(block.Values)
 
 	varNames := make([]string, numOfVars)
-	varValues := make([]ast2.Expr, numOfVars)
+	varValues := make([]ast.Expr, numOfVars)
 
 	for i := 0; i < numOfVars; i++ {
 		varNames[i] = fieldMap["VAR"+strconv.Itoa(i)]
 		varValues[i] = valueMap.get("DECL" + strconv.Itoa(i))
 	}
 	if block.GetType() == "local_declaration_statement" {
-		return &variables2.Var{
+		return &variables.Var{
 			Names:  varNames,
 			Values: varValues,
 			Body:   p.optSingleBody(block),
 		}
 	}
-	return &variables2.VarResult{Names: varNames, Values: varValues, Result: valueMap.get("RETURN")}
+	return &variables.VarResult{Names: varNames, Values: varValues, Result: valueMap.get("RETURN")}
 }
 
-func (p *XMLParser) variableSet(block ast2.Block) ast2.Expr {
+func (p *XMLParser) variableSet(block ast.Block) ast.Expr {
 	varName := block.SingleField()
 	isGlobal := strings.HasPrefix(varName, "global ")
 	if isGlobal {
 		varName = varName[len("global "):]
 	}
 	return p.makeBinary("=",
-		[]ast2.Expr{
-			&variables2.Get{
-				Where:  makeFakeToken(lex2.Global),
+		[]ast.Expr{
+			&variables.Get{
+				Where:  makeFakeToken(lex.Global),
 				Global: isGlobal,
 				Name:   varName,
 			},
@@ -609,7 +609,7 @@ func (p *XMLParser) variableSet(block ast2.Block) ast2.Expr {
 	)
 }
 
-func (p *XMLParser) variableGet(block ast2.Block) ast2.Expr {
+func (p *XMLParser) variableGet(block ast.Block) ast.Expr {
 	varName := block.Fields[0].Name
 	if varName == "VAR" {
 		varName = block.SingleField()
@@ -618,25 +618,25 @@ func (p *XMLParser) variableGet(block ast2.Block) ast2.Expr {
 	if isGlobal {
 		varName = varName[len("global "):]
 	}
-	return &variables2.Get{Where: makeFakeToken(lex2.Global), Global: isGlobal, Name: varName}
+	return &variables.Get{Where: makeFakeToken(lex.Global), Global: isGlobal, Name: varName}
 }
 
-func (p *XMLParser) dictWalkTree(block ast2.Block) ast2.Expr {
+func (p *XMLParser) dictWalkTree(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return p.makePropCall("walkTree", pVals.get("DICT"), pVals.get("PATH"))
 }
 
-func (p *XMLParser) dictCombine(block ast2.Block) ast2.Expr {
+func (p *XMLParser) dictCombine(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return p.makePropCall("mergeInto", pVals.get("DICT2"), pVals.get("DICT1"))
 }
 
-func (p *XMLParser) dictHasKey(block ast2.Block) ast2.Expr {
+func (p *XMLParser) dictHasKey(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return p.makePropCall("containsKey", pVals.get("DICT"), pVals.get("KEY"))
 }
 
-func (p *XMLParser) dictGetters(block ast2.Block) ast2.Expr {
+func (p *XMLParser) dictGetters(block ast.Block) ast.Expr {
 	var pOperation string
 	switch block.SingleField() {
 	case "KEYS":
@@ -649,180 +649,180 @@ func (p *XMLParser) dictGetters(block ast2.Block) ast2.Expr {
 	return p.makePropCall(pOperation, p.singleExpr(block))
 }
 
-func (p *XMLParser) dictSetPath(block ast2.Block) ast2.Expr {
+func (p *XMLParser) dictSetPath(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return p.makePropCall("setAtPath", pVals.get("DICT"), pVals.get("KEYS"), pVals.get("VALUE"))
 }
 
-func (p *XMLParser) dictLookupPath(block ast2.Block) ast2.Expr {
+func (p *XMLParser) dictLookupPath(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return p.makePropCall("getAtPath", pVals.get("DICT"), pVals.get("KEYS"), pVals.get("NOTFOUND"))
 }
 
-func (p *XMLParser) dictRemove(block ast2.Block) ast2.Expr {
+func (p *XMLParser) dictRemove(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return p.makePropCall("remove", pVals.get("DICT"), pVals.get("KEY"))
 }
 
-func (p *XMLParser) dictSet(block ast2.Block) ast2.Expr {
+func (p *XMLParser) dictSet(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return p.makePropCall("set", pVals.get("KEY"), pVals.get("VALUE"))
 }
 
-func (p *XMLParser) dictLookup(block ast2.Block) ast2.Expr {
+func (p *XMLParser) dictLookup(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return p.makePropCall("get", pVals.get("DICT"), pVals.get("KEY"), pVals.get("NOTFOUND"))
 }
 
-func (p *XMLParser) dictPair(block ast2.Block) ast2.Expr {
+func (p *XMLParser) dictPair(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makeBinary(":", []ast2.Expr{pVals.get("KEY"), pVals.get("VALUE")})
+	return p.makeBinary(":", []ast.Expr{pVals.get("KEY"), pVals.get("VALUE")})
 }
 
-func (p *XMLParser) listTransMax(block ast2.Block) ast2.Expr {
+func (p *XMLParser) listTransMax(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	pFields := p.makeFieldMap(block.Fields)
-	return &list2.Transformer{
-		Where:       makeFakeToken(lex2.OpenSquare),
+	return &list.Transformer{
+		Where:       makeFakeToken(lex.OpenSquare),
 		List:        pVals.get("LIST"),
 		Name:        "max",
-		Args:        []ast2.Expr{},
+		Args:        []ast.Expr{},
 		Names:       []string{pFields["VAR1"], pFields["VAR2"]},
 		Transformer: pVals.get("COMPARE"),
 	}
 }
 
-func (p *XMLParser) listTransMin(block ast2.Block) ast2.Expr {
+func (p *XMLParser) listTransMin(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	pFields := p.makeFieldMap(block.Fields)
-	return &list2.Transformer{
-		Where:       makeFakeToken(lex2.OpenSquare),
+	return &list.Transformer{
+		Where:       makeFakeToken(lex.OpenSquare),
 		List:        pVals.get("LIST"),
 		Name:        "min",
-		Args:        []ast2.Expr{},
+		Args:        []ast.Expr{},
 		Names:       []string{pFields["VAR1"], pFields["VAR2"]},
 		Transformer: pVals.get("COMPARE"),
 	}
 }
 
-func (p *XMLParser) listSortKeyComparator(block ast2.Block) ast2.Expr {
+func (p *XMLParser) listSortKeyComparator(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return &list2.Transformer{
-		Where:       makeFakeToken(lex2.OpenSquare),
+	return &list.Transformer{
+		Where:       makeFakeToken(lex.OpenSquare),
 		List:        pVals.get("LIST"),
 		Name:        "sortByKey",
-		Args:        []ast2.Expr{},
+		Args:        []ast.Expr{},
 		Names:       []string{block.SingleField()},
 		Transformer: pVals.get("KEY"),
 	}
 }
 
-func (p *XMLParser) listSortComparator(block ast2.Block) ast2.Expr {
+func (p *XMLParser) listSortComparator(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	pFields := p.makeFieldMap(block.Fields)
-	return &list2.Transformer{
-		Where:       makeFakeToken(lex2.OpenSquare),
+	return &list.Transformer{
+		Where:       makeFakeToken(lex.OpenSquare),
 		List:        pVals.get("LIST"),
 		Name:        "sort",
-		Args:        []ast2.Expr{},
+		Args:        []ast.Expr{},
 		Names:       []string{pFields["VAR1"], pFields["VAR2"]},
 		Transformer: pVals.get("COMPARE"),
 	}
 }
 
-func (p *XMLParser) listReduce(block ast2.Block) ast2.Expr {
+func (p *XMLParser) listReduce(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	pFields := p.makeFieldMap(block.Fields)
-	return &list2.Transformer{
-		Where:       makeFakeToken(lex2.OpenSquare),
+	return &list.Transformer{
+		Where:       makeFakeToken(lex.OpenSquare),
 		List:        pVals.get("LIST"),
 		Name:        "reduce",
-		Args:        []ast2.Expr{pVals.get("INITANSWER")},
+		Args:        []ast.Expr{pVals.get("INITANSWER")},
 		Names:       []string{pFields["VAR1"], pFields["VAR2"]},
 		Transformer: pVals.get("COMBINE"),
 	}
 }
 
-func (p *XMLParser) listFilter(block ast2.Block) ast2.Expr {
+func (p *XMLParser) listFilter(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return &list2.Transformer{
-		Where:       makeFakeToken(lex2.OpenSquare),
+	return &list.Transformer{
+		Where:       makeFakeToken(lex.OpenSquare),
 		List:        pVals.get("LIST"),
 		Name:        "filter",
-		Args:        []ast2.Expr{},
+		Args:        []ast.Expr{},
 		Names:       []string{block.SingleField()},
 		Transformer: pVals.get("TEST"),
 	}
 }
 
-func (p *XMLParser) listMap(block ast2.Block) ast2.Expr {
+func (p *XMLParser) listMap(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return &list2.Transformer{
-		Where:       makeFakeToken(lex2.OpenSquare),
+	return &list.Transformer{
+		Where:       makeFakeToken(lex.OpenSquare),
 		List:        pVals.get("LIST"),
 		Name:        "map",
-		Args:        []ast2.Expr{},
+		Args:        []ast.Expr{},
 		Names:       []string{block.SingleField()},
 		Transformer: pVals.get("TO"),
 	}
 }
 
-func (p *XMLParser) listSlice(block ast2.Block) ast2.Expr {
+func (p *XMLParser) listSlice(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return p.makePropCall("slice", pVals.get("LIST"), pVals.get("INDEX1"), pVals.get("INDEX2"))
 }
 
-func (p *XMLParser) listJoin(block ast2.Block) ast2.Expr {
+func (p *XMLParser) listJoin(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return p.makePropCall("join", pVals.get("LIST"), pVals.get("SEPARATOR"))
 }
 
-func (p *XMLParser) listLookupPairs(block ast2.Block) ast2.Expr {
+func (p *XMLParser) listLookupPairs(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return p.makePropCall("lookupInPairs", pVals.get("LIST"), pVals.get("KEY"), pVals.get("NOTFOUND"))
 }
 
-func (p *XMLParser) listRemoveItem(block ast2.Block) ast2.Expr {
+func (p *XMLParser) listRemoveItem(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return p.makePropCall("remove", pVals.get("LIST"), pVals.get("INDEX"))
 }
 
-func (p *XMLParser) listReplaceItem(block ast2.Block) ast2.Expr {
+func (p *XMLParser) listReplaceItem(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return &list2.Set{List: pVals.get("LIST"), Index: pVals.get("NUM"), Value: pVals.get("ITEM")}
+	return &list.Set{List: pVals.get("LIST"), Index: pVals.get("NUM"), Value: pVals.get("ITEM")}
 }
 
-func (p *XMLParser) listInsertItem(block ast2.Block) ast2.Expr {
+func (p *XMLParser) listInsertItem(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return p.makePropCall("insert", pVals.get("LIST"), pVals.get("INDEX"), pVals.get("ITEM"))
 }
 
-func (p *XMLParser) listSelectItem(block ast2.Block) ast2.Expr {
+func (p *XMLParser) listSelectItem(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return &list2.Get{List: pVals.get("LIST"), Index: pVals.get("NUM")}
+	return &list.Get{List: pVals.get("LIST"), Index: pVals.get("NUM")}
 }
 
-func (p *XMLParser) listIndexOf(block ast2.Block) ast2.Expr {
+func (p *XMLParser) listIndexOf(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return p.makePropCall("indexOf", pVals.get("LIST"), pVals.get("ITEM"))
 }
 
-func (p *XMLParser) listContainsItem(block ast2.Block) ast2.Expr {
+func (p *XMLParser) listContainsItem(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return p.makePropCall("containsItem", pVals.get("LIST"), pVals.get("ITEM"))
 }
 
-func (p *XMLParser) listAddItem(block ast2.Block) ast2.Expr {
+func (p *XMLParser) listAddItem(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	numElements := block.Mutation.ItemCount
-	arrElements := make([]ast2.Expr, numElements)
+	arrElements := make([]ast.Expr, numElements)
 	for i := 0; i < numElements; i++ {
 		arrElements[i] = pVals.get("ITEM" + strconv.Itoa(i))
 	}
 	return p.makePropCall("add", pVals.get("LIST"), arrElements...)
 }
 
-func (p *XMLParser) textReplaceMap(block ast2.Block) ast2.Expr {
+func (p *XMLParser) textReplaceMap(block ast.Block) ast.Expr {
 	var pOperation string
 	switch block.SingleField() {
 	case "LONGEST_STRING_FIRST":
@@ -836,24 +836,24 @@ func (p *XMLParser) textReplaceMap(block ast2.Block) ast2.Expr {
 	return p.makePropCall(pOperation, pVals.get("TEXT"), pVals.get("MAPPINGS"))
 }
 
-func (p *XMLParser) textObfuscate(block ast2.Block) ast2.Expr {
-	return &common2.Transform{
-		Where: makeFakeToken(lex2.Text),
-		On:    &fundamentals2.Text{Content: block.SingleField()},
+func (p *XMLParser) textObfuscate(block ast.Block) ast.Expr {
+	return &common.Transform{
+		Where: makeFakeToken(lex.Text),
+		On:    &fundamentals.Text{Content: block.SingleField()},
 		Name:  "obfuscate"}
 }
 
-func (p *XMLParser) textSegment(block ast2.Block) ast2.Expr {
+func (p *XMLParser) textSegment(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return p.makePropCall("segment", pVals.get("TEXT"), pVals.get("START"), pVals.get("LENGTH"))
 }
 
-func (p *XMLParser) textReplace(block ast2.Block) ast2.Expr {
+func (p *XMLParser) textReplace(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return p.makePropCall("replace", pVals.get("TEXT"), pVals.get("SEGMENT"), pVals.get("REPLACEMENT"))
 }
 
-func (p *XMLParser) textSplit(block ast2.Block) ast2.Expr {
+func (p *XMLParser) textSplit(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	var pOperation string
 	switch block.SingleField() {
@@ -871,7 +871,7 @@ func (p *XMLParser) textSplit(block ast2.Block) ast2.Expr {
 	return p.makePropCall(pOperation, pVals.get("TEXT"), pVals.get("AT"))
 }
 
-func (p *XMLParser) textContains(block ast2.Block) ast2.Expr {
+func (p *XMLParser) textContains(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	var pOperation string
 	switch block.SingleField() {
@@ -887,12 +887,12 @@ func (p *XMLParser) textContains(block ast2.Block) ast2.Expr {
 	return p.makePropCall(pOperation, pVals.get("TEXT"), pVals.get("PIECE"))
 }
 
-func (p *XMLParser) textStartsWith(block ast2.Block) ast2.Expr {
+func (p *XMLParser) textStartsWith(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
 	return p.makePropCall("startsWith", pVals.get("TEXT"), pVals.get("PIECE"))
 }
 
-func (p *XMLParser) textChangeCase(block ast2.Block) ast2.Expr {
+func (p *XMLParser) textChangeCase(block ast.Block) ast.Expr {
 	var pOperation string
 	switch block.SingleField() {
 	case "UPCASE":
@@ -905,7 +905,7 @@ func (p *XMLParser) textChangeCase(block ast2.Block) ast2.Expr {
 	return p.makePropCall(pOperation, p.singleExpr(block))
 }
 
-func (p *XMLParser) textCompare(block ast2.Block) ast2.Expr {
+func (p *XMLParser) textCompare(block ast.Block) ast.Expr {
 	var pOperation string
 	switch block.SingleField() {
 	case "EQ":
@@ -922,7 +922,7 @@ func (p *XMLParser) textCompare(block ast2.Block) ast2.Expr {
 	return p.makeBinary(pOperation, p.fromMinVals(block.Values, 2))
 }
 
-func (p *XMLParser) mathConvertNumber(block ast2.Block) ast2.Expr {
+func (p *XMLParser) mathConvertNumber(block ast.Block) ast.Expr {
 	var funcName string
 	switch block.SingleField() {
 	case "DEC_TO_HEX":
@@ -939,7 +939,7 @@ func (p *XMLParser) mathConvertNumber(block ast2.Block) ast2.Expr {
 	return makeFuncCall(funcName, p.singleExpr(block))
 }
 
-func (p *XMLParser) mathIsNumber(block ast2.Block) ast2.Expr {
+func (p *XMLParser) mathIsNumber(block ast.Block) ast.Expr {
 	var question string
 	switch block.SingleField() {
 	case "NUMBER":
@@ -953,10 +953,10 @@ func (p *XMLParser) mathIsNumber(block ast2.Block) ast2.Expr {
 	default:
 		panic("Unknown MathIsNumber type: " + block.SingleField())
 	}
-	return p.makeQuestion(lex2.Number, block, question)
+	return p.makeQuestion(lex.Number, block, question)
 }
 
-func (p *XMLParser) mathDivide(block ast2.Block) ast2.Expr {
+func (p *XMLParser) mathDivide(block ast.Block) ast.Expr {
 	var funcName string
 	switch block.SingleField() {
 	case "MODULO":
@@ -971,7 +971,7 @@ func (p *XMLParser) mathDivide(block ast2.Block) ast2.Expr {
 	return makeFuncCall(funcName, p.fromMinVals(block.Values, 2)...)
 }
 
-func (p *XMLParser) mathSingle(block ast2.Block) ast2.Expr {
+func (p *XMLParser) mathSingle(block ast.Block) ast.Expr {
 	funcName := strings.ToLower(block.SingleField())
 	switch funcName {
 	case "ln":
@@ -982,7 +982,7 @@ func (p *XMLParser) mathSingle(block ast2.Block) ast2.Expr {
 	return makeFuncCall(funcName, p.singleExpr(block))
 }
 
-func (p *XMLParser) mathOnList2(block ast2.Block) ast2.Expr {
+func (p *XMLParser) mathOnList2(block ast.Block) ast.Expr {
 	var funcName string
 	switch block.SingleField() {
 	case "AVG":
@@ -1003,7 +1003,7 @@ func (p *XMLParser) mathOnList2(block ast2.Block) ast2.Expr {
 	return makeFuncCall(funcName, p.singleExpr(block))
 }
 
-func (p *XMLParser) mathRadix(block ast2.Block) ast2.Expr {
+func (p *XMLParser) mathRadix(block ast.Block) ast.Expr {
 	pFields := p.makeFieldMap(block.Fields)
 	var funcName string
 	switch pFields["OP"] {
@@ -1018,15 +1018,15 @@ func (p *XMLParser) mathRadix(block ast2.Block) ast2.Expr {
 	default:
 		panic("Unknown Math Radix Type: " + pFields["OP"])
 	}
-	return makeFuncCall(funcName, &fundamentals2.Text{Content: pFields["NUM"]})
+	return makeFuncCall(funcName, &fundamentals.Text{Content: pFields["NUM"]})
 }
 
-func (p *XMLParser) mathRandom(block ast2.Block) ast2.Expr {
+func (p *XMLParser) mathRandom(block ast.Block) ast.Expr {
 	valMap := p.makeValueMap(block.Values)
 	return makeFuncCall("randInt", valMap.get("FROM"), valMap.get("TO"))
 }
 
-func (p *XMLParser) mathExpr(block ast2.Block) ast2.Expr {
+func (p *XMLParser) mathExpr(block ast.Block) ast.Expr {
 	var mathOp string
 	switch block.SingleField() {
 	case "EQ":
@@ -1053,74 +1053,74 @@ func (p *XMLParser) mathExpr(block ast2.Block) ast2.Expr {
 	return p.makeBinary(mathOp, p.fromMinVals(block.Values, 2))
 }
 
-func (p *XMLParser) makeColor(name string) ast2.Expr {
-	return &fundamentals2.Color{Where: makeFakeToken(lex2.Color), Name: name}
+func (p *XMLParser) makeColor(block ast.Block) ast.Expr {
+	return &fundamentals.Color{Where: makeFakeToken(lex.ColorCode), Hex: block.SingleField()}
 }
 
-func (p *XMLParser) makeQuestion(t lex2.Type, on ast2.Block, name string) ast2.Expr {
-	return &common2.Question{Where: makeFakeToken(t), On: p.singleExpr(on), Question: name}
+func (p *XMLParser) makeQuestion(t lex.Type, on ast.Block, name string) ast.Expr {
+	return &common.Question{Where: makeFakeToken(t), On: p.singleExpr(on), Question: name}
 }
 
-func (p *XMLParser) makePropCall(name string, on ast2.Expr, args ...ast2.Expr) ast2.Expr {
+func (p *XMLParser) makePropCall(name string, on ast.Expr, args ...ast.Expr) ast.Expr {
 	return &method.Call{
-		Where: makeFakeToken(lex2.Text),
+		Where: makeFakeToken(lex.Text),
 		Name:  name,
 		On:    on,
 		Args:  args,
 	}
 }
 
-func (p *XMLParser) makeBinary(operator string, operands []ast2.Expr) ast2.Expr {
+func (p *XMLParser) makeBinary(operator string, operands []ast.Expr) ast.Expr {
 	token := makeToken(operator)
-	return &common2.BinaryExpr{
+	return &common.BinaryExpr{
 		Where:    token,
 		Operator: token.Type,
 		Operands: operands,
 	}
 }
 
-func makeFuncCall(name string, args ...ast2.Expr) ast2.Expr {
-	return &common2.FuncCall{
-		Where: makeFakeToken(lex2.Func),
+func makeFuncCall(name string, args ...ast.Expr) ast.Expr {
+	return &common.FuncCall{
+		Where: makeFakeToken(lex.Func),
 		Name:  name,
 		Args:  args,
 	}
 }
 
 // TODO: (future) it'll point to something meaningful
-func makeFakeToken(t lex2.Type) *lex2.Token {
-	return &lex2.Token{
+func makeFakeToken(t lex.Type) *lex.Token {
+	return &lex.Token{
 		Column:  -1,
 		Row:     -1,
 		Context: nil,
 		Type:    t,
-		Flags:   make([]lex2.Flag, 0),
+		Flags:   make([]lex.Flag, 0),
 		Content: nil,
 	}
 }
 
-func makeToken(symbol string) *lex2.Token {
-	sToken := lex2.Symbols[symbol]
+func makeToken(symbol string) *lex.Token {
+	sToken := lex.Symbols[symbol]
 	return sToken.Normal(-1, -1, nil, symbol)
 }
 
-func (p *XMLParser) optSingleBody(block ast2.Block) []ast2.Expr {
+func (p *XMLParser) optSingleBody(block ast.Block) []ast.Expr {
 	if len(block.Statements) > 0 {
 		return p.recursiveParse(*block.SingleStatement().Block)
 	}
-	return []ast2.Expr{}
+	return []ast.Expr{}
 }
 
-func (p *XMLParser) makeStatementMap(allStatements []ast2.Statement) StatementMap {
-	statementMap := make(map[string][]ast2.Expr, len(allStatements))
+func (p *XMLParser) makeStatementMap(allStatements []ast.Statement) StatementMap {
+	statementMap := make(map[string][]ast.Expr, len(allStatements))
 	for _, stmt := range allStatements {
 		statementMap[stmt.Name] = p.recursiveParse(*stmt.Block)
 	}
 	return StatementMap{statementMap: statementMap}
 }
 
-func (p *XMLParser) recursiveParse(currBlock ast2.Block) []ast2.Expr {
-	var pParsed []ast2.Expr
+func (p *XMLParser) recursiveParse(currBlock ast.Block) []ast.Expr {
+	var pParsed []ast.Expr
 	for {
 		pParsed = append(pParsed, p.parseBlock(currBlock))
 		if currBlock.Next == nil {
@@ -1131,7 +1131,7 @@ func (p *XMLParser) recursiveParse(currBlock ast2.Block) []ast2.Expr {
 	return pParsed
 }
 
-func (p *XMLParser) makeFieldMap(allFields []ast2.Field) map[string]string {
+func (p *XMLParser) makeFieldMap(allFields []ast.Field) map[string]string {
 	fieldMap := make(map[string]string, len(allFields))
 	for _, fil := range allFields {
 		fieldMap[fil.Name] = fil.Value
@@ -1139,30 +1139,30 @@ func (p *XMLParser) makeFieldMap(allFields []ast2.Field) map[string]string {
 	return fieldMap
 }
 
-func (p *XMLParser) makeValueMap(allValues []ast2.Value) ValueMap {
-	valueMap := make(map[string]ast2.Expr, len(allValues))
+func (p *XMLParser) makeValueMap(allValues []ast.Value) ValueMap {
+	valueMap := make(map[string]ast.Expr, len(allValues))
 	for _, val := range allValues {
 		valueMap[val.Name] = p.parseBlock(val.Block)
 	}
 	return ValueMap{valueMap: valueMap}
 }
 
-func (p *XMLParser) fromVals(allValues []ast2.Value) []ast2.Expr {
-	arrBlocks := make([]ast2.Expr, len(allValues))
+func (p *XMLParser) fromVals(allValues []ast.Value) []ast.Expr {
+	arrBlocks := make([]ast.Expr, len(allValues))
 	for i := range allValues {
 		arrBlocks[i] = p.parseBlock(allValues[i].Block)
 	}
 	return arrBlocks
 }
 
-func (p *XMLParser) fromMinVals(allValues []ast2.Value, minCount int) []ast2.Expr {
+func (p *XMLParser) fromMinVals(allValues []ast.Value, minCount int) []ast.Expr {
 	size := max(minCount, len(allValues))
-	arrExprs := make([]ast2.Expr, size)
+	arrExprs := make([]ast.Expr, size)
 	for i := range allValues {
 		arrExprs[i] = p.parseBlock(allValues[i].Block)
 	}
 	for i := len(allValues); i < size; i++ {
-		arrExprs[i] = &common2.EmptySocket{}
+		arrExprs[i] = &common.EmptySocket{}
 	}
 	return arrExprs
 }

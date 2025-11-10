@@ -626,9 +626,8 @@ func (p *LangParser) value(t *l.Token) ast.Expr {
 	case l.This:
 		p.expect(l.Dot)
 		return &variables.Get{Where: t, Global: true, Name: p.name()}
-	case l.Color:
-		p.expect(l.Colon)
-		return &fundamentals.Color{Where: t, Name: p.name()}
+	case l.ColorCode:
+		return &fundamentals.Color{Where: t, Hex: *t.Content}
 	default:
 		t.Error("Unknown value type '%'", t.String())
 		panic("") // unreachable

@@ -53,7 +53,7 @@ const (
 	Text
 	Number
 	Name
-	Color
+	ColorCode
 
 	If
 	Elif

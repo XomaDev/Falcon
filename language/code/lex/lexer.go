@@ -39,8 +39,8 @@ func (l *Lexer) Lex() []*Token {
 func (l *Lexer) parse() {
 	c := l.next()
 
-	if c == '#' {
-		// skip the current line
+	if c == '/' && l.consume('/') {
+		// comment, skip the current line
 		for l.notEOF() {
 			n := l.next()
 			if n == '\n' {
@@ -151,6 +151,8 @@ func (l *Lexer) parse() {
 		l.createOp("@")
 	case '"':
 		l.text()
+	case '#':
+		l.colorCode()
 	default:
 		l.back()
 		if l.isAlpha() {
@@ -170,6 +172,34 @@ func (l *Lexer) createOp(op string) {
 	} else {
 		l.appendToken(sToken.Normal(l.currColumn, l.currRow, l.ctx, op))
 	}
+}
+
+func (l *Lexer) colorCode() {
+	startIndex := l.currIndex
+	// Read up to 6 hex characters
+	for i := 0; i < 6 && l.notEOF(); i++ {
+		c := l.peek()
+		if (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f') {
+			l.skip()
+		} else {
+			l.error("Invalid color code character '%' in color literal", string(c))
+		}
+	}
+
+	length := l.currIndex - startIndex
+	if length != 6 {
+		l.error("Color code must be 6 hexadecimal characters, got %", strconv.Itoa(length))
+	}
+	content := l.source[startIndex-1 : l.currIndex] // include '#'
+	l.appendToken(&Token{
+		Context: l.ctx,
+		Row:     l.currRow,
+		Column:  l.currColumn,
+
+		Type:    ColorCode,
+		Content: &content,
+		Flags:   []Flag{Value, ConstantValue},
+	})
 }
 
 func (l *Lexer) text() {
