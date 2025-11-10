@@ -1,9 +1,5 @@
-local personality = {
-  "food": "Masala Dosa",
-  "fruit": "Mango",
-  "animal": "The Royal Bengal Tiger"
-}
+local countries = ["India", "Japan", "Russia", "Germany"]
 
-each key::value -> personality {
-   println("My favourite " _ key _ " is " _ value)
+each name in countries {
+  println(name)
 }

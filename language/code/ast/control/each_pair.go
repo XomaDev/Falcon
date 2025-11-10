@@ -37,7 +37,7 @@ func (e *EachPair) Yail() string {
 }
 
 func (e *EachPair) String() string {
-	return sugar.Format("each %::% -> % {\n%}", e.KeyName, e.ValueName, e.Iterable.String(), ast2.PadBody(e.Body))
+	return sugar.Format("each (%, %) -> % {\n%}", e.KeyName, e.ValueName, e.Iterable.String(), ast2.PadBody(e.Body))
 }
 
 func (e *EachPair) Blockly() ast2.Block {

@@ -19,14 +19,14 @@ func main() {
 	println("Hello from Falcon!\n")
 
 	//diffTest()
-	//analyzeSyntax()
+	analyzeSyntax()
 	//xmlTest()
-	designTest()
+	//designTest()
 }
 
 func designTest() {
 	xmlFile := "Screen1.aiml"
-	xmlPath := "/home/ekina/GolandProjects/Falcon/" + xmlFile
+	xmlPath := "/home/ekina/GolandProjects/Falcon/testing/" + xmlFile
 	codeBytes, err := os.ReadFile(xmlPath)
 	if err != nil {
 		panic(err)
@@ -47,7 +47,7 @@ func designTest() {
 
 func xmlTest() {
 	xmlFile := "xml.txt"
-	xmlPath := "/home/ekina/GolandProjects/Falcon/" + xmlFile
+	xmlPath := "/home/ekina/GolandProjects/Falcon/testing/" + xmlFile
 	codeBytes, err := os.ReadFile(xmlPath)
 	if err != nil {
 		panic(err)
@@ -66,14 +66,14 @@ func diffTest() {
 	diff0 := "diff0.mist"
 	diff1 := "diff1.mist"
 
-	diff0Path := "/home/ekina/GolandProjects/Falcon/" + diff0
+	diff0Path := "/home/ekina/GolandProjects/Falcon/testing/" + diff0
 	codeBytes, err := os.ReadFile(diff0Path)
 	if err != nil {
 		panic(err)
 	}
 	diff0Code := string(codeBytes)
 
-	diff1Path := "/home/ekina/GolandProjects/Falcon/" + diff1
+	diff1Path := "/home/ekina/GolandProjects/Falcon/testing/" + diff1
 	codeBytes, err = os.ReadFile(diff1Path)
 	if err != nil {
 		panic(err)
@@ -86,7 +86,7 @@ func diffTest() {
 
 func analyzeSyntax() {
 	fileName := "hi.mist"
-	filePath := "/home/ekina/GolandProjects/Falcon/" + fileName
+	filePath := "/home/ekina/GolandProjects/Falcon/testing/" + fileName
 	codeBytes, err := os.ReadFile(filePath)
 	if err != nil {
 		panic(err)

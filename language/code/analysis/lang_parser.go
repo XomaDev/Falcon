@@ -220,15 +220,17 @@ func (p *LangParser) whileExpr() *control.While {
 
 func (p *LangParser) eachExpr() ast.Expr {
 	p.skip()
-	keyName := p.name()
-	if p.consume(l.DoubleColon) {
+	if p.consume(l.OpenCurve) {
 		// a dictionary pair iteration
+		keyName := p.name()
+		p.expect(l.Comma)
 		valueName := p.name()
-		p.expect(l.RightArrow)
+		p.expect(l.CloseCurve)
+		p.expect(l.In)
 		return &control.EachPair{KeyName: keyName, ValueName: valueName, Iterable: p.element(), Body: p.body()}
 	} else {
-		// a simple list iteration
-		p.expect(l.RightArrow)
+		keyName := p.name()
+		p.expect(l.In)
 		return &control.Each{IName: keyName, Iterable: p.element(), Body: p.body()}
 	}
 }
