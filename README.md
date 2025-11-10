@@ -164,10 +164,10 @@ for x: 1 to 10 by 2 {
 
 `each` statement is used to iterate over a list:
 
-```go
+```python
 local countries = ["India", "Japan", "Russia", "Germany"]
 
-each name -> countries {
+each name in countries {
   println(name)
 }
 ```
@@ -181,7 +181,7 @@ local personality = {
   "animal": "The Royal Bengal Tiger"
 }
 
-each key::value -> personality {
+each (key, value) in personality {
    println("My favourite " _ key _ " is " _ value)
 }
 ```
@@ -372,13 +372,13 @@ numbers[1] = 8
 ## Dictionary access
 
 ```python
-local(personality = {
+local personality = {
   "food": "Masala Dosa",
   "fruit": "Mango",
   "animal": "The Royal Bengal Tiger"
-}) {
-    println(personality.get("food", 0))
 }
+
+println(personality.get("food", 0))
 ```
 
 ## List transformer

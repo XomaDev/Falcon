@@ -135,8 +135,8 @@ func analyzeSyntax() {
 	}
 	println(machineSourceCode.String())
 
-	// Generate a merged syntax
-	println("\n=== DIFF ===\n")
-	syntaxDiff := diff.MakeSyntaxDiff(sourceCode, machineSourceCode.String())
-	println(syntaxDiff.Merge())
+	//// Generate a merged syntax
+	//println("\n=== DIFF ===\n")
+	//syntaxDiff := diff.MakeSyntaxDiff(sourceCode, machineSourceCode.String())
+	//println(syntaxDiff.Merge())
 }

@@ -1,5 +1,6 @@
-local countries = ["India", "Japan", "Russia", "Germany"]
-
-each name in countries {
-  println(name)
+local personality = {
+  "food": "Masala Dosa",
+  "fruit": "Mango",
+  "animal": "The Royal Bengal Tiger"
 }
+println(personality.get("food", 0))
