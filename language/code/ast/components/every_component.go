@@ -1,7 +1,7 @@
 package components
 
 import (
-	blky "Falcon/code/ast"
+	"Falcon/code/ast"
 	"Falcon/code/sugar"
 )
 
@@ -17,11 +17,11 @@ func (e *EveryComponent) String() string {
 	return sugar.Format("every(%)", e.Type)
 }
 
-func (e *EveryComponent) Blockly() blky.Block {
-	return blky.Block{
+func (e *EveryComponent) Blockly() ast.Block {
+	return ast.Block{
 		Type:     "component_all_component_block",
-		Mutation: &blky.Mutation{ComponentType: e.Type},
-		Fields:   []blky.Field{{Name: "COMPONENT_SELECTOR", Value: e.Type}},
+		Mutation: &ast.Mutation{ComponentType: e.Type},
+		Fields:   []ast.Field{{Name: "COMPONENT_SELECTOR", Value: e.Type}},
 	}
 }
 
@@ -31,4 +31,8 @@ func (e *EveryComponent) Continuous() bool {
 
 func (e *EveryComponent) Consumable() bool {
 	return true
+}
+
+func (e *EveryComponent) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignList}
 }

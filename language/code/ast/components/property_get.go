@@ -48,3 +48,7 @@ func (p *PropertyGet) Continuous() bool {
 func (p *PropertyGet) Consumable() bool {
 	return true
 }
+
+func (p *PropertyGet) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignAny}
+}

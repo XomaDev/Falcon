@@ -1,7 +1,7 @@
 package components
 
 import (
-	ast2 "Falcon/code/ast"
+	"Falcon/code/ast"
 	"Falcon/code/sugar"
 	"strings"
 )
@@ -10,7 +10,7 @@ type MethodCall struct {
 	ComponentName string
 	ComponentType string
 	Method        string
-	Args          []ast2.Expr
+	Args          []ast.Expr
 }
 
 func (m *MethodCall) Yail() string {
@@ -21,7 +21,7 @@ func (m *MethodCall) Yail() string {
 	yail += " '"
 	yail += m.Method
 	yail += " (*list-for-runtime*"
-	yail += ast2.JoinYailExprs(" ", m.Args)
+	yail += ast.JoinYailExprs(" ", m.Args)
 	yail += ") '("
 	yail += strings.Repeat("any ", len(m.Args))
 	yail += "))"
@@ -30,20 +30,20 @@ func (m *MethodCall) Yail() string {
 }
 
 func (m *MethodCall) String() string {
-	return sugar.Format("%.%(%)", m.ComponentName, m.Method, ast2.JoinExprs(", ", m.Args))
+	return sugar.Format("%.%(%)", m.ComponentName, m.Method, ast.JoinExprs(", ", m.Args))
 }
 
-func (m *MethodCall) Blockly() ast2.Block {
-	return ast2.Block{
+func (m *MethodCall) Blockly() ast.Block {
+	return ast.Block{
 		Type: "component_method",
-		Mutation: &ast2.Mutation{
+		Mutation: &ast.Mutation{
 			MethodName:    m.Method,
 			IsGeneric:     false,
 			InstanceName:  m.ComponentName,
 			ComponentType: m.ComponentType,
 		},
-		Fields: []ast2.Field{{Name: "COMPONENT_SELECTOR", Value: m.ComponentName}},
-		Values: ast2.ValuesByPrefix("ARG", m.Args),
+		Fields: []ast.Field{{Name: "COMPONENT_SELECTOR", Value: m.ComponentName}},
+		Values: ast.ValuesByPrefix("ARG", m.Args),
 	}
 }
 
@@ -53,4 +53,8 @@ func (m *MethodCall) Continuous() bool {
 
 func (m *MethodCall) Consumable() bool {
 	return false // may be consumable too
+}
+
+func (m *MethodCall) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignAny}
 }
