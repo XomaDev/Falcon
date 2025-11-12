@@ -1,17 +1,17 @@
 package common
 
 import (
-	ast2 "Falcon/code/ast"
-	list2 "Falcon/code/ast/list"
+	"Falcon/code/ast"
+	"Falcon/code/ast/list"
 	"Falcon/code/ast/variables"
-	lex2 "Falcon/code/lex"
+	"Falcon/code/lex"
 	"strconv"
 )
 
 type BinaryExpr struct {
-	Where    *lex2.Token
-	Operands []ast2.Expr
-	Operator lex2.Type
+	Where    *lex.Token
+	Operands []ast.Expr
+	Operator lex.Type
 }
 
 func (b *BinaryExpr) Yail() string {
@@ -20,46 +20,46 @@ func (b *BinaryExpr) Yail() string {
 }
 
 func (b *BinaryExpr) String() string {
-	return ast2.JoinExprs(" "+*b.Where.Content+" ", b.Operands)
+	return ast.JoinExprs(" "+*b.Where.Content+" ", b.Operands)
 }
 
 // CanRepeat: return true if the binary expr can be optimized into one struct
 //	without the need to create additional BinaryExpr struct for the same Operator.
 //	This factor also depends on the type of Operator being used. (Some support, some don't)
 
-func (b *BinaryExpr) CanRepeat(testOperator lex2.Type) bool {
+func (b *BinaryExpr) CanRepeat(testOperator lex.Type) bool {
 	if b.Operator != testOperator {
 		return false
 	}
 	switch b.Operator {
-	case lex2.Power, lex2.Dash, lex2.Slash, lex2.Colon:
+	case lex.Power, lex.Dash, lex.Slash, lex.Colon:
 		return false
 	default:
 		return true
 	}
 }
 
-func (b *BinaryExpr) Blockly() ast2.Block {
+func (b *BinaryExpr) Blockly() ast.Block {
 	switch b.Operator {
-	case lex2.BitwiseAnd, lex2.BitwiseOr, lex2.BitwiseXor:
+	case lex.BitwiseAnd, lex.BitwiseOr, lex.BitwiseXor:
 		return b.bitwiseExpr()
-	case lex2.Equals, lex2.NotEquals:
+	case lex.Equals, lex.NotEquals:
 		return b.compareExpr()
-	case lex2.LogicAnd, lex2.LogicOr:
+	case lex.LogicAnd, lex.LogicOr:
 		return b.boolExpr()
-	case lex2.Colon:
+	case lex.Colon:
 		return b.pairExpr()
-	case lex2.Plus, lex2.Times:
+	case lex.Plus, lex.Times:
 		return b.addOrTimes()
-	case lex2.Dash, lex2.Slash, lex2.Power:
+	case lex.Dash, lex.Slash, lex.Power:
 		return b.simpleMathExpr()
-	case lex2.Underscore:
+	case lex.Underscore:
 		return b.textJoin()
-	case lex2.LessThan, lex2.LessThanEqual, lex2.GreatThan, lex2.GreaterThanEqual:
+	case lex.LessThan, lex.LessThanEqual, lex.GreatThan, lex.GreaterThanEqual:
 		return b.relationalExpr()
-	case lex2.TextEquals, lex2.TextNotEquals, lex2.TextLessThan, lex2.TextGreaterThan:
+	case lex.TextEquals, lex.TextNotEquals, lex.TextLessThan, lex.TextGreaterThan:
 		return b.textCompare()
-	case lex2.Assign:
+	case lex.Assign:
 		return b.assignment()
 	default:
 		b.Where.Error("Unknown binary operator! " + b.Operator.String())
@@ -72,18 +72,46 @@ func (b *BinaryExpr) Continuous() bool {
 }
 
 func (b *BinaryExpr) Consumable() bool {
-	return b.Operator != lex2.Assign
+	return b.Operator != lex.Assign
 }
 
-func (b *BinaryExpr) assignment() ast2.Block {
+func (b *BinaryExpr) Signature() []ast.Signature {
+	switch b.Operator {
+	case lex.BitwiseAnd, lex.BitwiseOr, lex.BitwiseXor:
+		return []ast.Signature{ast.SignNumb}
+	case lex.Equals, lex.NotEquals:
+		return []ast.Signature{ast.SignBool}
+	case lex.LogicAnd, lex.LogicOr:
+		return []ast.Signature{ast.SignBool}
+	case lex.Colon:
+		return []ast.Signature{ast.SignList}
+	case lex.Plus, lex.Times:
+		return []ast.Signature{ast.SignNumb}
+	case lex.Dash, lex.Slash, lex.Power:
+		return []ast.Signature{ast.SignNumb}
+	case lex.Underscore:
+		return []ast.Signature{ast.SignText}
+	case lex.LessThan, lex.LessThanEqual, lex.GreatThan, lex.GreaterThanEqual:
+		return []ast.Signature{ast.SignBool}
+	case lex.TextEquals, lex.TextNotEquals, lex.TextLessThan, lex.TextGreaterThan:
+		return []ast.Signature{ast.SignBool}
+	case lex.Assign:
+		return []ast.Signature{ast.SignVoid}
+	default:
+		b.Where.Error("Unknown binary operator! " + b.Operator.String())
+		panic("") // unreachable
+	}
+}
+
+func (b *BinaryExpr) assignment() ast.Block {
 	if len(b.Operands) != 2 {
 		b.Where.Error("Assignment '=' received more than two operands")
 	}
 	settable := b.Operands[0]
 	newValue := b.Operands[1]
 
-	if listGet, ok := settable.(*list2.Get); ok {
-		listSet := list2.Set{List: listGet.List, Index: listGet.Index, Value: newValue}
+	if listGet, ok := settable.(*list.Get); ok {
+		listSet := list.Set{List: listGet.List, Index: listGet.Index, Value: newValue}
 		return listSet.Blockly()
 	} else if varGet, ok := settable.(*variables.Get); ok {
 		var name string
@@ -92,154 +120,154 @@ func (b *BinaryExpr) assignment() ast2.Block {
 		} else {
 			name = varGet.Name
 		}
-		return ast2.Block{
+		return ast.Block{
 			Type:   "lexical_variable_set",
-			Fields: []ast2.Field{{Name: "VAR", Value: name}},
-			Values: []ast2.Value{{Name: "VALUE", Block: newValue.Blockly()}},
+			Fields: []ast.Field{{Name: "VAR", Value: name}},
+			Values: []ast.Value{{Name: "VALUE", Block: newValue.Blockly()}},
 		}
 	}
 	panic("Unimplemented!")
 }
 
-func (b *BinaryExpr) textCompare() ast2.Block {
+func (b *BinaryExpr) textCompare() ast.Block {
 	var fieldOp string
 	switch b.Operator {
-	case lex2.TextEquals:
+	case lex.TextEquals:
 		fieldOp = "EQUAL"
-	case lex2.NotEquals:
+	case lex.NotEquals:
 		fieldOp = "NEQ"
-	case lex2.TextLessThan:
+	case lex.TextLessThan:
 		fieldOp = "LT"
-	case lex2.TextGreaterThan:
+	case lex.TextGreaterThan:
 		fieldOp = "GT"
 	}
-	return ast2.Block{
+	return ast.Block{
 		Type:   "text_compare",
-		Fields: []ast2.Field{{Name: "OP", Value: fieldOp}},
-		Values: ast2.MakeValues(b.Operands, "TEXT1", "TEXT2"),
+		Fields: []ast.Field{{Name: "OP", Value: fieldOp}},
+		Values: ast.MakeValues(b.Operands, "TEXT1", "TEXT2"),
 	}
 }
 
-func (b *BinaryExpr) relationalExpr() ast2.Block {
+func (b *BinaryExpr) relationalExpr() ast.Block {
 	var fieldOp string
 	switch b.Operator {
-	case lex2.LessThan:
+	case lex.LessThan:
 		fieldOp = "LT"
-	case lex2.LessThanEqual:
+	case lex.LessThanEqual:
 		fieldOp = "LT"
-	case lex2.GreatThan:
+	case lex.GreatThan:
 		fieldOp = "GT"
-	case lex2.GreaterThanEqual:
+	case lex.GreaterThanEqual:
 		fieldOp = "GTE"
 	}
-	return ast2.Block{
+	return ast.Block{
 		Type:   "math_compare",
-		Fields: []ast2.Field{{Name: "OP", Value: fieldOp}},
-		Values: ast2.MakeValues(b.Operands, "A", "B"),
+		Fields: []ast.Field{{Name: "OP", Value: fieldOp}},
+		Values: ast.MakeValues(b.Operands, "A", "B"),
 	}
 }
 
-func (b *BinaryExpr) textJoin() ast2.Block {
-	return ast2.Block{
+func (b *BinaryExpr) textJoin() ast.Block {
+	return ast.Block{
 		Type:     "text_join",
-		Mutation: &ast2.Mutation{ItemCount: len(b.Operands)},
-		Values:   ast2.ValuesByPrefix("ADD", b.Operands),
+		Mutation: &ast.Mutation{ItemCount: len(b.Operands)},
+		Values:   ast.ValuesByPrefix("ADD", b.Operands),
 	}
 }
 
-func (b *BinaryExpr) pairExpr() ast2.Block {
+func (b *BinaryExpr) pairExpr() ast.Block {
 	if len(b.Operands) != 2 {
 		b.Where.Error("Pair operator ':' received more than two operands")
 	}
-	return ast2.Block{
+	return ast.Block{
 		Type:   "pair",
-		Values: ast2.MakeValues(b.Operands, "KEY", "VALUE"),
+		Values: ast.MakeValues(b.Operands, "KEY", "VALUE"),
 	}
 }
 
-func (b *BinaryExpr) boolExpr() ast2.Block {
+func (b *BinaryExpr) boolExpr() ast.Block {
 	var fieldOp string
-	if b.Operator == lex2.LogicAnd {
+	if b.Operator == lex.LogicAnd {
 		fieldOp = "AND"
 	} else {
 		fieldOp = "OR"
 	}
-	values := []ast2.Value{
+	values := []ast.Value{
 		{Name: "A", Block: b.Operands[0].Blockly()},
 		{Name: "B", Block: b.Operands[1].Blockly()},
 	}
 	lenOperands := len(b.Operands)
 	if lenOperands > 2 {
 		for i := 2; i < lenOperands; i++ {
-			values = append(values, ast2.Value{Name: "BOOL" + strconv.Itoa(i), Block: b.Operands[i].Blockly()})
+			values = append(values, ast.Value{Name: "BOOL" + strconv.Itoa(i), Block: b.Operands[i].Blockly()})
 		}
 	}
-	return ast2.Block{
+	return ast.Block{
 		Type:     "logic_operation",
-		Mutation: &ast2.Mutation{ItemCount: lenOperands},
+		Mutation: &ast.Mutation{ItemCount: lenOperands},
 		Values:   values,
-		Fields:   []ast2.Field{{Name: "OP", Value: fieldOp}},
+		Fields:   []ast.Field{{Name: "OP", Value: fieldOp}},
 	}
 }
 
-func (b *BinaryExpr) compareExpr() ast2.Block {
+func (b *BinaryExpr) compareExpr() ast.Block {
 	var fieldOp string
-	if b.Operator == lex2.Equals {
+	if b.Operator == lex.Equals {
 		fieldOp = "EQ"
 	} else {
 		fieldOp = "NEQ"
 	}
-	return ast2.Block{
+	return ast.Block{
 		Type:   "logic_compare",
-		Values: ast2.MakeValues(b.Operands, "A", "B"),
-		Fields: []ast2.Field{{Name: "OP", Value: fieldOp}},
+		Values: ast.MakeValues(b.Operands, "A", "B"),
+		Fields: []ast.Field{{Name: "OP", Value: fieldOp}},
 	}
 }
 
-func (b *BinaryExpr) bitwiseExpr() ast2.Block {
+func (b *BinaryExpr) bitwiseExpr() ast.Block {
 	var fieldOp string
 	switch b.Operator {
-	case lex2.BitwiseAnd:
+	case lex.BitwiseAnd:
 		fieldOp = "BITAND"
-	case lex2.BitwiseOr:
+	case lex.BitwiseOr:
 		fieldOp = "BITIOR"
-	case lex2.BitwiseXor:
+	case lex.BitwiseXor:
 		fieldOp = "BITXOR"
 	}
-	return ast2.Block{
+	return ast.Block{
 		Type:     "math_bitwise",
-		Values:   ast2.ValuesByPrefix("NUM", b.Operands),
-		Mutation: &ast2.Mutation{ItemCount: len(b.Operands)},
-		Fields:   []ast2.Field{{Name: "OP", Value: fieldOp}},
+		Values:   ast.ValuesByPrefix("NUM", b.Operands),
+		Mutation: &ast.Mutation{ItemCount: len(b.Operands)},
+		Fields:   []ast.Field{{Name: "OP", Value: fieldOp}},
 	}
 }
 
-func (b *BinaryExpr) simpleMathExpr() ast2.Block {
+func (b *BinaryExpr) simpleMathExpr() ast.Block {
 	var blockType string
 	switch b.Operator {
-	case lex2.Dash:
+	case lex.Dash:
 		blockType = "math_subtract"
-	case lex2.Slash:
+	case lex.Slash:
 		blockType = "math_division"
-	case lex2.Power:
+	case lex.Power:
 		blockType = "math_power"
 	}
-	return ast2.Block{
+	return ast.Block{
 		Type:   blockType,
-		Values: ast2.MakeValues(b.Operands, "A", "B"),
+		Values: ast.MakeValues(b.Operands, "A", "B"),
 	}
 }
 
-func (b *BinaryExpr) addOrTimes() ast2.Block {
+func (b *BinaryExpr) addOrTimes() ast.Block {
 	var blockType string
-	if b.Operator == lex2.Plus {
+	if b.Operator == lex.Plus {
 		blockType = "math_add"
 	} else {
 		blockType = "math_multiply"
 	}
-	return ast2.Block{
+	return ast.Block{
 		Type:     blockType,
-		Values:   ast2.ValuesByPrefix("NUM", b.Operands),
-		Mutation: &ast2.Mutation{ItemCount: len(b.Operands)},
+		Values:   ast.ValuesByPrefix("NUM", b.Operands),
+		Mutation: &ast.Mutation{ItemCount: len(b.Operands)},
 	}
 }

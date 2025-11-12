@@ -22,16 +22,16 @@ func (t *Transformer) Yail() string {
 	panic("implement me")
 }
 
-type Signature struct {
+type transformerSignature struct {
 	ArgSize  int
 	NameSize int
 }
 
-func makeSignature(argSize int, nameSize int) *Signature {
-	return &Signature{ArgSize: argSize, NameSize: nameSize}
+func makeSignature(argSize int, nameSize int) *transformerSignature {
+	return &transformerSignature{ArgSize: argSize, NameSize: nameSize}
 }
 
-var transformers = map[string]*Signature{
+var transformers = map[string]*transformerSignature{
 	"map":       makeSignature(0, 1),
 	"filter":    makeSignature(0, 1),
 	"reduce":    makeSignature(1, 2),

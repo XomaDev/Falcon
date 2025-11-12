@@ -29,3 +29,7 @@ func (e *EmptySocket) Continuous() bool {
 func (e *EmptySocket) Consumable() bool {
 	return false
 }
+
+func (e *EmptySocket) Signature() ast.Signature {
+	return ast.SignText
+}
