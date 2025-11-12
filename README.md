@@ -95,25 +95,6 @@ local age = 12
 println(age)
 ```
 
-A local variable statement with a scoped body:
-
-```python
-local (
-  x = 8,
-  j = 2,
-  k = 12
-) {
-   # use x, j, k here
-}
-```
-
-A returning variable expression:
-
-```python
-compute(a = 2, b = 8) -> a * b
-```
-
-
 ## Conditions and loops
 
 ### If statement
@@ -130,15 +111,15 @@ if age < 18 {
 }
 ```
 
-### Returning if-else expression
+### if-else expression
 
 Ternary like expression for returning values.
 Unlike If statement, use `()` between your condition.
 
 ```go
-local(a = 8, b = 2) {
-  println("Maximum " _ if (a > b) a else b)
-}
+local a = 8
+local b = 12
+local max = if (a > b) a else b
 ```
 
 ### For loops
@@ -188,18 +169,6 @@ each (key, value) in personality {
 }
 ```
 
-## Do expression
-
-`do` expression is to execute a body and return a result.
-
-```go
-do {
-  ...
-} -> result # outer scope
-```
-
-The `result` expression in `do`, is executed outside the body (outer scope).
-
 ## Functions
 
 A void function:
@@ -213,7 +182,12 @@ func funcName(x, y, z) {
 A returning function:
 
 ```go
-func greet(name) = "Hello " _ name _ "!"
+func getMin(x, y) = {
+  if x < y {
+    return x
+  }
+  return y
+}
 ```
 
 ## Functions
