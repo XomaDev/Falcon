@@ -242,8 +242,12 @@ func (p *LangParser) forExpr() *control.For {
 	from := p.expr(0)
 	p.expect(l.To)
 	to := p.expr(0)
-	p.expect(l.By)
-	by := p.expr(0)
+	var by ast.Expr
+	if p.consume(l.By) {
+		by = p.expr(0)
+	} else {
+		by = &fundamentals.Number{Content: "1"}
+	}
 	body := p.body()
 	return &control.For{
 		IName: iName,
