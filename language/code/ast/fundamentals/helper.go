@@ -33,3 +33,7 @@ func (h *HelperDropdown) Continuous() bool {
 func (h *HelperDropdown) Consumable() bool {
 	return true
 }
+
+func (h *HelperDropdown) Signature() ast.Signature {
+	return ast.SignHelper
+}

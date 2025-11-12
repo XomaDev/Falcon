@@ -1,17 +1,17 @@
 package fundamentals
 
 import (
-	ast2 "Falcon/code/ast"
+	"Falcon/code/ast"
 	"Falcon/code/sugar"
 	"strings"
 )
 
 type Dictionary struct {
-	Elements []ast2.Expr
+	Elements []ast.Expr
 }
 
 func (d *Dictionary) Yail() string {
-	return ast2.PrimitiveCall(
+	return ast.PrimitiveCall(
 		"make-yail-dictionary",
 		"make a dictionary",
 		d.Elements,
@@ -20,14 +20,14 @@ func (d *Dictionary) Yail() string {
 }
 
 func (d *Dictionary) String() string {
-	return sugar.Format("{ % }", ast2.JoinExprs(", ", d.Elements))
+	return sugar.Format("{ % }", ast.JoinExprs(", ", d.Elements))
 }
 
-func (d *Dictionary) Blockly() ast2.Block {
-	return ast2.Block{
+func (d *Dictionary) Blockly() ast.Block {
+	return ast.Block{
 		Type:     "dictionaries_create_with",
-		Mutation: &ast2.Mutation{ItemCount: len(d.Elements)},
-		Values:   ast2.ValuesByPrefix("ADD", d.Elements),
+		Mutation: &ast.Mutation{ItemCount: len(d.Elements)},
+		Values:   ast.ValuesByPrefix("ADD", d.Elements),
 	}
 }
 
@@ -37,6 +37,10 @@ func (d *Dictionary) Continuous() bool {
 
 func (d *Dictionary) Consumable() bool {
 	return true
+}
+
+func (d *Dictionary) Signature() ast.Signature {
+	return ast.SignDict
 }
 
 type WalkAll struct {
@@ -50,8 +54,8 @@ func (w *WalkAll) String() string {
 	return "walkAll"
 }
 
-func (w *WalkAll) Blockly() ast2.Block {
-	return ast2.Block{Type: "dictionaries_walk_all"}
+func (w *WalkAll) Blockly() ast.Block {
+	return ast.Block{Type: "dictionaries_walk_all"}
 }
 
 func (w *WalkAll) Continuous() bool {
@@ -60,4 +64,8 @@ func (w *WalkAll) Continuous() bool {
 
 func (w *WalkAll) Consumable() bool {
 	return true
+}
+
+func (w *WalkAll) Signature() ast.Signature {
+	return ast.SignText
 }

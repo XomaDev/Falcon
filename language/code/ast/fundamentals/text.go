@@ -32,3 +32,7 @@ func (t *Text) Continuous() bool {
 func (t *Text) Consumable() bool {
 	return true
 }
+
+func (t *Text) Signature() ast.Signature {
+	return ast.SignText
+}

@@ -30,3 +30,7 @@ func (n *Number) Continuous() bool {
 func (n *Number) Consumable() bool {
 	return true
 }
+
+func (n *Number) Signature() ast.Signature {
+	return ast.SignNumb
+}
