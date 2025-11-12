@@ -1,14 +1,14 @@
 package variables
 
 import (
-	ast2 "Falcon/code/ast"
+	"Falcon/code/ast"
 	"strings"
 )
 
 type SimpleVar struct {
 	Name  string
-	Value ast2.Expr
-	Body  []ast2.Expr
+	Value ast.Expr
+	Body  []ast.Expr
 }
 
 func (v *SimpleVar) Yail() string {
@@ -17,7 +17,7 @@ func (v *SimpleVar) Yail() string {
 	yail += " "
 	yail += v.Value.Yail()
 	yail += "))"
-	yail += ast2.PadBodyYail(v.Body)
+	yail += ast.PadBodyYail(v.Body)
 	yail += ")"
 	return yail
 }
@@ -29,20 +29,20 @@ func (v *SimpleVar) String() string {
 	builder.WriteString(" = ")
 	builder.WriteString(v.Value.String())
 	builder.WriteString("\n")
-	builder.WriteString(ast2.JoinExprs("\n", v.Body))
+	builder.WriteString(ast.JoinExprs("\n", v.Body))
 	return builder.String()
 }
 
-func (v *SimpleVar) Blockly() ast2.Block {
-	var statements []ast2.Statement
+func (v *SimpleVar) Blockly() ast.Block {
+	var statements []ast.Statement
 	if len(v.Body) > 0 {
-		statements = []ast2.Statement{ast2.CreateStatement("STACK", v.Body)}
+		statements = []ast.Statement{ast.CreateStatement("STACK", v.Body)}
 	}
-	return ast2.Block{
+	return ast.Block{
 		Type:       "local_declaration_statement",
-		Mutation:   &ast2.Mutation{LocalNames: ast2.MakeLocalNames(v.Name)},
-		Fields:     []ast2.Field{{Name: "VAR0", Value: v.Name}},
-		Values:     []ast2.Value{{Name: "DECL0", Block: v.Value.Blockly()}},
+		Mutation:   &ast.Mutation{LocalNames: ast.MakeLocalNames(v.Name)},
+		Fields:     []ast.Field{{Name: "VAR0", Value: v.Name}},
+		Values:     []ast.Value{{Name: "DECL0", Block: v.Value.Blockly()}},
 		Statements: statements,
 	}
 }
@@ -53,4 +53,8 @@ func (v *SimpleVar) Continuous() bool {
 
 func (v *SimpleVar) Consumable() bool {
 	return false
+}
+
+func (v *SimpleVar) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignVoid}
 }
