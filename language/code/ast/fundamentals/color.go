@@ -33,3 +33,7 @@ func (c *Color) Continuous() bool {
 func (c *Color) Consumable() bool {
 	return true
 }
+
+func (c *Color) Signature() ast.Signature {
+	return ast.SignNumb
+}

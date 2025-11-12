@@ -32,3 +32,7 @@ func (c *Component) Continuous() bool {
 func (c *Component) Consumable() bool {
 	return true
 }
+
+func (c *Component) Signature() ast.Signature {
+	return ast.SignComponent
+}
