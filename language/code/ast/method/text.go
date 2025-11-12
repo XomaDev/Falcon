@@ -4,7 +4,7 @@ import (
 	"Falcon/code/ast"
 )
 
-func (c *Call) textMethods(signature *Signature) ast.Block {
+func (c *Call) textMethods(signature *CallSignature) ast.Block {
 	switch signature.BlocklyName {
 	case "text_length":
 		return c.simpleOperand("text_length", "VALUE")

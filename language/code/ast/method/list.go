@@ -4,7 +4,7 @@ import (
 	"Falcon/code/ast"
 )
 
-func (c *Call) listMethods(signature *Signature) ast.Block {
+func (c *Call) listMethods(signature *CallSignature) ast.Block {
 	switch signature.BlocklyName {
 	case "lists_length", "lists_pick_random_item", "lists_reverse", "lists_to_csv_row",
 		"lists_to_csv_table", "lists_sort", "lists_but_first", "lists_but_last":
