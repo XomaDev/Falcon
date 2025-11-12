@@ -80,6 +80,7 @@ In Falcon, it is similar to that of Java. Below is the list, ranked from the low
 A global variable:
 
 ```python
+# always at the root level
 global name = "Kumaraswamy"
 
 # access global var
