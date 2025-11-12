@@ -6,7 +6,7 @@ type Expr interface {
 	Blockly() Block
 	Continuous() bool
 	Consumable() bool
-	Signature() Signature
+	Signature() []Signature
 }
 
 func (b *Block) String() string {

@@ -38,6 +38,6 @@ func (g *Get) Consumable() bool {
 	return true
 }
 
-func (g *Get) Signature() ast.Signature {
-	return ast.SignAny
+func (g *Get) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignAny}
 }

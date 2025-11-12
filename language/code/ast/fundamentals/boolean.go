@@ -76,6 +76,6 @@ func (n *Not) Consumable() bool {
 	return true
 }
 
-func (n *Not) Signature() ast.Signature {
-	return ast.SignBool
+func (n *Not) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignBool}
 }

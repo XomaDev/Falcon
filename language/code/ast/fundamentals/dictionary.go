@@ -39,8 +39,8 @@ func (d *Dictionary) Consumable() bool {
 	return true
 }
 
-func (d *Dictionary) Signature() ast.Signature {
-	return ast.SignDict
+func (d *Dictionary) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignDict}
 }
 
 type WalkAll struct {
@@ -66,6 +66,6 @@ func (w *WalkAll) Consumable() bool {
 	return true
 }
 
-func (w *WalkAll) Signature() ast.Signature {
-	return ast.SignText
+func (w *WalkAll) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignText}
 }
