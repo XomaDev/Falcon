@@ -27,3 +27,7 @@ func (b *Break) Continuous() bool {
 func (b *Break) Consumable() bool {
 	return false
 }
+
+func (b *Break) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignVoid}
+}
