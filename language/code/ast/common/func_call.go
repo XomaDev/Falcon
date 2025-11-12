@@ -1,7 +1,7 @@
 package common
 
 import (
-	ast2 "Falcon/code/ast"
+	"Falcon/code/ast"
 	"Falcon/code/ast/fundamentals"
 	"Falcon/code/ast/variables"
 	"Falcon/code/lex"
@@ -9,33 +9,10 @@ import (
 	"strconv"
 )
 
-var mathConversions = map[string]string{
-	"root":     "ROOT",
-	"abs":      "ABS",
-	"neg":      "NEG",
-	"log":      "LN",
-	"exp":      "EXP",
-	"round":    "ROUND",
-	"ceil":     "CEILING",
-	"floor":    "FLOOR",
-	"sin":      "SIN",
-	"cos":      "COS",
-	"tan":      "TAN",
-	"asin":     "ASIN",
-	"acos":     "ACOS",
-	"atan":     "ATAN",
-	"degrees":  "RADIANS_TO_DEGREES",
-	"radians":  "DEGREES_TO_RADIANS",
-	"decToHex": "DEC_TO_HEX",
-	"decToBin": "DEC_TO_BIN",
-	"hexToDec": "HEX_TO_DEC",
-	"binToDec": "BIN_TO_DEC",
-}
-
 type FuncCall struct {
 	Where *lex.Token
 	Name  string
-	Args  []ast2.Expr
+	Args  []ast.Expr
 }
 
 func (f *FuncCall) Yail() string {
@@ -44,10 +21,10 @@ func (f *FuncCall) Yail() string {
 }
 
 func (f *FuncCall) String() string {
-	return sugar.Format("%(%)", f.Name, ast2.JoinExprs(", ", f.Args))
+	return sugar.Format("%(%)", f.Name, ast.JoinExprs(", ", f.Args))
 }
 
-func (f *FuncCall) Blockly() ast2.Block {
+func (f *FuncCall) Blockly() ast.Block {
 	switch f.Name {
 	case "root", "abs", "neg", "log", "exp", "round", "ceil", "floor",
 		"sin", "cos", "tan", "asin", "acos", "atan", "degrees", "radians",
@@ -121,7 +98,6 @@ func (f *FuncCall) Continuous() bool {
 }
 
 func (f *FuncCall) Consumable() bool {
-	// TODO: in the long run, use a signature based model, maybe like that of the call.go
 	if f.Name == "setRandSeed" || f.Name == "println" ||
 		f.Name == "openScreen" || f.Name == "openScreenWithValue" ||
 		f.Name == "closeScreen" || f.Name == "closeScreenWithValue" ||
@@ -131,19 +107,88 @@ func (f *FuncCall) Consumable() bool {
 	return true
 }
 
-func (f *FuncCall) everyComponent() ast2.Block {
+func (f *FuncCall) Signature() []ast.Signature {
+	switch f.Name {
+	case "root", "abs", "neg", "log", "exp", "round", "ceil", "floor",
+		"sin", "cos", "tan", "asin", "acos", "atan", "degrees", "radians",
+		"decToHex", "decToBin", "hexToDec", "binToDec":
+		return []ast.Signature{ast.SignNumb}
+
+	case "dec", "bin", "octal", "hexa":
+		return []ast.Signature{ast.SignNumb}
+	case "randInt":
+		return []ast.Signature{ast.SignNumb}
+	case "randFloat":
+		return []ast.Signature{ast.SignNumb}
+	case "setRandSeed":
+		return []ast.Signature{ast.SignNumb}
+	case "min", "max":
+		return []ast.Signature{ast.SignNumb}
+	case "avgOf", "maxOf", "minOf", "geoMeanOf", "stdDevOf", "stdErrOf":
+		return []ast.Signature{ast.SignNumb}
+	case "modeOf":
+		return []ast.Signature{ast.SignNumb}
+	case "mod", "rem", "quot":
+		return []ast.Signature{ast.SignNumb}
+	case "aTan2":
+		return []ast.Signature{ast.SignNumb}
+	case "formatDecimal":
+		return []ast.Signature{ast.SignNumb}
+
+	case "println":
+		return []ast.Signature{ast.SignVoid}
+	case "openScreen":
+		return []ast.Signature{ast.SignVoid}
+	case "openScreenWithValue":
+		return []ast.Signature{ast.SignVoid}
+	case "closeScreenWithValue":
+		return []ast.Signature{ast.SignVoid}
+	case "getStartValue":
+		return []ast.Signature{ast.SignVoid}
+	case "closeScreen":
+		return []ast.Signature{ast.SignVoid}
+	case "closeApp":
+		return []ast.Signature{ast.SignVoid}
+	case "getPlainStartText":
+		return []ast.Signature{ast.SignText}
+	case "closeScreenWithPlainText":
+		return []ast.Signature{ast.SignText}
+	case "copyList":
+		return []ast.Signature{ast.SignList}
+	case "copyDict":
+		return []ast.Signature{ast.SignDict}
+
+	case "makeColor":
+		return []ast.Signature{ast.SignNumb}
+	case "splitColor":
+		return []ast.Signature{ast.SignList}
+
+	case "set":
+		return []ast.Signature{ast.SignVoid}
+	case "get":
+		return []ast.Signature{ast.SignAny}
+	case "call":
+		return []ast.Signature{ast.SignAny}
+	case "every":
+		return []ast.Signature{ast.SignList}
+	default:
+		panic("Unknown function " + f.Name)
+	}
+}
+
+func (f *FuncCall) everyComponent() ast.Block {
 	compType, ok := f.Args[0].(*variables.Get)
 	if !ok || compType.Global {
 		f.Where.Error("Expected a component type for every() 1st argument!")
 	}
-	return ast2.Block{
+	return ast.Block{
 		Type:     "component_all_component_block",
-		Mutation: &ast2.Mutation{ComponentType: compType.Name},
-		Fields:   []ast2.Field{{Name: "COMPONENT_SELECTOR", Value: compType.Name}},
+		Mutation: &ast.Mutation{ComponentType: compType.Name},
+		Fields:   []ast.Field{{Name: "COMPONENT_SELECTOR", Value: compType.Name}},
 	}
 }
 
-func (f *FuncCall) genericCall() ast2.Block {
+func (f *FuncCall) genericCall() ast.Block {
 	// arg[0] 	 compType
 	// arg[1] 	 component (any object)
 	// arg[2] 	 method name
@@ -156,18 +201,18 @@ func (f *FuncCall) genericCall() ast2.Block {
 	if !ok || vGet.Global {
 		f.Where.Error("Expected a method name for call() 3rd argument!")
 	}
-	return ast2.Block{
+	return ast.Block{
 		Type: "component_method",
-		Mutation: &ast2.Mutation{
+		Mutation: &ast.Mutation{
 			MethodName:    vGet.Name,
 			IsGeneric:     true,
 			ComponentType: compType.Name,
 		},
-		Values: ast2.ValueArgsByPrefix(f.Args[1], "COMPONENT", "ARG", f.Args[3:]),
+		Values: ast.ValueArgsByPrefix(f.Args[1], "COMPONENT", "ARG", f.Args[3:]),
 	}
 }
 
-func (f *FuncCall) genericGet() ast2.Block {
+func (f *FuncCall) genericGet() ast.Block {
 	f.assertArgLen(3)
 	compType, ok := f.Args[0].(*variables.Get)
 	if !ok || compType.Global {
@@ -177,20 +222,20 @@ func (f *FuncCall) genericGet() ast2.Block {
 	if !ok || vGet.Global {
 		f.Where.Error("Expected a property type for get() 3rd argument!")
 	}
-	return ast2.Block{
+	return ast.Block{
 		Type: "component_set_get",
-		Mutation: &ast2.Mutation{
+		Mutation: &ast.Mutation{
 			SetOrGet:      "get",
 			PropertyName:  vGet.Name,
 			IsGeneric:     true,
 			ComponentType: compType.Name,
 		},
-		Fields: []ast2.Field{{Name: "PROP", Value: vGet.Name}},
-		Values: []ast2.Value{{Name: "COMPONENT", Block: f.Args[1].Blockly()}},
+		Fields: []ast.Field{{Name: "PROP", Value: vGet.Name}},
+		Values: []ast.Value{{Name: "COMPONENT", Block: f.Args[1].Blockly()}},
 	}
 }
 
-func (f *FuncCall) genericSet() ast2.Block {
+func (f *FuncCall) genericSet() ast.Block {
 	f.assertArgLen(4)
 	compType, ok := f.Args[0].(*variables.Get)
 	if !ok || compType.Global {
@@ -200,94 +245,117 @@ func (f *FuncCall) genericSet() ast2.Block {
 	if !ok || vGet.Global {
 		f.Where.Error("Expected a property type for set() 3rd argument!")
 	}
-	return ast2.Block{
+	return ast.Block{
 		Type: "component_set_get",
-		Mutation: &ast2.Mutation{
+		Mutation: &ast.Mutation{
 			SetOrGet:      "set",
 			PropertyName:  vGet.Name,
 			IsGeneric:     true,
 			ComponentType: compType.Name,
 		},
-		Fields: []ast2.Field{{Name: "PROP", Value: vGet.Name}},
-		Values: ast2.MakeValues([]ast2.Expr{f.Args[1], f.Args[3]}, "COMPONENT", "VALUE"),
+		Fields: []ast.Field{{Name: "PROP", Value: vGet.Name}},
+		Values: ast.MakeValues([]ast.Expr{f.Args[1], f.Args[3]}, "COMPONENT", "VALUE"),
 	}
 }
 
-func (f *FuncCall) splitColor() ast2.Block {
-	return ast2.Block{
+func (f *FuncCall) splitColor() ast.Block {
+	return ast.Block{
 		Type:   "color_make_color",
-		Values: ast2.MakeValues(f.Args, "COLOR"),
+		Values: ast.MakeValues(f.Args, "COLOR"),
 	}
 }
 
-func (f *FuncCall) makeColor() ast2.Block {
-	return ast2.Block{
+func (f *FuncCall) makeColor() ast.Block {
+	return ast.Block{
 		Type:   "color_make_color",
-		Values: ast2.MakeValues(f.Args, "COLORLIST"),
+		Values: ast.MakeValues(f.Args, "COLORLIST"),
 	}
 }
 
-func (f *FuncCall) copyDict() ast2.Block {
-	return ast2.Block{
+func (f *FuncCall) copyDict() ast.Block {
+	return ast.Block{
 		Type:   "dictionaries_copy",
-		Values: ast2.MakeValues(f.Args, "DICT"),
+		Values: ast.MakeValues(f.Args, "DICT"),
 	}
 }
 
-func (f *FuncCall) copyList() ast2.Block {
-	return ast2.Block{
+func (f *FuncCall) copyList() ast.Block {
+	return ast.Block{
 		Type:   "lists_copy",
-		Values: ast2.MakeValues(f.Args, "LIST"),
+		Values: ast.MakeValues(f.Args, "LIST"),
 	}
 }
 
-func (f *FuncCall) ctrlSimpleBlock(blockType string) ast2.Block {
-	return ast2.Block{Type: blockType}
+func (f *FuncCall) ctrlSimpleBlock(blockType string) ast.Block {
+	return ast.Block{Type: blockType}
 }
 
-func (f *FuncCall) closeScreenWithPlainText() ast2.Block {
+func (f *FuncCall) closeScreenWithPlainText() ast.Block {
 	f.assertArgLen(1)
-	return ast2.Block{
+	return ast.Block{
 		Type:   "controls_closeScreenWithPlainText",
-		Values: ast2.MakeValues(f.Args, "TEXT"),
+		Values: ast.MakeValues(f.Args, "TEXT"),
 	}
 }
 
-func (f *FuncCall) closeScreenWithValue() ast2.Block {
+func (f *FuncCall) closeScreenWithValue() ast.Block {
 	f.assertArgLen(1)
-	return ast2.Block{
+	return ast.Block{
 		Type:   "controls_closeScreenWithValue",
-		Values: ast2.MakeValues(f.Args, "SCREEN"),
+		Values: ast.MakeValues(f.Args, "SCREEN"),
 	}
 }
 
-func (f *FuncCall) openScreenWithValue() ast2.Block {
+func (f *FuncCall) openScreenWithValue() ast.Block {
 	f.assertArgLen(2)
-	return ast2.Block{
+	return ast.Block{
 		Type:   "controls_openAnotherScreenWithStartValue",
-		Values: ast2.MakeValues(f.Args, "SCREENNAME", "STARTVALUE"),
+		Values: ast.MakeValues(f.Args, "SCREENNAME", "STARTVALUE"),
 	}
 }
 
-func (f *FuncCall) openScreen() ast2.Block {
+func (f *FuncCall) openScreen() ast.Block {
 	f.assertArgLen(1)
-	return ast2.Block{
+	return ast.Block{
 		Type:   "controls_openAnotherScreen",
-		Values: ast2.MakeValues(f.Args, "SCREEN"),
+		Values: ast.MakeValues(f.Args, "SCREEN"),
 	}
 }
 
-func (f *FuncCall) println() ast2.Block {
+func (f *FuncCall) println() ast.Block {
 	f.assertArgLen(1)
-	return ast2.Block{
+	return ast.Block{
 		Type:   "controls_eval_but_ignore",
-		Values: ast2.MakeValues(f.Args, "VALUE"),
+		Values: ast.MakeValues(f.Args, "VALUE"),
 	}
 }
 
-func (f *FuncCall) mathConversions() ast2.Block {
+var mathFuncMap = map[string]string{
+	"root":     "ROOT",
+	"abs":      "ABS",
+	"neg":      "NEG",
+	"log":      "LN",
+	"exp":      "EXP",
+	"round":    "ROUND",
+	"ceil":     "CEILING",
+	"floor":    "FLOOR",
+	"sin":      "SIN",
+	"cos":      "COS",
+	"tan":      "TAN",
+	"asin":     "ASIN",
+	"acos":     "ACOS",
+	"atan":     "ATAN",
+	"degrees":  "RADIANS_TO_DEGREES",
+	"radians":  "DEGREES_TO_RADIANS",
+	"decToHex": "DEC_TO_HEX",
+	"decToBin": "DEC_TO_BIN",
+	"hexToDec": "HEX_TO_DEC",
+	"binToDec": "BIN_TO_DEC",
+}
+
+func (f *FuncCall) mathConversions() ast.Block {
 	f.assertArgLen(1)
-	fieldOp, ok := mathConversions[f.Name]
+	fieldOp, ok := mathFuncMap[f.Name]
 	if !ok {
 		f.Where.Error("Unknown Math Conversion %()", f.Name)
 	}
@@ -302,30 +370,30 @@ func (f *FuncCall) mathConversions() ast2.Block {
 	default:
 		blockType = "math_single"
 	}
-	return ast2.Block{
+	return ast.Block{
 		Type:   blockType,
-		Fields: []ast2.Field{{Name: "OP", Value: fieldOp}},
-		Values: []ast2.Value{{Name: "NUM", Block: f.Args[0].Blockly()}},
+		Fields: []ast.Field{{Name: "OP", Value: fieldOp}},
+		Values: []ast.Value{{Name: "NUM", Block: f.Args[0].Blockly()}},
 	}
 }
 
-func (f *FuncCall) formatDecimal() ast2.Block {
+func (f *FuncCall) formatDecimal() ast.Block {
 	f.assertArgLen(2)
-	return ast2.Block{
+	return ast.Block{
 		Type:   "math_format_as_decimal",
-		Values: ast2.MakeValues(f.Args, "NUM", "PLACES"),
+		Values: ast.MakeValues(f.Args, "NUM", "PLACES"),
 	}
 }
 
-func (f *FuncCall) atan2() ast2.Block {
+func (f *FuncCall) atan2() ast.Block {
 	f.assertArgLen(2)
-	return ast2.Block{
+	return ast.Block{
 		Type:   "math_atan2",
-		Values: ast2.MakeValues(f.Args, "Y", "X"),
+		Values: ast.MakeValues(f.Args, "Y", "X"),
 	}
 }
 
-func (f *FuncCall) mathDivide() ast2.Block {
+func (f *FuncCall) mathDivide() ast.Block {
 	f.assertArgLen(2)
 	var fieldOp string
 	switch f.Name {
@@ -336,22 +404,22 @@ func (f *FuncCall) mathDivide() ast2.Block {
 	case "quot":
 		fieldOp = "QUOTIENT"
 	}
-	return ast2.Block{
+	return ast.Block{
 		Type:   "math_divide",
-		Fields: []ast2.Field{{Name: "OP", Value: fieldOp}},
-		Values: ast2.MakeValues(f.Args, "DIVIDEND", "DIVISOR"),
+		Fields: []ast.Field{{Name: "OP", Value: fieldOp}},
+		Values: ast.MakeValues(f.Args, "DIVIDEND", "DIVISOR"),
 	}
 }
 
-func (f *FuncCall) modeOf() ast2.Block {
+func (f *FuncCall) modeOf() ast.Block {
 	f.assertArgLen(1)
-	return ast2.Block{
+	return ast.Block{
 		Type:   "math_mode_of_list",
-		Values: ast2.MakeValues(f.Args, "LIST"),
+		Values: ast.MakeValues(f.Args, "LIST"),
 	}
 }
 
-func (f *FuncCall) mathOnList() ast2.Block {
+func (f *FuncCall) mathOnList() ast.Block {
 	f.assertArgLen(1)
 	var fieldOp string
 	switch f.Name {
@@ -368,14 +436,14 @@ func (f *FuncCall) mathOnList() ast2.Block {
 	case "stdErrOf":
 		fieldOp = "SE"
 	}
-	return ast2.Block{
+	return ast.Block{
 		Type:   "math_on_list2",
-		Fields: []ast2.Field{{Name: "OP", Value: fieldOp}},
-		Values: ast2.MakeValues(f.Args, "LIST"),
+		Fields: []ast.Field{{Name: "OP", Value: fieldOp}},
+		Values: ast.MakeValues(f.Args, "LIST"),
 	}
 }
 
-func (f *FuncCall) minOrMax() ast2.Block {
+func (f *FuncCall) minOrMax() ast.Block {
 	argSize := len(f.Args)
 	if argSize == 0 {
 		f.Where.Error("No arguments provided for %()", f.Name)
@@ -387,36 +455,36 @@ func (f *FuncCall) minOrMax() ast2.Block {
 	case "max":
 		fieldOp = "MAX"
 	}
-	return ast2.Block{
+	return ast.Block{
 		Type:     "math_on_list",
-		Fields:   []ast2.Field{{Name: "OP", Value: fieldOp}},
-		Mutation: &ast2.Mutation{ItemCount: argSize},
-		Values:   ast2.ValuesByPrefix("NUM", f.Args),
+		Fields:   []ast.Field{{Name: "OP", Value: fieldOp}},
+		Mutation: &ast.Mutation{ItemCount: argSize},
+		Values:   ast.ValuesByPrefix("NUM", f.Args),
 	}
 }
 
-func (f *FuncCall) setRandSeed() ast2.Block {
+func (f *FuncCall) setRandSeed() ast.Block {
 	f.assertArgLen(1)
-	return ast2.Block{
+	return ast.Block{
 		Type:   "math_random_set_seed",
-		Values: ast2.MakeValues(f.Args, "NUM"),
+		Values: ast.MakeValues(f.Args, "NUM"),
 	}
 }
 
-func (f *FuncCall) randFloat() ast2.Block {
+func (f *FuncCall) randFloat() ast.Block {
 	f.assertArgLen(0)
-	return ast2.Block{Type: "math_random_float"}
+	return ast.Block{Type: "math_random_float"}
 }
 
-func (f *FuncCall) randInt() ast2.Block {
+func (f *FuncCall) randInt() ast.Block {
 	f.assertArgLen(2)
-	return ast2.Block{
+	return ast.Block{
 		Type:   "math_random_int",
-		Values: ast2.MakeValues(f.Args, "FROM", "TO"),
+		Values: ast.MakeValues(f.Args, "FROM", "TO"),
 	}
 }
 
-func (f *FuncCall) mathRadix() ast2.Block {
+func (f *FuncCall) mathRadix() ast.Block {
 	f.assertArgLen(1)
 	var fieldOp string
 	switch f.Name {
@@ -433,9 +501,9 @@ func (f *FuncCall) mathRadix() ast2.Block {
 	if !ok {
 		f.Where.Error("Expected a numeric string argument for %()", f.Name)
 	}
-	return ast2.Block{
+	return ast.Block{
 		Type: "math_number_radix",
-		Fields: []ast2.Field{
+		Fields: []ast.Field{
 			{Name: "OP", Value: fieldOp},
 			{Name: "NUM", Value: textExpr.Content},
 		},
