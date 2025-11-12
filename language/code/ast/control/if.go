@@ -90,3 +90,7 @@ func (i *If) Continuous() bool {
 func (i *If) Consumable() bool {
 	return false
 }
+
+func (i *If) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignVoid}
+}

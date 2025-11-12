@@ -1,7 +1,7 @@
 package control
 
 import (
-	ast2 "Falcon/code/ast"
+	"Falcon/code/ast"
 	"Falcon/code/ast/fundamentals"
 	"Falcon/code/ast/list"
 	"Falcon/code/ast/variables"
@@ -11,8 +11,8 @@ import (
 type EachPair struct {
 	KeyName   string
 	ValueName string
-	Iterable  ast2.Expr
-	Body      []ast2.Expr
+	Iterable  ast.Expr
+	Body      []ast.Expr
 }
 
 func (e *EachPair) Yail() string {
@@ -29,7 +29,7 @@ func (e *EachPair) Yail() string {
 
 	yail := "(foreach $item "
 	yail += "(let ( " + setKey + " " + setValue + ")"
-	yail += ast2.PadBodyYail(e.Body)
+	yail += ast.PadBodyYail(e.Body)
 	yail += ") "
 	yail += e.Iterable.Yail()
 	yail += ") "
@@ -37,18 +37,18 @@ func (e *EachPair) Yail() string {
 }
 
 func (e *EachPair) String() string {
-	return sugar.Format("each (%, %) -> % {\n%}", e.KeyName, e.ValueName, e.Iterable.String(), ast2.PadBody(e.Body))
+	return sugar.Format("each (%, %) -> % {\n%}", e.KeyName, e.ValueName, e.Iterable.String(), ast.PadBody(e.Body))
 }
 
-func (e *EachPair) Blockly() ast2.Block {
-	return ast2.Block{
+func (e *EachPair) Blockly() ast.Block {
+	return ast.Block{
 		Type: "controls_for_each_dict",
-		Fields: []ast2.Field{
+		Fields: []ast.Field{
 			{Name: "KEY", Value: e.KeyName},
 			{Name: "VALUE", Value: e.ValueName},
 		},
-		Values:     []ast2.Value{{Name: "DICT", Block: e.Iterable.Blockly()}},
-		Statements: []ast2.Statement{ast2.CreateStatement("DO", e.Body)},
+		Values:     []ast.Value{{Name: "DICT", Block: e.Iterable.Blockly()}},
+		Statements: []ast.Statement{ast.CreateStatement("DO", e.Body)},
 	}
 }
 
@@ -58,4 +58,8 @@ func (e *EachPair) Continuous() bool {
 
 func (e *EachPair) Consumable() bool {
 	return false
+}
+
+func (e *EachPair) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignVoid}
 }
