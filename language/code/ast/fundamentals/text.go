@@ -33,6 +33,6 @@ func (t *Text) Consumable() bool {
 	return true
 }
 
-func (t *Text) Signature() ast.Signature {
-	return ast.SignText
+func (t *Text) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignText}
 }

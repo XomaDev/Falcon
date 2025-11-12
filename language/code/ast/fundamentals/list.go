@@ -34,6 +34,6 @@ func (l *List) Consumable() bool {
 	return true
 }
 
-func (l *List) Signature() ast.Signature {
-	return ast.SignList
+func (l *List) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignList}
 }

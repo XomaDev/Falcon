@@ -33,6 +33,6 @@ func (c *Component) Consumable() bool {
 	return true
 }
 
-func (c *Component) Signature() ast.Signature {
-	return ast.SignComponent
+func (c *Component) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignComponent}
 }

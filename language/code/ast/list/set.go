@@ -39,6 +39,6 @@ func (s *Set) Consumable() bool {
 	return false
 }
 
-func (s *Set) Signature() ast.Signature {
-	return ast.SignVoid
+func (s *Set) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignVoid}
 }

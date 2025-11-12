@@ -31,6 +31,6 @@ func (n *Number) Consumable() bool {
 	return true
 }
 
-func (n *Number) Signature() ast.Signature {
-	return ast.SignNumb
+func (n *Number) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignNumb}
 }

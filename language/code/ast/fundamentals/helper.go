@@ -34,6 +34,6 @@ func (h *HelperDropdown) Consumable() bool {
 	return true
 }
 
-func (h *HelperDropdown) Signature() ast.Signature {
-	return ast.SignHelper
+func (h *HelperDropdown) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignHelper}
 }
