@@ -47,3 +47,7 @@ func (t *Transform) Continuous() bool {
 func (t *Transform) Consumable() bool {
 	return false
 }
+
+func (t *Transform) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignText}
+}

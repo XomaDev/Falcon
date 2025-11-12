@@ -44,8 +44,8 @@ func (b *Boolean) Consumable() bool {
 	return true
 }
 
-func (b *Boolean) Signature() ast.Signature {
-	return ast.SignBool
+func (b *Boolean) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignBool}
 }
 
 type Not struct {

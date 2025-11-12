@@ -30,6 +30,6 @@ func (e *EmptySocket) Consumable() bool {
 	return false
 }
 
-func (e *EmptySocket) Signature() ast.Signature {
-	return ast.SignText
+func (e *EmptySocket) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignText}
 }
