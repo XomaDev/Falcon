@@ -1,7 +1,7 @@
 package components
 
 import (
-	ast2 "Falcon/code/ast"
+	"Falcon/code/ast"
 	"Falcon/code/sugar"
 	"strings"
 )
@@ -10,49 +10,53 @@ type GenericEvent struct {
 	ComponentType string
 	Event         string
 	Parameters    []string
-	Body          []ast2.Expr
+	Body          []ast.Expr
 }
 
-func (e *GenericEvent) Yail() string {
+func (g *GenericEvent) Yail() string {
 	yail := "(define-generic-event "
-	yail += e.ComponentType
+	yail += g.ComponentType
 	yail += " "
-	yail += e.Event
+	yail += g.Event
 	yail += " ("
-	for _, p := range e.Parameters {
+	for _, p := range g.Parameters {
 		yail += "$" + p + " "
 	}
 	yail += ") (set-this-form) "
-	yail += ast2.PadBodyYail(e.Body)
+	yail += ast.PadBodyYail(g.Body)
 	yail += ")"
 	return yail
 }
 
-func (e *GenericEvent) String() string {
+func (g *GenericEvent) String() string {
 	pFormat := "when any %.%(%) {\n%}"
-	return sugar.Format(pFormat, e.ComponentType, e.Event, strings.Join(e.Parameters, ", "), ast2.PadBody(e.Body))
+	return sugar.Format(pFormat, g.ComponentType, g.Event, strings.Join(g.Parameters, ", "), ast.PadBody(g.Body))
 }
 
-func (e *GenericEvent) Blockly() ast2.Block {
-	var statements []ast2.Statement
-	if len(e.Body) > 0 {
-		statements = []ast2.Statement{ast2.CreateStatement("DO", e.Body)}
+func (g *GenericEvent) Blockly() ast.Block {
+	var statements []ast.Statement
+	if len(g.Body) > 0 {
+		statements = []ast.Statement{ast.CreateStatement("DO", g.Body)}
 	}
-	return ast2.Block{
+	return ast.Block{
 		Type: "component_event",
-		Mutation: &ast2.Mutation{
+		Mutation: &ast.Mutation{
 			IsGeneric:     true,
-			EventName:     e.Event,
-			ComponentType: e.ComponentType,
+			EventName:     g.Event,
+			ComponentType: g.ComponentType,
 		},
 		Statements: statements,
 	}
 }
 
-func (e *GenericEvent) Continuous() bool {
+func (g *GenericEvent) Continuous() bool {
 	return false
 }
 
-func (e *GenericEvent) Consumable() bool {
+func (g *GenericEvent) Consumable() bool {
 	return false
+}
+
+func (g *GenericEvent) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignVoid}
 }

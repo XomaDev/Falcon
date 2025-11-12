@@ -1,7 +1,7 @@
 package components
 
 import (
-	ast2 "Falcon/code/ast"
+	"Falcon/code/ast"
 	"Falcon/code/sugar"
 )
 
@@ -9,7 +9,7 @@ type PropertySet struct {
 	ComponentName string
 	ComponentType string
 	Property      string
-	Value         ast2.Expr
+	Value         ast.Expr
 }
 
 func (p *PropertySet) Yail() string {
@@ -28,21 +28,21 @@ func (p *PropertySet) String() string {
 	return sugar.Format("%.% = %", p.ComponentName, p.Property, p.Value.String())
 }
 
-func (p *PropertySet) Blockly() ast2.Block {
-	return ast2.Block{
+func (p *PropertySet) Blockly() ast.Block {
+	return ast.Block{
 		Type: "component_set_get",
-		Mutation: &ast2.Mutation{
+		Mutation: &ast.Mutation{
 			SetOrGet:      "set",
 			PropertyName:  p.Property,
 			IsGeneric:     false,
 			InstanceName:  p.ComponentName,
 			ComponentType: p.ComponentType,
 		},
-		Fields: ast2.FieldsFromMap(map[string]string{
+		Fields: ast.FieldsFromMap(map[string]string{
 			"COMPONENT_SELECTOR": p.ComponentName,
 			"PROP":               p.Property,
 		}),
-		Values: []ast2.Value{{Name: "VALUE", Block: p.Value.Blockly()}},
+		Values: []ast.Value{{Name: "VALUE", Block: p.Value.Blockly()}},
 	}
 }
 
@@ -52,4 +52,8 @@ func (p *PropertySet) Continuous() bool {
 
 func (p *PropertySet) Consumable() bool {
 	return false
+}
+
+func (p *PropertySet) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignVoid}
 }
