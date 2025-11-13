@@ -1,5 +1,6 @@
 package ast
 
+//go:generate stringer -type=Signature
 type Signature int
 
 const (
