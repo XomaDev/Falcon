@@ -4,6 +4,9 @@ import (
 	"strings"
 )
 
+// TODO:
+// Be careful about the use of %, we have got a remainder operator too
+// In future we need to replace with a more robust thingy
 func Format(format string, args ...string) string {
 	var builder strings.Builder
 	formatLen := len(format)

@@ -28,7 +28,7 @@ This page assumes you have some experience in Programming and App Inventor.
 ## Operators
 
 - Arithmetic operators
-	- `+`, `-`, `*`, `/`, `^` (*power*)
+	- `+`, `-`, `*`, `/`, `^` (*power*), `%` (*remainder*)
 - Logical operators
 	- `||` , `&&`, 
 - Bit-wise operators
@@ -73,7 +73,7 @@ In Falcon, it is similar to that of Java. Below is the list, ranked from the low
 9. `Equality`  (`==`, `!=`, `===`, and `!==`)
 10. `Relational` (`<`, `<=`, `>`, `>=`, `<<`, and `>>`)
 11. `Binary` (`+` and `-`)
-12. `BinaryL1` (`*` and `)
+12. `BinaryL1` (`*` and `\`, `%`)
 13. `BinaryL2` (`^`)
 
 ## Variables

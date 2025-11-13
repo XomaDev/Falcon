@@ -4,7 +4,6 @@ import (
 	"Falcon/code/ast"
 	"Falcon/code/ast/fundamentals"
 	"Falcon/code/sugar"
-	"strings"
 )
 
 type SimpleIf struct {
@@ -32,11 +31,16 @@ func (s *SimpleIf) Yail() string {
 }
 
 func (s *SimpleIf) String() string {
-	format := "if (%) %\nelse %"
-	if strings.Contains(s.smartThen.String(), "\n") {
-		format = "if (%) % else %"
+	format := "if (%) {\n%} else "
+	var stringElse string
+	if _, ok := s.normalElse[0].(*SimpleIf); ok && len(s.normalElse) == 1 {
+		format += "%"
+		stringElse = ast.JoinExprs("\n", s.normalElse)
+	} else {
+		format += "{\n%}"
+		stringElse = ast.PadBody(s.normalElse)
 	}
-	return sugar.Format(format, s.condition.String(), s.smartThen.String(), s.smartElse.String())
+	return sugar.Format(format, s.condition.String(), ast.PadBody(s.normalThen), stringElse)
 }
 
 func (s *SimpleIf) Blockly(flags ...bool) ast.Block {
