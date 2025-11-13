@@ -43,9 +43,9 @@ var transformers = map[string]*transformerSignature{
 
 func (t *Transformer) String() string {
 	if len(t.Args) == 0 {
-		pFormat := "%.% { % -> % }"
+		pFormat := "%\n  .% { % -> % }"
 		if !t.List.Continuous() {
-			pFormat = "(%).% { % -> %} "
+			pFormat = "(%)\n  .% { % -> %} "
 		}
 		return sugar.Format(pFormat,
 			t.List.String(),
@@ -53,9 +53,9 @@ func (t *Transformer) String() string {
 			strings.Join(t.Names, ", "),
 			t.Transformer.String())
 	} else {
-		pFormat := "%.%(%) { % -> % }"
+		pFormat := "%\n  .%(%) { % -> % }"
 		if !t.List.Continuous() {
-			pFormat = "(%).%(%) { % -> % }"
+			pFormat = "(%)\n  .%(%) { % -> % }"
 		}
 		return sugar.Format(pFormat,
 			t.List.String(),
