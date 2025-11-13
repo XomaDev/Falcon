@@ -2,7 +2,6 @@ package control
 
 import (
 	"Falcon/code/ast"
-	"Falcon/code/sugar"
 )
 
 type Do struct {
@@ -20,7 +19,7 @@ func (d *Do) Yail() string {
 }
 
 func (d *Do) String() string {
-	return sugar.Format("{\n%\n}", ast.PadDirect(ast.JoinExprs("\n", d.Body)+"\n"+d.Result.String()))
+	return ast.JoinExprs("\n", d.Body) + "\n" + d.Result.String()
 }
 
 func (d *Do) Blockly(flags ...bool) ast.Block {

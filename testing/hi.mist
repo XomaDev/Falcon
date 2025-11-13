@@ -1,8 +1,10 @@
-func MedianAdultAge() {
-  if (true) {
+func MedianAdultAge() = {
+  local adults = this.membersAge.filter { n -> n >= 18 }.sort()
+  local len = adults.listLen()
+  if (rem(len, 2) == 1) {
     println("cat")
-
+    adults[(len + 1) / 2]
   } else {
-    2
+    (adults[len / 2] + adults[(len / 2) + 1]) / 2
   }
 }
