@@ -141,6 +141,7 @@ func MakeValueArgs(on Expr, onName string, operands []Expr, names ...string) []V
 func CreateStatement(name string, body []Expr) Statement {
 	headBlock := body[0].Blockly(true)
 	if body[0].Consumable(true) {
+		println(body[0].String())
 		panic("Cannot include a consumable in a statement!")
 	}
 	bodyLen := len(body)
