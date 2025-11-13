@@ -2,6 +2,7 @@ package common
 
 import (
 	"Falcon/code/ast"
+	"Falcon/code/ast/fundamentals"
 	"Falcon/code/lex"
 	"Falcon/code/sugar"
 )
@@ -39,6 +40,8 @@ func (q *Question) Blockly(flags ...bool) ast.Block {
 		return q.textIsEmpty()
 	case "emptyList":
 		return q.listIsEmpty()
+	case "even", "odd":
+		return q.evenOrOdd()
 	default:
 		q.Where.Error("Unknown question ? %", q.Question)
 	}
@@ -55,6 +58,26 @@ func (q *Question) Consumable(flags ...bool) bool {
 
 func (q *Question) Signature() []ast.Signature {
 	return []ast.Signature{ast.SignBool}
+}
+
+func (q *Question) evenOrOdd() ast.Block {
+	var remainder string
+	if q.Question == "even" {
+		remainder = "0"
+	} else {
+		remainder = "1"
+	}
+	remainderCall := &FuncCall{
+		Where: q.Where,
+		Name:  "rem",
+		Args:  []ast.Expr{q.On, &fundamentals.Number{Content: "2"}},
+	}
+	comparison := BinaryExpr{
+		Where:    q.Where,
+		Operands: []ast.Expr{remainderCall, &fundamentals.Number{Content: remainder}},
+		Operator: lex.Equals,
+	}
+	return comparison.Blockly()
 }
 
 func (q *Question) listIsEmpty() ast.Block {
