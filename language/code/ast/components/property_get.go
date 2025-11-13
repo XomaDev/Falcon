@@ -45,7 +45,7 @@ func (p *PropertyGet) Continuous() bool {
 	return false
 }
 
-func (p *PropertyGet) Consumable() bool {
+func (p *PropertyGet) Consumable(flags ...bool) bool {
 	return true
 }
 

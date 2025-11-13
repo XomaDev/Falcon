@@ -87,7 +87,7 @@ func (i *If) Continuous() bool {
 	return false
 }
 
-func (i *If) Consumable() bool {
+func (i *If) Consumable(flags ...bool) bool {
 	return false
 }
 

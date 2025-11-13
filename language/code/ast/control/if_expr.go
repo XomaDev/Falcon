@@ -59,8 +59,8 @@ func (s *SimpleIf) Continuous() bool {
 	return false
 }
 
-func (s *SimpleIf) Consumable() bool {
-	return true
+func (s *SimpleIf) Consumable(flags ...bool) bool {
+	return !(len(flags) > 0 && flags[0])
 }
 
 func (s *SimpleIf) Signature() []ast.Signature {

@@ -29,7 +29,7 @@ func (t *Text) Continuous() bool {
 	return true
 }
 
-func (t *Text) Consumable() bool {
+func (t *Text) Consumable(flags ...bool) bool {
 	return true
 }
 

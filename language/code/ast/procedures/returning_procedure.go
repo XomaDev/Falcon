@@ -40,7 +40,7 @@ func (v *RetProcedure) Continuous() bool {
 	return false
 }
 
-func (v *RetProcedure) Consumable() bool {
+func (v *RetProcedure) Consumable(flags ...bool) bool {
 	return false
 }
 

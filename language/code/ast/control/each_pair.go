@@ -56,7 +56,7 @@ func (e *EachPair) Continuous() bool {
 	return false
 }
 
-func (e *EachPair) Consumable() bool {
+func (e *EachPair) Consumable(flags ...bool) bool {
 	return false
 }
 

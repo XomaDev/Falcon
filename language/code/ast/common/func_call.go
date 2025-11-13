@@ -97,7 +97,7 @@ func (f *FuncCall) Continuous() bool {
 	return true
 }
 
-func (f *FuncCall) Consumable() bool {
+func (f *FuncCall) Consumable(flags ...bool) bool {
 	if f.Name == "setRandSeed" || f.Name == "println" ||
 		f.Name == "openScreen" || f.Name == "openScreenWithValue" ||
 		f.Name == "closeScreen" || f.Name == "closeScreenWithValue" ||

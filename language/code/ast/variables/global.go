@@ -34,7 +34,7 @@ func (g *Global) Continuous() bool {
 	return false
 }
 
-func (g *Global) Consumable() bool {
+func (g *Global) Consumable(flags ...bool) bool {
 	return false
 }
 

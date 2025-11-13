@@ -44,7 +44,7 @@ func (v *Call) Continuous() bool {
 	return true
 }
 
-func (v *Call) Consumable() bool {
+func (v *Call) Consumable(flags ...bool) bool {
 	return v.Returning
 }
 

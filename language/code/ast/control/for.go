@@ -46,7 +46,7 @@ func (f *For) Continuous() bool {
 	return false
 }
 
-func (f *For) Consumable() bool {
+func (f *For) Consumable(flags ...bool) bool {
 	return false
 }
 

@@ -5,7 +5,7 @@ type Expr interface {
 	Yail() string
 	Blockly(flags ...bool) Block
 	Continuous() bool
-	Consumable() bool
+	Consumable(flags ...bool) bool
 	Signature() []Signature
 }
 
