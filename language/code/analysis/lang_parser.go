@@ -221,48 +221,6 @@ func (p *LangParser) varExpr() ast.Expr {
 	return &variables.Var{Names: names, Values: values, Body: p.bodyUntilCurly()}
 }
 
-func (p *LangParser) createLocalVarBodySmt() ast.Expr {
-	// a clean full scope variable
-	var varSmts []variables.Var
-
-	var names []string
-	var values []ast.Expr
-
-	for {
-		if !p.consume(l.Local) {
-			break
-		}
-		name := p.name()
-		p.expect(l.Assign)
-		value := p.parse()
-
-		if ast.DependsOnVariables(value, names) {
-			// Since this variable depends on the last variable, we cannot include
-			// it in the current set.
-			varSmts = append(varSmts, variables.Var{Names: names, Values: values})
-			names = make([]string, 0)
-			values = make([]ast.Expr, 0)
-		}
-
-		names = append(names, name)
-		values = append(values, value)
-	}
-	varSmts = append(varSmts, variables.Var{Names: names, Values: values, Body: p.bodyUntilCurly()})
-	println("cat")
-	for _, smt := range varSmts {
-		println("-")
-		println(smt.String())
-	}
-	println("katze")
-	// We have to stitch them together into one variable smt
-	if len(varSmts) > 0 {
-		for k := len(varSmts) - 2; k >= 0; k-- {
-			varSmts[k].Body = []ast.Expr{&varSmts[k+1]}
-		}
-	}
-	return &varSmts[0]
-}
-
 func (p *LangParser) whileExpr() *control.While {
 	p.skip()
 	condition := p.expr(0)
