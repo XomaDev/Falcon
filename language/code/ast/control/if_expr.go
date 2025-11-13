@@ -16,7 +16,7 @@ func (s *SimpleIf) Yail() string {
 }
 
 func (s *SimpleIf) String() string {
-	return sugar.Format("if (%) %\n\telse %", s.Condition.String(), s.Then.String(), s.Else.String())
+	return sugar.Format("if (%) %\nelse %", s.Condition.String(), s.Then.String(), s.Else.String())
 }
 
 func (s *SimpleIf) Blockly() ast.Block {

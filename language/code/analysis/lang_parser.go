@@ -69,7 +69,7 @@ func (p *LangParser) ParseAll() []ast.Expr {
 		p.defineStatements()
 	}
 	for p.notEOF() {
-		expressions = append(expressions, p.parse())
+		expressions = append(expressions, p.parseRoot())
 	}
 	return expressions
 }
@@ -94,7 +94,7 @@ func (p *LangParser) defineStatements() {
 	}
 }
 
-func (p *LangParser) parse() ast.Expr {
+func (p *LangParser) parseRoot() ast.Expr {
 	switch p.peek().Type {
 	case l.If:
 		return p.ifExpr()
@@ -107,9 +107,6 @@ func (p *LangParser) parse() ast.Expr {
 	case l.Break:
 		p.skip()
 		return &control.Break{}
-	case l.WalkAll:
-		p.skip()
-		return &fundamentals.WalkAll{}
 	case l.Local:
 		return p.varExpr()
 	case l.Global:
@@ -122,6 +119,38 @@ func (p *LangParser) parse() ast.Expr {
 			return p.genericEvent()
 		}
 		return p.event()
+	default:
+		// It cannot be consumable
+		return p.expr(0)
+	}
+}
+
+func (p *LangParser) parseSmt() ast.Expr {
+	switch p.peek().Type {
+	case l.If:
+		return p.ifExpr()
+	case l.For:
+		return p.forExpr()
+	case l.Each:
+		return p.eachExpr()
+	case l.While:
+		return p.whileExpr()
+	case l.Break:
+		p.skip()
+		return &control.Break{}
+	case l.Local:
+		return p.varExpr()
+	default:
+		// It cannot be consumable
+		return p.expr(0)
+	}
+}
+
+func (p *LangParser) parse() ast.Expr {
+	switch p.peek().Type {
+	case l.If:
+		p.skip()
+		return p.simpleIf()
 	default:
 		return p.expr(0)
 	}
@@ -250,9 +279,6 @@ func (p *LangParser) forExpr() *control.For {
 
 func (p *LangParser) ifExpr() ast.Expr {
 	p.skip()
-	if p.ScopeCursor.In(ScopeSmartBody) {
-		return p.simpleIf()
-	}
 	var conditions []ast.Expr
 	var bodies [][]ast.Expr
 
@@ -302,7 +328,7 @@ func (p *LangParser) bodyUntilCurly() []ast.Expr {
 		return expressions
 	}
 	for p.notEOF() && !p.isNext(l.CloseCurly) {
-		expressions = append(expressions, p.parse())
+		expressions = append(expressions, p.parseSmt())
 	}
 	return expressions
 }
@@ -511,6 +537,8 @@ func (p *LangParser) term() ast.Expr {
 		return p.simpleIf()
 	case l.Compute:
 		return p.computeExpr()
+	case l.WalkAll:
+		return &fundamentals.WalkAll{}
 	default:
 		if token.HasFlag(l.Value) {
 			return p.checkCall(token)
