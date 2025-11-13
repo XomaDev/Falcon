@@ -113,7 +113,7 @@ func analyzeSyntax() {
 
 	blocks := make([]ast.Block, len(expressions))
 	for i, expression := range expressions {
-		blocks[i] = expression.Blockly()
+		blocks[i] = expression.Blockly(true)
 	}
 	xmlBlock := ast.XmlRoot{
 		Blocks: blocks,
