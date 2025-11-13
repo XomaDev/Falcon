@@ -69,7 +69,7 @@ func (p *LangParser) ParseAll() []ast.Expr {
 		p.defineStatements()
 	}
 	for p.notEOF() {
-		expressions = append(expressions, p.parseRoot())
+		expressions = append(expressions, p.parse())
 	}
 	return expressions
 }
@@ -94,7 +94,7 @@ func (p *LangParser) defineStatements() {
 	}
 }
 
-func (p *LangParser) parseRoot() ast.Expr {
+func (p *LangParser) parse() ast.Expr {
 	switch p.peek().Type {
 	case l.If:
 		return p.ifExpr()
@@ -121,37 +121,6 @@ func (p *LangParser) parseRoot() ast.Expr {
 		return p.event()
 	default:
 		// It cannot be consumable
-		return p.expr(0)
-	}
-}
-
-func (p *LangParser) parseSmt() ast.Expr {
-	switch p.peek().Type {
-	case l.If:
-		return p.ifExpr()
-	case l.For:
-		return p.forExpr()
-	case l.Each:
-		return p.eachExpr()
-	case l.While:
-		return p.whileExpr()
-	case l.Break:
-		p.skip()
-		return &control.Break{}
-	case l.Local:
-		return p.varExpr()
-	default:
-		// It cannot be consumable
-		return p.expr(0)
-	}
-}
-
-func (p *LangParser) parse() ast.Expr {
-	switch p.peek().Type {
-	case l.If:
-		p.skip()
-		return p.simpleIf()
-	default:
 		return p.expr(0)
 	}
 }
@@ -199,8 +168,13 @@ func (p *LangParser) funcSmt() ast.Expr {
 	p.Resolver.Procedures[name] = Procedure{Name: name, Parameters: parameters, Returning: returning}
 	if returning {
 		p.ScopeCursor.Enter(where, ScopeSmartBody)
-		result := p.parse()
-		p.ScopeCursor.Enter(where, ScopeSmartBody)
+		var result ast.Expr
+		if p.isNext(l.OpenCurly) {
+			result = p.smartBody()
+		} else {
+			result = p.parse()
+		}
+		p.ScopeCursor.Exit(ScopeSmartBody)
 		return &procedures.RetProcedure{Name: name, Parameters: parameters, Result: result}
 	} else {
 		return &procedures.VoidProcedure{Name: name, Parameters: parameters, Body: p.body(ScopeProc)}
@@ -222,12 +196,20 @@ func (p *LangParser) varExpr() ast.Expr {
 	if p.ScopeCursor.AtRoot() {
 		where.Error("Cannot define a local variable at the root level.")
 	}
+	p.back()
 	// a clean full scope variable
-	name := p.name()
-	p.expect(l.Assign)
-	value := p.parse()
+	var names []string
+	var values []ast.Expr
+	for {
+		if !p.consume(l.Local) {
+			break
+		}
+		names = append(names, p.name())
+		p.expect(l.Assign)
+		values = append(values, p.parse())
+	}
 	// we have to parse rest of the body here
-	return &variables.SimpleVar{Name: name, Value: value, Body: p.bodyUntilCurly()}
+	return &variables.Var{Names: names, Values: values, Body: p.bodyUntilCurly()}
 }
 
 func (p *LangParser) whileExpr() *control.While {
@@ -285,6 +267,13 @@ func (p *LangParser) ifExpr() ast.Expr {
 	p.expect(l.OpenCurve)
 	conditions = append(conditions, p.expr(0))
 	p.expect(l.CloseCurve)
+
+	if !p.isNext(l.OpenCurly) {
+		then := p.parse()
+		p.expect(l.Else)
+		elze := p.parse()
+		return &control.SimpleIf{Condition: conditions[0], Then: then, Else: elze}
+	}
 	bodies = append(bodies, p.body(ScopeIfBody))
 
 	var elseBody []ast.Expr
@@ -303,16 +292,6 @@ func (p *LangParser) ifExpr() ast.Expr {
 	return &control.If{Conditions: conditions, Bodies: bodies, ElseBody: elseBody}
 }
 
-func (p *LangParser) simpleIf() *control.SimpleIf {
-	p.expect(l.OpenCurve)
-	condition := p.parse()
-	p.expect(l.CloseCurve)
-	then := p.parse()
-	p.expect(l.Else)
-	elze := p.parse()
-	return &control.SimpleIf{Condition: condition, Then: then, Else: elze}
-}
-
 func (p *LangParser) body(scope Scope) []ast.Expr {
 	where := p.expect(l.OpenCurly)
 	p.ScopeCursor.Enter(where, scope)
@@ -328,7 +307,7 @@ func (p *LangParser) bodyUntilCurly() []ast.Expr {
 		return expressions
 	}
 	for p.notEOF() && !p.isNext(l.CloseCurly) {
-		expressions = append(expressions, p.parseSmt())
+		expressions = append(expressions, p.parse())
 	}
 	return expressions
 }
@@ -534,7 +513,8 @@ func (p *LangParser) term() ast.Expr {
 	case l.Not:
 		return &fundamentals.Not{Expr: p.element()}
 	case l.If:
-		return p.simpleIf()
+		p.back()
+		return p.ifExpr()
 	case l.Compute:
 		return p.computeExpr()
 	case l.WalkAll:

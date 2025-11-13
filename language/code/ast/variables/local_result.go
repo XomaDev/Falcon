@@ -37,6 +37,7 @@ func (v *VarResult) String() string {
 		builder.WriteString("\n")
 	}
 	builder.WriteString(v.Result.String())
+	builder.WriteString("}")
 	return builder.String()
 }
 
