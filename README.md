@@ -80,10 +80,10 @@ In Falcon, it is similar to that of Java. Below is the list, ranked from the low
 A global variable:
 
 ```python
-# always at the root level
+// always at the root level
 global name = "Kumaraswamy"
 
-# access global var
+// access global var
 println(this.name)
 ```
 
@@ -92,7 +92,7 @@ A simple local variable:
 ```python
 local age = 12
 
-# accessing local var
+// accessing local var
 println(age)
 ```
 
@@ -103,9 +103,9 @@ println(age)
 ```go
 local age = 8
 
-if age < 18 {
+if (age < 18) {
   println("You are a kid :D")
-} elif age == 18 {
+} else if (age == 18) {
   println("Congrats! You are an adult!")
 } else {
   println("Hola, grown person!")
@@ -123,7 +123,7 @@ local b = 12
 local max = if (a > b) a else b
 ```
 
-### For loops
+### Loops
 
 `while` statement to iterate till the condition is true.
 
@@ -132,7 +132,7 @@ local x = 0
 
 while true {
   x = x + 1
-  if x == 5 {
+  if (x == 5) {
     break
   }  
 }
@@ -183,12 +183,15 @@ func funcName(x, y, z) {
 A returning function:
 
 ```go
-func getMin(x, y) = {
-  if x < y {
-    return x
+global just18 = false
+
+func fooBar(n) =
+  if (n < 18) "Child"
+  else if (n == 18) {
+    this.just18 = true
+    "Adult" // Like Kotlin
   }
-  return y
-}
+  else "Adult"
 ```
 
 ## Functions
@@ -404,14 +407,14 @@ println(Button1.Text) # get and print Button1' text
 ```
 
 ```kotlin
-# change Button1's text to "Hello, World!"
+// change Button1's text to "Hello, World!"
 Button1.Text = "Hello, World!"
 ```
 
 ### Method calls
 
 ```kotlin
-# Show a toast for "Hello World"
+// Show a toast for "Hello World"
 Notifier1.ShowAlert("Hello, World!")
 ```
 
@@ -421,7 +424,7 @@ You do not need to explicitly define parameters.
 
 ```kotlin
 when Button1.Click {
-  # do something
+  // do something
 }
 ```
 
@@ -429,6 +432,6 @@ for a generic event:
 
 ```kotlin
 when any Button.Click {
-  # do something
+  // do something
 }
 ```
