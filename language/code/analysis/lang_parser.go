@@ -28,18 +28,20 @@ type Procedure struct {
 }
 
 type LangParser struct {
-	Tokens      []*l.Token
-	currIndex   int
-	tokenSize   int
-	Resolver    *NameResolver
-	ScopeCursor *ScopeCursor
+	Tokens         []*l.Token
+	currIndex      int
+	tokenSize      int
+	currCheckpoint int
+	Resolver       *NameResolver
+	ScopeCursor    *ScopeCursor
 }
 
 func NewLangParser(tokens []*l.Token) *LangParser {
 	return &LangParser{
-		Tokens:    tokens,
-		tokenSize: len(tokens),
-		currIndex: 0,
+		Tokens:         tokens,
+		tokenSize:      len(tokens),
+		currIndex:      0,
+		currCheckpoint: 0,
 		Resolver: &NameResolver{
 			Procedures:        map[string]Procedure{},
 			ComponentTypesMap: map[string]string{},
@@ -201,6 +203,7 @@ func (p *LangParser) varExpr() ast.Expr {
 	var names []string
 	var values []ast.Expr
 	for {
+		p.createCheckpoint()
 		if !p.consume(l.Local) {
 			break
 		}
@@ -211,6 +214,7 @@ func (p *LangParser) varExpr() ast.Expr {
 		if ast.DependsOnVariables(value, names) {
 			// Since this variable depends on the last variable, we cannot include
 			// it in the current set.
+			p.backToPast()
 			break
 		}
 
@@ -724,6 +728,14 @@ func (p *LangParser) next() *l.Token {
 	token := p.Tokens[p.currIndex]
 	p.currIndex++
 	return token
+}
+
+func (p *LangParser) createCheckpoint() {
+	p.currCheckpoint = p.currIndex
+}
+
+func (p *LangParser) backToPast() {
+	p.currIndex = p.currCheckpoint
 }
 
 func (p *LangParser) back() {
