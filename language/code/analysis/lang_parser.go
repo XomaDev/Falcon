@@ -28,10 +28,11 @@ type Procedure struct {
 }
 
 type LangParser struct {
-	Tokens    []*l.Token
-	currIndex int
-	tokenSize int
-	Resolver  *NameResolver
+	Tokens      []*l.Token
+	currIndex   int
+	tokenSize   int
+	Resolver    *NameResolver
+	ScopeCursor *ScopeCursor
 }
 
 func NewLangParser(tokens []*l.Token) *LangParser {

@@ -15,8 +15,20 @@ const (
 )
 
 func CombineSignatures(first []Signature, second []Signature) []Signature {
-	combined := make([]Signature, len(first)+len(second))
-	copy(combined, first)
-	copy(combined[len(first):], second)
-	return combined
+	seen := make(map[Signature]bool)
+	unique := make([]Signature, 0, len(first)+len(second))
+
+	for _, sig := range first {
+		if !seen[sig] {
+			seen[sig] = true
+			unique = append(unique, sig)
+		}
+	}
+	for _, sig := range second {
+		if !seen[sig] {
+			seen[sig] = true
+			unique = append(unique, sig)
+		}
+	}
+	return unique
 }
