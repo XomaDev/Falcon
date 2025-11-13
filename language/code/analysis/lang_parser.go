@@ -200,7 +200,7 @@ func (p *LangParser) varExpr() ast.Expr {
 func (p *LangParser) whileExpr() *control.While {
 	p.skip()
 	condition := p.expr(0)
-	body := p.body(Loop)
+	body := p.body(ScopeLoop)
 	return &control.While{Condition: condition, Body: body}
 }
 
@@ -213,11 +213,11 @@ func (p *LangParser) eachExpr() ast.Expr {
 		valueName := p.name()
 		p.expect(l.CloseCurve)
 		p.expect(l.In)
-		return &control.EachPair{KeyName: keyName, ValueName: valueName, Iterable: p.element(), Body: p.body(Loop)}
+		return &control.EachPair{KeyName: keyName, ValueName: valueName, Iterable: p.element(), Body: p.body(ScopeLoop)}
 	} else {
 		keyName := p.name()
 		p.expect(l.In)
-		return &control.Each{IName: keyName, Iterable: p.element(), Body: p.body(Loop)}
+		return &control.Each{IName: keyName, Iterable: p.element(), Body: p.body(ScopeLoop)}
 	}
 }
 
@@ -234,7 +234,7 @@ func (p *LangParser) forExpr() *control.For {
 	} else {
 		by = &fundamentals.Number{Content: "1"}
 	}
-	body := p.body(Loop)
+	body := p.body(ScopeLoop)
 	return &control.For{
 		IName: iName,
 		From:  from,
@@ -253,15 +253,15 @@ func (p *LangParser) ifExpr() ast.Expr {
 	var bodies [][]ast.Expr
 
 	conditions = append(conditions, p.expr(0))
-	bodies = append(bodies, p.body(IfBody))
+	bodies = append(bodies, p.body(ScopeIfBody))
 
 	for p.notEOF() && p.consume(l.Elif) {
 		conditions = append(conditions, p.expr(0))
-		bodies = append(bodies, p.body(IfBody))
+		bodies = append(bodies, p.body(ScopeIfBody))
 	}
 	var elseBody []ast.Expr
 	if p.notEOF() && p.consume(l.Else) {
-		elseBody = p.body(IfBody)
+		elseBody = p.body(ScopeIfBody)
 	}
 	return &control.If{Conditions: conditions, Bodies: bodies, ElseBody: elseBody}
 }

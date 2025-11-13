@@ -12,8 +12,9 @@ const (
 	ScopeProc
 	ScopeGenericEvent
 	ScopeEvent
-	Loop
-	IfBody
+	ScopeLoop
+	ScopeIfBody
+	ScopeSmartBody
 )
 
 type ScopeCursor struct {
