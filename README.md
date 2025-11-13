@@ -7,6 +7,7 @@ This page assumes you have some experience in Programming and App Inventor.
 - Falcon syntax was created for App Inventor that follows 1-based indexing.
 - List, and Dictionaries are passed as references, only text and number are copied.
 - Tags of various languages are used only for syntax highlighting
+- Falcon does not have a do clause, nor a switch clause
 
 ## Data types
 
@@ -180,7 +181,7 @@ func funcName(x, y, z) {
 }
 ```
 
-A returning function:
+To indicate a returning function, use an equals sign:
 
 ```go
 global just18 = false

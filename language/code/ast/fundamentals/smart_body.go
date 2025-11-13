@@ -14,22 +14,21 @@ func (s *SmartBody) Yail() string {
 }
 
 func (s *SmartBody) String() string {
-	return ast.PadBody(s.Body)
+	return ast.JoinExprs("\n", s.Body)
 }
 
 func (s *SmartBody) Blockly() ast.Block {
 	// a single expression, just inline it
+	if v, ok := s.Body[0].(*variables.Var); ok {
+		// it's a var body, but we want a var result!
+		doExpr := s.createDoSmt(v.Body[len(v.Body)-1], v.Body[:len(v.Body)-1])
+		return s.createLocalResult(v.Names, v.Values, doExpr)
+	}
 	if len(s.Body) == 1 {
 		return s.Body[0].Blockly()
 	}
 	// prepare a do expression out of the Then
-	doResult := s.Body[len(s.Body)-1]
-	doBody := s.Body[:len(s.Body)-1]
-	doExpr := ast.Block{
-		Type:       "controls_do_then_return",
-		Statements: []ast.Statement{ast.CreateStatement("STM", doBody)},
-		Values:     []ast.Value{{Name: "VALUE", Block: doResult.Blockly()}},
-	}
+	doExpr := s.createDoSmt(s.Body[len(s.Body)-1], s.Body[:len(s.Body)-1])
 
 	var namesLocal = s.mutateVars()
 	if len(namesLocal) == 0 {
@@ -41,13 +40,31 @@ func (s *SmartBody) Blockly() ast.Block {
 	for k := range defaultLocalVals {
 		defaultLocalVals[k] = &Boolean{Value: false}
 	}
+	return s.createLocalResult(namesLocal, defaultLocalVals, doExpr)
+}
+
+func (s *SmartBody) createLocalResult(names []string, values []ast.Expr, doExpr ast.Block) ast.Block {
 	return ast.Block{
 		Type:     "local_declaration_expression",
-		Mutation: &ast.Mutation{LocalNames: ast.MakeLocalNames(namesLocal...)},
-		Fields:   ast.ToFields("VAR", namesLocal),
-		Values: append(ast.ValuesByPrefix("DECL", defaultLocalVals),
+		Mutation: &ast.Mutation{LocalNames: ast.MakeLocalNames(names...)},
+		Fields:   ast.ToFields("VAR", names),
+		Values: append(ast.ValuesByPrefix("DECL", values),
 			ast.Value{Name: "RETURN", Block: doExpr}),
 	}
+}
+
+func (s *SmartBody) createDoSmt(doResult ast.Expr, doBody []ast.Expr) ast.Block {
+	var doExpr ast.Block
+	if len(doBody) == 0 {
+		doExpr = doResult.Blockly()
+	} else {
+		doExpr = ast.Block{
+			Type:       "controls_do_then_return",
+			Statements: []ast.Statement{ast.CreateStatement("STM", doBody)},
+			Values:     []ast.Value{{Name: "VALUE", Block: doResult.Blockly()}},
+		}
+	}
+	return doExpr
 }
 
 // mutateVars returns a name list of declared variables, and the declarations are mutated to a set call.

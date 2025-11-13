@@ -1,8 +1,6 @@
-func fooBar(n) =
-  if (n < 18) "Hi kid!"
-  else {
-    if (true) {
-      println("false")
-    }
-    "cat"
-  }
+func medianAdultAge() = {
+    local adults = membersAge.filter { n -> n >= 18 }.sort()
+    local len = adults.listLen()
+    if (mod(len, 2) == 0) adults[len / 2] + adults[len / 2 + 1] / 2
+    else adults[len + 1 / 2]
+}
