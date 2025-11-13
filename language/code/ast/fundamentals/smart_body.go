@@ -22,7 +22,7 @@ func (s *SmartBody) Blockly() ast.Block {
 	if len(s.Body) == 1 {
 		return s.Body[0].Blockly()
 	}
-	// prepare a do expression out of the Body
+	// prepare a do expression out of the Then
 	doResult := s.Body[len(s.Body)-1]
 	doBody := s.Body[:len(s.Body)-1]
 	doExpr := ast.Block{
@@ -33,7 +33,7 @@ func (s *SmartBody) Blockly() ast.Block {
 
 	var namesLocal = s.mutateVars()
 	if len(namesLocal) == 0 {
-		// no variables declared in the Body, a do expression is enough
+		// no variables declared in the Then, a do expression is enough
 		return doExpr
 	}
 	// We'd need to use a local result expression

@@ -45,6 +45,7 @@ func NewLangParser(tokens []*l.Token) *LangParser {
 			ComponentTypesMap: map[string]string{},
 			ComponentNameMap:  map[string][]string{},
 		},
+		ScopeCursor: &ScopeCursor{currScopes: []Scope{}},
 	}
 }
 
@@ -488,6 +489,7 @@ func (p *LangParser) term() ast.Expr {
 	case l.OpenSquare:
 		return p.list()
 	case l.OpenCurly:
+		p.back()
 		return p.smartBody()
 	case l.OpenCurve:
 		e := p.parse()
@@ -709,6 +711,10 @@ func (p *LangParser) next() *l.Token {
 	token := p.Tokens[p.currIndex]
 	p.currIndex++
 	return token
+}
+
+func (p *LangParser) back() {
+	p.currIndex--
 }
 
 func (p *LangParser) skip() {
