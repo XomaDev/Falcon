@@ -2,8 +2,6 @@ package common
 
 import (
 	"Falcon/code/ast"
-	"Falcon/code/ast/list"
-	"Falcon/code/ast/variables"
 	"Falcon/code/lex"
 	"strconv"
 )
@@ -32,7 +30,7 @@ func (b *BinaryExpr) CanRepeat(testOperator lex.Type) bool {
 		return false
 	}
 	switch b.Operator {
-	case lex.Power, lex.Dash, lex.Slash, lex.Colon:
+	case lex.Power, lex.Dash, lex.Slash:
 		return false
 	default:
 		return true
@@ -47,8 +45,6 @@ func (b *BinaryExpr) Blockly() ast.Block {
 		return b.compareExpr()
 	case lex.LogicAnd, lex.LogicOr:
 		return b.boolExpr()
-	case lex.Colon:
-		return b.pairExpr()
 	case lex.Plus, lex.Times:
 		return b.addOrTimes()
 	case lex.Dash, lex.Slash, lex.Power:
@@ -59,8 +55,6 @@ func (b *BinaryExpr) Blockly() ast.Block {
 		return b.relationalExpr()
 	case lex.TextEquals, lex.TextNotEquals, lex.TextLessThan, lex.TextGreaterThan:
 		return b.textCompare()
-	case lex.Assign:
-		return b.assignment()
 	default:
 		b.Where.Error("Unknown binary operator! " + b.Operator.String())
 		panic("") // unreachable
@@ -72,7 +66,7 @@ func (b *BinaryExpr) Continuous() bool {
 }
 
 func (b *BinaryExpr) Consumable() bool {
-	return b.Operator != lex.Assign
+	return true
 }
 
 func (b *BinaryExpr) Signature() []ast.Signature {
@@ -83,8 +77,6 @@ func (b *BinaryExpr) Signature() []ast.Signature {
 		return []ast.Signature{ast.SignBool}
 	case lex.LogicAnd, lex.LogicOr:
 		return []ast.Signature{ast.SignBool}
-	case lex.Colon:
-		return []ast.Signature{ast.SignList}
 	case lex.Plus, lex.Times:
 		return []ast.Signature{ast.SignNumb}
 	case lex.Dash, lex.Slash, lex.Power:
@@ -95,38 +87,10 @@ func (b *BinaryExpr) Signature() []ast.Signature {
 		return []ast.Signature{ast.SignBool}
 	case lex.TextEquals, lex.TextNotEquals, lex.TextLessThan, lex.TextGreaterThan:
 		return []ast.Signature{ast.SignBool}
-	case lex.Assign:
-		return []ast.Signature{ast.SignVoid}
 	default:
 		b.Where.Error("Unknown binary operator! " + b.Operator.String())
 		panic("") // unreachable
 	}
-}
-
-func (b *BinaryExpr) assignment() ast.Block {
-	if len(b.Operands) != 2 {
-		b.Where.Error("Assignment '=' received more than two operands")
-	}
-	settable := b.Operands[0]
-	newValue := b.Operands[1]
-
-	if listGet, ok := settable.(*list.Get); ok {
-		listSet := list.Set{List: listGet.List, Index: listGet.Index, Value: newValue}
-		return listSet.Blockly()
-	} else if varGet, ok := settable.(*variables.Get); ok {
-		var name string
-		if varGet.Global {
-			name = "global " + varGet.Name
-		} else {
-			name = varGet.Name
-		}
-		return ast.Block{
-			Type:   "lexical_variable_set",
-			Fields: []ast.Field{{Name: "VAR", Value: name}},
-			Values: []ast.Value{{Name: "VALUE", Block: newValue.Blockly()}},
-		}
-	}
-	panic("Unimplemented!")
 }
 
 func (b *BinaryExpr) textCompare() ast.Block {
@@ -172,16 +136,6 @@ func (b *BinaryExpr) textJoin() ast.Block {
 		Type:     "text_join",
 		Mutation: &ast.Mutation{ItemCount: len(b.Operands)},
 		Values:   ast.ValuesByPrefix("ADD", b.Operands),
-	}
-}
-
-func (b *BinaryExpr) pairExpr() ast.Block {
-	if len(b.Operands) != 2 {
-		b.Where.Error("Pair operator ':' received more than two operands")
-	}
-	return ast.Block{
-		Type:   "pair",
-		Values: ast.MakeValues(b.Operands, "KEY", "VALUE"),
 	}
 }
 

@@ -43,6 +43,38 @@ func (d *Dictionary) Signature() []ast.Signature {
 	return []ast.Signature{ast.SignDict}
 }
 
+type Pair struct {
+	Key   ast.Expr
+	Value ast.Expr
+}
+
+func (p *Pair) Yail() string {
+	panic("implement me")
+}
+
+func (p *Pair) String() string {
+	return sugar.Format("% : %", p.Key.String(), p.Value.String())
+}
+
+func (p *Pair) Blockly() ast.Block {
+	return ast.Block{
+		Type:   "pair",
+		Values: ast.MakeValues([]ast.Expr{p.Key, p.Value}, "KEY", "VALUE"),
+	}
+}
+
+func (p *Pair) Continuous() bool {
+	return false
+}
+
+func (p *Pair) Consumable() bool {
+	return true
+}
+
+func (p *Pair) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignList}
+}
+
 type WalkAll struct {
 }
 
