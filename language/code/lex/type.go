@@ -56,7 +56,6 @@ const (
 	ColorCode
 
 	If
-	Elif
 	Else
 	For
 	To

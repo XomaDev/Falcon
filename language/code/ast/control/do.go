@@ -20,7 +20,7 @@ func (d *Do) Yail() string {
 }
 
 func (d *Do) String() string {
-	return sugar.Format("do {\n%} -> %", ast.PadBody(d.Body), d.Result.String())
+	return sugar.Format("{\n%%\n  }", ast.PadDirect(ast.PadBody(d.Body)), ast.PadDirect(d.Result.String()))
 }
 
 func (d *Do) Blockly() ast.Block {
