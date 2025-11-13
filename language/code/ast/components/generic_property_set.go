@@ -31,7 +31,7 @@ func (g *GenericPropertySet) String() string {
 
 }
 
-func (g *GenericPropertySet) Blockly() ast.Block {
+func (g *GenericPropertySet) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type: "component_set_get",
 		Mutation: &ast.Mutation{

@@ -66,7 +66,7 @@ func (t *Transformer) String() string {
 	}
 }
 
-func (t *Transformer) Blockly() ast.Block {
+func (t *Transformer) Blockly(flags ...bool) ast.Block {
 	signature, ok := transformers[t.Name]
 	if !ok {
 		t.Where.Error("Unknown transformer '%'", t.Name)

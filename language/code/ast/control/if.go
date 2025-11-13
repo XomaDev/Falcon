@@ -62,7 +62,7 @@ func (i *If) String() string {
 	return builder.String()
 }
 
-func (i *If) Blockly() ast.Block {
+func (i *If) Blockly(flags ...bool) ast.Block {
 	conditions := ast.ValuesByPrefix("IF", i.Conditions)
 	bodies := ast.ToStatements("DO", i.Bodies)
 

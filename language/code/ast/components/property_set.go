@@ -28,7 +28,7 @@ func (p *PropertySet) String() string {
 	return sugar.Format("%.% = %", p.ComponentName, p.Property, p.Value.String())
 }
 
-func (p *PropertySet) Blockly() ast.Block {
+func (p *PropertySet) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type: "component_set_get",
 		Mutation: &ast.Mutation{

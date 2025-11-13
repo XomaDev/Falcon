@@ -3,7 +3,7 @@ package ast
 type Expr interface {
 	String() string
 	Yail() string
-	Blockly() Block
+	Blockly(flags ...bool) Block
 	Continuous() bool
 	Consumable() bool
 	Signature() []Signature

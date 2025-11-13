@@ -22,7 +22,7 @@ func (g *Global) String() string {
 	return "global " + g.Name + " = " + g.Value.String()
 }
 
-func (g *Global) Blockly() ast.Block {
+func (g *Global) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:   "global_declaration",
 		Fields: []ast.Field{{Name: "NAME", Value: g.Name}},

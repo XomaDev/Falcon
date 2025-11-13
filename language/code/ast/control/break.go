@@ -16,7 +16,7 @@ func (b *Break) String() string {
 	return "break"
 }
 
-func (b *Break) Blockly() ast.Block {
+func (b *Break) Blockly(flags ...bool) ast.Block {
 	return ast.Block{Type: "controls_break"}
 }
 

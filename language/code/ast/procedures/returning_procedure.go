@@ -27,7 +27,7 @@ func (v *RetProcedure) String() string {
 	return sugar.Format("func %(%) =\n%", v.Name, strings.Join(v.Parameters, ", "), ast.Pad(v.Result.String()))
 }
 
-func (v *RetProcedure) Blockly() ast.Block {
+func (v *RetProcedure) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:     "procedures_defreturn",
 		Mutation: &ast.Mutation{Args: ast.ToArgs(v.Parameters)},

@@ -24,7 +24,7 @@ func (s *Set) String() string {
 	return sugar.Format(pFormat, s.List.String(), s.Index.String(), s.Value.String())
 }
 
-func (s *Set) Blockly() ast.Block {
+func (s *Set) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:   "lists_replace_item",
 		Values: ast.MakeValues([]ast.Expr{s.List, s.Index, s.Value}, "LIST", "NUM", "ITEM"),

@@ -33,7 +33,7 @@ func (m *MethodCall) String() string {
 	return sugar.Format("%.%(%)", m.ComponentName, m.Method, ast.JoinExprs(", ", m.Args))
 }
 
-func (m *MethodCall) Blockly() ast.Block {
+func (m *MethodCall) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type: "component_method",
 		Mutation: &ast.Mutation{

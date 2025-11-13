@@ -30,7 +30,7 @@ func (g *Get) String() string {
 	return g.Name
 }
 
-func (g *Get) Blockly() ast.Block {
+func (g *Get) Blockly(flags ...bool) ast.Block {
 	var name string
 	if g.Global {
 		name = "global " + g.Name

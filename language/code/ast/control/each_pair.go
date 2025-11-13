@@ -40,7 +40,7 @@ func (e *EachPair) String() string {
 	return sugar.Format("each (%, %) -> % {\n%}", e.KeyName, e.ValueName, e.Iterable.String(), ast.PadBody(e.Body))
 }
 
-func (e *EachPair) Blockly() ast.Block {
+func (e *EachPair) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type: "controls_for_each_dict",
 		Fields: []ast.Field{

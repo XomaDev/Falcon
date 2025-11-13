@@ -25,7 +25,7 @@ func (q *Question) String() string {
 	return sugar.Format(pFormat, q.On.String(), q.Question)
 }
 
-func (q *Question) Blockly() ast.Block {
+func (q *Question) Blockly(flags ...bool) ast.Block {
 	switch q.Question {
 	case "number", "base10", "hexa", "bin":
 		return q.mathQuestion()

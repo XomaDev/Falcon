@@ -33,7 +33,7 @@ func (f *For) String() string {
 		f.IName, f.From.String(), f.To.String(), f.By.String(), ast.PadBody(f.Body))
 }
 
-func (f *For) Blockly() ast.Block {
+func (f *For) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:       "controls_forRange",
 		Fields:     []ast.Field{{Name: "VAR", Value: f.IName}},

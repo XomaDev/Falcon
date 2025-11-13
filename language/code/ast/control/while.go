@@ -23,7 +23,7 @@ func (w *While) String() string {
 	return sugar.Format("while % {\n%}", w.Condition.String(), ast.PadBody(w.Body))
 }
 
-func (w *While) Blockly() ast.Block {
+func (w *While) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:       "controls_while",
 		Values:     []ast.Value{{Name: "TEST", Block: w.Condition.Blockly()}},

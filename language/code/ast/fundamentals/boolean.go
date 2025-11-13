@@ -23,7 +23,7 @@ func (b *Boolean) String() string {
 	return "false"
 }
 
-func (b *Boolean) Blockly() ast.Block {
+func (b *Boolean) Blockly(flags ...bool) ast.Block {
 	var bText string
 	if b.Value {
 		bText = "TRUE"
@@ -61,7 +61,7 @@ func (n *Not) String() string {
 	return sugar.Format("!%", n.Expr.String())
 }
 
-func (n *Not) Blockly() ast.Block {
+func (n *Not) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:   "logic_negate",
 		Values: []ast.Value{{Name: "BOOL", Block: n.Expr.Blockly()}},

@@ -37,7 +37,7 @@ func (b *BinaryExpr) CanRepeat(testOperator lex.Type) bool {
 	}
 }
 
-func (b *BinaryExpr) Blockly() ast.Block {
+func (b *BinaryExpr) Blockly(flags ...bool) ast.Block {
 	switch b.Operator {
 	case lex.BitwiseAnd, lex.BitwiseOr, lex.BitwiseXor:
 		return b.bitwiseExpr()
