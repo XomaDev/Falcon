@@ -56,6 +56,7 @@ func (b *BinaryExpr) Blockly() ast.Block {
 	case lex.TextEquals, lex.TextNotEquals, lex.TextLessThan, lex.TextGreaterThan:
 		return b.textCompare()
 	default:
+		println("Unknown binary operator! " + b.Operator.String())
 		b.Where.Error("Unknown binary operator! " + b.Operator.String())
 		panic("") // unreachable
 	}

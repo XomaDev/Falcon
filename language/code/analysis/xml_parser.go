@@ -597,16 +597,7 @@ func (p *XMLParser) variableSet(block ast.Block) ast.Expr {
 	if isGlobal {
 		varName = varName[len("global "):]
 	}
-	return p.makeBinary("=",
-		[]ast.Expr{
-			&variables.Get{
-				Where:  makeFakeToken(lex.Global),
-				Global: isGlobal,
-				Name:   varName,
-			},
-			p.singleExpr(block),
-		},
-	)
+	return variables.Set{Global: isGlobal, Name: varName, Expr: p.singleExpr(block)}
 }
 
 func (p *XMLParser) variableGet(block ast.Block) ast.Expr {
@@ -676,7 +667,7 @@ func (p *XMLParser) dictLookup(block ast.Block) ast.Expr {
 
 func (p *XMLParser) dictPair(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makeBinary(":", []ast.Expr{pVals.get("KEY"), pVals.get("VALUE")})
+	return &fundamentals.Pair{Key: pVals.get("KEY"), Value: pVals.get("VALUE")}
 }
 
 func (p *XMLParser) listTransMax(block ast.Block) ast.Expr {
