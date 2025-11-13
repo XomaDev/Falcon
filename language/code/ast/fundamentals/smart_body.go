@@ -57,6 +57,11 @@ func (s *SmartBody) createLocalResult(names []string, values []ast.Expr, doExpr 
 func (s *SmartBody) createDoSmt(doResult ast.Expr, doBody []ast.Expr) ast.Block {
 	var doExpr ast.Block
 	if len(doBody) == 0 {
+		if v, ok := doResult.(*variables.Var); ok {
+			// it's a var body, but we want a var result!
+			doExpr = s.createDoSmt(v.Body[len(v.Body)-1], v.Body[:len(v.Body)-1])
+			return s.createLocalResult(v.Names, v.Values, doExpr)
+		}
 		doExpr = doResult.Blockly()
 	} else {
 		doExpr = ast.Block{
