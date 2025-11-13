@@ -1,36 +1,10 @@
-func checkAge(n) = {
-  if n < 18 {
-    use "Hi kid!"
-  } else {
-    local name = "You just turned into an adult!"
-    println(name)
-    if n == 18 {
-      use name
-    } else {
-      use "Hi, adult!"
-    }
-  }
-}
-
-func checkAge(n) = {
-  if (n < 18) "Hi kid!"
+func fooBar(x) =
+  if (x < 18) "Child"
   else {
-    local x = 1
-    println(1)
-    local y = 2
-    if (n < 18) y else {
-      println("meow")
-      "Adult!"
+    if (x == 18) {
+      println("hehe")
+      "New adult!"
+    } else {
+      "Old adult!"
     }
   }
-}
-
-func fooBar(n) = {
-  local returning = ""
-  if n < 18 {
-    returning = "Child"
-  } else {
-    returning = "Adult"
-  }
-  returning
-}
