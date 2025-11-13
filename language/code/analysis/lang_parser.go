@@ -323,10 +323,24 @@ func (p *LangParser) expr(minPrecedence int) ast.Expr {
 			lBinExpr.Operands = append(lBinExpr.Operands, right)
 		} else {
 			// a new binary node
-			left = &common.BinaryExpr{Where: opToken, Operands: []ast.Expr{left, right}, Operator: opToken.Type}
+			left = p.makeBinary(opToken, left, right)
 		}
 	}
 	return left
+}
+
+func (p *LangParser) makeBinary(opToken *l.Token, left ast.Expr, right ast.Expr) ast.Expr {
+	switch opToken.Type {
+	case l.Colon:
+		return &fundamentals.Pair{Key: left, Value: right}
+	case l.Assign:
+		if nameExpr, ok := left.(*variables.Get); ok {
+			return &variables.Set{Global: nameExpr.Global, Name: nameExpr.Name, Expr: right}
+		} else if listGet, ok := left.(*list.Get); ok {
+			return &list.Set{List: listGet.List, Index: listGet.Index, Value: right}
+		}
+	}
+	return &common.BinaryExpr{Where: opToken, Operands: []ast.Expr{left, right}, Operator: opToken.Type}
 }
 
 func precedenceOf(flag l.Flag) int {
@@ -381,9 +395,6 @@ func (p *LangParser) element() ast.Expr {
 		case l.Dot:
 			left = p.objectCall(left)
 			continue
-		//case l.RightArrow:
-		//left = &common.Convert{Where: p.next(), On: left, Name: p.name()}
-		//continue
 		case l.Question:
 			left = &common.Question{Where: p.next(), On: left, Question: p.name()}
 			continue
@@ -477,40 +488,52 @@ func (p *LangParser) term() ast.Expr {
 	case l.OpenSquare:
 		return p.list()
 	case l.OpenCurly:
-		return p.dictionary()
+		return p.smartBody()
 	case l.OpenCurve:
 		e := p.parse()
 		p.expect(l.CloseCurve)
 		return e
 	case l.Not:
 		return &fundamentals.Not{Expr: p.element()}
-	//case l.Do:
-	//	return p.doExpr()
 	case l.If:
 		return p.simpleIf()
 	case l.Compute:
 		return p.computeExpr()
 	default:
 		if token.HasFlag(l.Value) {
-			value := p.value(token)
-			if nameExpr, ok := value.(*variables.Get); ok && p.notEOF() && p.isNext(l.OpenCurve) {
-				signature, ok := p.Resolver.Procedures[nameExpr.Name]
-				if ok {
-					return &procedures.Call{
-						Name:       nameExpr.Name,
-						Parameters: signature.Parameters,
-						Arguments:  p.arguments(),
-						Returning:  signature.Returning}
-				} else {
-					return &common.FuncCall{Where: nameExpr.Where, Name: nameExpr.Name, Args: p.arguments()}
-				}
-			}
-			return value
+			return p.checkCall(token)
 		}
 		token.Error("Unexpected! %", token.String())
 		panic("") // unreachable
 	}
-	// TODO: a returning local statement might be possible here
+}
+
+func (p *LangParser) smartBody() ast.Expr {
+	body := p.body(ScopeSmartBody)
+	k := 0
+	for ; k < len(body); k++ {
+		if _, ok := body[k].(*fundamentals.Pair); !ok {
+			break
+		}
+	}
+	if k == len(body) {
+		// It's actually a dictionary!
+		return &fundamentals.Dictionary{Elements: body}
+	}
+	return &fundamentals.SmartBody{Body: body}
+}
+
+func (p *LangParser) checkCall(token *l.Token) ast.Expr {
+	value := p.value(token)
+	if nameExpr, ok := value.(*variables.Get); ok && p.notEOF() && p.isNext(l.OpenCurve) {
+		signature, ok := p.Resolver.Procedures[nameExpr.Name]
+		if ok {
+			return &procedures.Call{Name: nameExpr.Name, Parameters: signature.Parameters, Arguments: p.arguments(), Returning: signature.Returning}
+		} else {
+			return &common.FuncCall{Where: nameExpr.Where, Name: nameExpr.Name, Args: p.arguments()}
+		}
+	}
+	return value
 }
 
 func (p *LangParser) computeExpr() *variables.VarResult {
@@ -535,13 +558,6 @@ func (p *LangParser) computeExpr() *variables.VarResult {
 	p.expect(l.RightArrow)
 	return &variables.VarResult{Names: varNames, Values: varValues, Result: p.parse()}
 }
-
-//func (p *LangParser) doExpr() *control.Do {
-//	body := p.body()
-//	p.expect(l.RightArrow)
-//	result := p.expr(0)
-//	return &control.Do{Body: body, Result: result}
-//}
 
 func (p *LangParser) dictionary() *fundamentals.Dictionary {
 	var elements []ast.Expr

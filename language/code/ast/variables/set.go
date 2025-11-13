@@ -2,7 +2,6 @@ package variables
 
 import "Falcon/code/ast"
 
-// Set Used internally, never for parsing
 type Set struct {
 	Global bool
 	Name   string
@@ -43,5 +42,5 @@ func (s Set) Consumable() bool {
 }
 
 func (s Set) Signature() []ast.Signature {
-	return s.Expr.Signature()
+	return []ast.Signature{ast.SignVoid}
 }
