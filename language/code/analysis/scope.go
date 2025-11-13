@@ -1,17 +1,27 @@
 package analysis
 
+import (
+	"Falcon/code/lex"
+)
+
 //go:generate stringer -type=Scope
 type Scope int
 
 const (
-	RetProc Scope = iota
+	ScopeRetProc Scope = iota
+	ScopeProc
+	ScopeGenericEvent
+	ScopeEvent
+	Loop
+	IfBody
 )
 
 type ScopeCursor struct {
 	currScopes []Scope
 }
 
-func (s *ScopeCursor) Enter(t Scope) {
+func (s *ScopeCursor) Enter(where *lex.Token, t Scope) {
+	// TODO: check for bad scoping
 	s.currScopes = append(s.currScopes, t)
 }
 

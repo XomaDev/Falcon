@@ -72,7 +72,6 @@ const (
 	Compute
 	This
 	Func
-	Return
 	When
 	Any
 	Undefined
