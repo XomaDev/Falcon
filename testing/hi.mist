@@ -1,6 +1,7 @@
-func medianAdultAge() = {
-    local adults = membersAge.filter { n -> n >= 18 }.sort()
-    local len = adults.listLen()
-    if (mod(len, 2) == 0) adults[len / 2] + adults[len / 2 + 1] / 2
-    else adults[len + 1 / 2]
-}
+func fooBar(n) =
+  if (n < 18) "Child"
+  else if (n == 18) {
+     this.just18 = true
+    "Adult"
+  }
+  else "Adult"
