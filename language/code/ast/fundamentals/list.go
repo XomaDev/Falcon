@@ -18,7 +18,7 @@ func (l *List) String() string {
 	return sugar.Format("[%]", ast.JoinExprs(", ", l.Elements))
 }
 
-func (l *List) Blockly() ast.Block {
+func (l *List) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:     "lists_create_with",
 		Mutation: &ast.Mutation{ItemCount: len(l.Elements)},

@@ -122,7 +122,7 @@ func (c *Call) Yail() string {
 	return ast.PrimitiveCall(signature.YailName, c.Name, c.Args, argTypes)
 }
 
-func (c *Call) Blockly() ast.Block {
+func (c *Call) Blockly(flags ...bool) ast.Block {
 	signature := c.getCallSignature()
 	switch signature.Module {
 	case "text":

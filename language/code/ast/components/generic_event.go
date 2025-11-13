@@ -33,7 +33,7 @@ func (g *GenericEvent) String() string {
 	return sugar.Format(pFormat, g.ComponentType, g.Event, strings.Join(g.Parameters, ", "), ast.PadBody(g.Body))
 }
 
-func (g *GenericEvent) Blockly() ast.Block {
+func (g *GenericEvent) Blockly(flags ...bool) ast.Block {
 	var statements []ast.Statement
 	if len(g.Body) > 0 {
 		statements = []ast.Statement{ast.CreateStatement("DO", g.Body)}

@@ -3,6 +3,7 @@ package fundamentals
 import (
 	"Falcon/code/ast"
 	"Falcon/code/ast/variables"
+	"Falcon/code/sugar"
 )
 
 type SmartBody struct {
@@ -14,10 +15,10 @@ func (s *SmartBody) Yail() string {
 }
 
 func (s *SmartBody) String() string {
-	return ast.JoinExprs("\n", s.Body)
+	return sugar.Format("{\n%}", ast.PadBody(s.Body))
 }
 
-func (s *SmartBody) Blockly() ast.Block {
+func (s *SmartBody) Blockly(flags ...bool) ast.Block {
 	// a single expression, just inline it
 	if v, ok := s.Body[0].(*variables.Var); ok {
 		// it's a var body, but we want a var result!
@@ -27,12 +28,12 @@ func (s *SmartBody) Blockly() ast.Block {
 	if len(s.Body) == 1 {
 		return s.Body[0].Blockly()
 	}
-	// prepare a do expression out of the Then
+	// prepare a do expression out of the then
 	doExpr := s.createDoSmt(s.Body[len(s.Body)-1], s.Body[:len(s.Body)-1])
 
 	var namesLocal = s.mutateVars()
 	if len(namesLocal) == 0 {
-		// no variables declared in the Then, a do expression is enough
+		// no variables declared in the then, a do expression is enough
 		return doExpr
 	}
 	// We'd need to use a local result expression

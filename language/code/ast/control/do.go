@@ -20,10 +20,10 @@ func (d *Do) Yail() string {
 }
 
 func (d *Do) String() string {
-	return sugar.Format("{\n %\n}", ast.PadDirect(ast.JoinExprs("\n", d.Body)+"\n"+d.Result.String()))
+	return sugar.Format("{\n%\n}", ast.PadDirect(ast.JoinExprs("\n", d.Body)+"\n"+d.Result.String()))
 }
 
-func (d *Do) Blockly() ast.Block {
+func (d *Do) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:       "controls_do_then_return",
 		Statements: []ast.Statement{ast.CreateStatement("STM", d.Body)},

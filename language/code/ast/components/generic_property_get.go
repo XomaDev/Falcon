@@ -26,7 +26,7 @@ func (g *GenericPropertyGet) String() string {
 	return sugar.Format("get(%, %, %)", g.ComponentType, g.Component.String(), g.Property)
 }
 
-func (g *GenericPropertyGet) Blockly() ast.Block {
+func (g *GenericPropertyGet) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type: "component_set_get",
 		Mutation: &ast.Mutation{

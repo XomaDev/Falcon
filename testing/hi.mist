@@ -1,7 +1,10 @@
-func fooBar(n) =
-  if (n < 18) "Child"
-  else if (n == 18) {
-     this.just18 = true
-    "Adult"
+func MedianAdultAge() {
+  local adults = this.membersAge.filter { n -> n >= 18 }.sort()
+  local len = adults.listLen()
+  if (rem(len, 2) == 1) {
+    println("cat")
+    adults[(len + 1) / 2]
+  } else {
+    (adults[len / 2] + adults[(len / 2) + 1]) / 2
   }
-  else "Adult"
+}

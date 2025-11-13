@@ -26,7 +26,7 @@ func (e *Each) String() string {
 	return sugar.Format("each % -> % {\n%}", e.IName, e.Iterable.String(), ast.PadBody(e.Body))
 }
 
-func (e *Each) Blockly() ast.Block {
+func (e *Each) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:       "controls_forEach",
 		Fields:     []ast.Field{{Name: "VAR", Value: e.IName}},

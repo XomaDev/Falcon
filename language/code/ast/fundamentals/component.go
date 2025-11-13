@@ -17,7 +17,7 @@ func (c *Component) String() string {
 	return c.Name
 }
 
-func (c *Component) Blockly() ast.Block {
+func (c *Component) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:     "component_component_block",
 		Mutation: &ast.Mutation{InstanceName: c.Name, ComponentType: c.Type},

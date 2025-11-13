@@ -69,7 +69,7 @@ func (p *LangParser) ParseAll() []ast.Expr {
 		p.defineStatements()
 	}
 	for p.notEOF() {
-		expressions = append(expressions, p.parseSmt())
+		expressions = append(expressions, p.parse())
 	}
 	return expressions
 }
@@ -94,10 +94,10 @@ func (p *LangParser) defineStatements() {
 	}
 }
 
-func (p *LangParser) parseSmt() ast.Expr {
+func (p *LangParser) parse() ast.Expr {
 	switch p.peek().Type {
 	case l.If:
-		return p.ifExpr()
+		return p.simpleIf()
 	case l.For:
 		return p.forExpr()
 	case l.Each:
@@ -119,16 +119,6 @@ func (p *LangParser) parseSmt() ast.Expr {
 			return p.genericEvent()
 		}
 		return p.event()
-	default:
-		// It cannot be consumable
-		return p.expr(0)
-	}
-}
-
-func (p *LangParser) parse() ast.Expr {
-	switch p.peek().Type {
-	case l.If:
-		return p.simpleIf()
 	default:
 		// It cannot be consumable
 		return p.expr(0)
@@ -269,40 +259,23 @@ func (p *LangParser) forExpr() *control.For {
 	}
 }
 
-func (p *LangParser) ifExpr() ast.Expr {
-	p.skip()
-	var conditions []ast.Expr
-	var bodies [][]ast.Expr
-
-	p.expect(l.OpenCurve)
-	conditions = append(conditions, p.expr(0))
-	p.expect(l.CloseCurve)
-
-	bodies = append(bodies, p.body(ScopeIfBody))
-
-	var elseBody []ast.Expr
-	for p.notEOF() && p.consume(l.Else) {
-		if p.consume(l.If) {
-			p.expect(l.OpenCurve)
-			conditions = append(conditions, p.expr(0))
-			p.expect(l.CloseCurve)
-			bodies = append(bodies, p.body(ScopeIfBody))
-		} else {
-			elseBody = p.body(ScopeIfBody)
-			break
-		}
-
-	}
-	return &control.If{Conditions: conditions, Bodies: bodies, ElseBody: elseBody}
-}
-
 func (p *LangParser) simpleIf() ast.Expr {
 	p.skip()
 	condition := p.expr(0)
-	then := p.parse()
+	var then []ast.Expr
+	if p.isNext(l.OpenCurly) {
+		then = p.body(ScopeIfBody)
+	} else {
+		then = []ast.Expr{p.parse()}
+	}
 	p.expect(l.Else)
-	elze := p.parse()
-	return &control.SimpleIf{Condition: condition, Then: then, Else: elze}
+	var elze []ast.Expr
+	if p.isNext(l.OpenCurly) {
+		elze = p.body(ScopeIfBody)
+	} else {
+		elze = []ast.Expr{p.parse()}
+	}
+	return control.MakeSimpleIf(condition, then, elze)
 }
 
 func (p *LangParser) body(scope Scope) []ast.Expr {
@@ -320,7 +293,7 @@ func (p *LangParser) bodyUntilCurly() []ast.Expr {
 		return expressions
 	}
 	for p.notEOF() && !p.isNext(l.CloseCurly) {
-		expressions = append(expressions, p.parseSmt())
+		expressions = append(expressions, p.parse())
 	}
 	return expressions
 }
@@ -527,7 +500,7 @@ func (p *LangParser) term() ast.Expr {
 		return &fundamentals.Not{Expr: p.element()}
 	case l.If:
 		p.back()
-		return p.ifExpr()
+		return p.simpleIf()
 	case l.Compute:
 		return p.computeExpr()
 	case l.WalkAll:

@@ -15,7 +15,7 @@ func (e *EmptySocket) String() string {
 	return "undefined"
 }
 
-func (e *EmptySocket) Blockly() ast.Block {
+func (e *EmptySocket) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:   "math_number",
 		Fields: ast.FieldsFromMap(map[string]string{"NUM": "0"}),

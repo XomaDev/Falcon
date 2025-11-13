@@ -33,7 +33,7 @@ func (v *SimpleVar) String() string {
 	return builder.String()
 }
 
-func (v *SimpleVar) Blockly() ast.Block {
+func (v *SimpleVar) Blockly(flags ...bool) ast.Block {
 	var statements []ast.Statement
 	if len(v.Body) > 0 {
 		statements = []ast.Statement{ast.CreateStatement("STACK", v.Body)}

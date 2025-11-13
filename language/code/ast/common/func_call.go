@@ -24,7 +24,7 @@ func (f *FuncCall) String() string {
 	return sugar.Format("%(%)", f.Name, ast.JoinExprs(", ", f.Args))
 }
 
-func (f *FuncCall) Blockly() ast.Block {
+func (f *FuncCall) Blockly(flags ...bool) ast.Block {
 	switch f.Name {
 	case "root", "abs", "neg", "log", "exp", "round", "ceil", "floor",
 		"sin", "cos", "tan", "asin", "acos", "atan", "degrees", "radians",

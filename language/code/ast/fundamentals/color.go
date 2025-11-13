@@ -19,7 +19,7 @@ func (c *Color) String() string {
 	return c.Hex
 }
 
-func (c *Color) Blockly() ast.Block {
+func (c *Color) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:   "color_black",
 		Fields: []ast.Field{{Name: "COLOR", Value: c.Hex}},

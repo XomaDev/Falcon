@@ -40,7 +40,7 @@ func (v *VarResult) String() string {
 	return builder.String()
 }
 
-func (v *VarResult) Blockly() ast.Block {
+func (v *VarResult) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:     "local_declaration_expression",
 		Mutation: &ast.Mutation{LocalNames: ast.MakeLocalNames(v.Names...)},

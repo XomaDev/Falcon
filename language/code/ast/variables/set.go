@@ -19,7 +19,7 @@ func (s Set) Yail() string {
 	panic("not required")
 }
 
-func (s Set) Blockly() ast.Block {
+func (s Set) Blockly(flags ...bool) ast.Block {
 	var name string
 	if s.Global {
 		name = "global " + s.Name

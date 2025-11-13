@@ -462,7 +462,9 @@ func (p *XMLParser) componentProp(block ast.Block) ast.Expr {
 
 func (p *XMLParser) ctrlChoose(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return &control.SimpleIf{Condition: pVals.get("TEST"), Then: pVals.get("THENRETURN"), Else: pVals.get("ELSERETURN")}
+	then := pVals.get("THENRETURN")
+	elze := pVals.get("ELSERETURN")
+	return control.MakeSimpleIf(pVals.get("TEST"), []ast.Expr{then}, []ast.Expr{elze})
 }
 
 func (p *XMLParser) ctrlForEachDict(block ast.Block) ast.Expr {

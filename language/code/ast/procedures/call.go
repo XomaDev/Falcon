@@ -25,7 +25,7 @@ func (v *Call) String() string {
 	return sugar.Format("%(%)", v.Name, ast.JoinExprs(", ", v.Arguments))
 }
 
-func (v *Call) Blockly() ast.Block {
+func (v *Call) Blockly(flags ...bool) ast.Block {
 	var blockType string
 	if v.Returning {
 		blockType = "procedures_callreturn"

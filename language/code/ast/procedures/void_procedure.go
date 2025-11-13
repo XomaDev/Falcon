@@ -27,7 +27,7 @@ func (v *VoidProcedure) String() string {
 	return sugar.Format("func %(%) {\n%}", v.Name, strings.Join(v.Parameters, ", "), ast.PadBody(v.Body))
 }
 
-func (v *VoidProcedure) Blockly() ast.Block {
+func (v *VoidProcedure) Blockly(flags ...bool) ast.Block {
 	var statements []ast.Statement
 	if len(v.Body) > 0 {
 		statements = []ast.Statement{ast.CreateStatement("STACK", v.Body)}

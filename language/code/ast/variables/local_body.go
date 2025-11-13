@@ -28,19 +28,17 @@ func (v *Var) Yail() string {
 
 func (v *Var) String() string {
 	var builder strings.Builder
-	builder.WriteString("{\n")
 	localLines := make([]string, len(v.Names))
 	for k, name := range v.Names {
 		localLines[k] = "local " + name + " = " + v.Values[k].String()
 	}
-	builder.WriteString(ast.PadDirect(strings.Join(localLines, "\n")))
+	builder.WriteString(strings.Join(localLines, "\n"))
 	builder.WriteString("\n")
-	builder.WriteString(ast.PadBody(v.Body))
-	builder.WriteString("}")
+	builder.WriteString(ast.JoinExprs("\n", v.Body))
 	return builder.String()
 }
 
-func (v *Var) Blockly() ast.Block {
+func (v *Var) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:       "local_declaration_statement",
 		Mutation:   &ast.Mutation{LocalNames: ast.MakeLocalNames(v.Names...)},

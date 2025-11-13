@@ -22,7 +22,7 @@ func (t *Transform) String() string {
 	return sugar.Format("%::%", t.On.String(), t.Name)
 }
 
-func (t *Transform) Blockly() ast.Block {
+func (t *Transform) Blockly(flags ...bool) ast.Block {
 	switch t.Name {
 	case "obfuscate":
 		textExpr, ok := t.On.(*fundamentals.Text)

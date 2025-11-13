@@ -18,7 +18,7 @@ func (t *Text) String() string {
 	return "\"" + t.Content + "\""
 }
 
-func (t *Text) Blockly() ast.Block {
+func (t *Text) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:   "text",
 		Fields: ast.FieldsFromMap(map[string]string{"TEXT": t.Content}),

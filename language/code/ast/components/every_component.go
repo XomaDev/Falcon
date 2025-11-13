@@ -17,7 +17,7 @@ func (e *EveryComponent) String() string {
 	return sugar.Format("every(%)", e.Type)
 }
 
-func (e *EveryComponent) Blockly() ast.Block {
+func (e *EveryComponent) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:     "component_all_component_block",
 		Mutation: &ast.Mutation{ComponentType: e.Type},

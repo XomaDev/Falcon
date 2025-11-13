@@ -23,7 +23,7 @@ func (d *Dictionary) String() string {
 	return sugar.Format("{ % }", ast.JoinExprs(", ", d.Elements))
 }
 
-func (d *Dictionary) Blockly() ast.Block {
+func (d *Dictionary) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:     "dictionaries_create_with",
 		Mutation: &ast.Mutation{ItemCount: len(d.Elements)},
@@ -56,7 +56,7 @@ func (p *Pair) String() string {
 	return sugar.Format("% : %", p.Key.String(), p.Value.String())
 }
 
-func (p *Pair) Blockly() ast.Block {
+func (p *Pair) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:   "pair",
 		Values: ast.MakeValues([]ast.Expr{p.Key, p.Value}, "KEY", "VALUE"),
@@ -86,7 +86,7 @@ func (w *WalkAll) String() string {
 	return "walkAll"
 }
 
-func (w *WalkAll) Blockly() ast.Block {
+func (w *WalkAll) Blockly(flags ...bool) ast.Block {
 	return ast.Block{Type: "dictionaries_walk_all"}
 }
 

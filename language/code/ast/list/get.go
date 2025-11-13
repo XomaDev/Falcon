@@ -23,7 +23,7 @@ func (g *Get) String() string {
 	return sugar.Format(pFormat, g.List.String(), g.Index.String())
 }
 
-func (g *Get) Blockly() ast.Block {
+func (g *Get) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:   "lists_select_item",
 		Values: ast.MakeValues([]ast.Expr{g.List, g.Index}, "LIST", "NUM"),
