@@ -9,6 +9,7 @@ const (
 	Times
 	Slash
 	Power
+	Remainder
 
 	LogicOr
 	LogicAnd
