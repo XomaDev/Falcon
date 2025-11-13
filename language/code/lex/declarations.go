@@ -5,6 +5,7 @@ var Symbols = map[string]StaticToken{
 	"-": staticOf(Dash, Binary, Operator, Unary),
 	"*": staticOf(Times, BinaryL1, Operator, PreserveOrder),
 	"/": staticOf(Slash, BinaryL1, Operator, PreserveOrder),
+	"%": staticOf(Remainder, BinaryL1, Operator, PreserveOrder),
 	"^": staticOf(Power, BinaryL2, Operator, PreserveOrder),
 
 	"||": staticOf(LogicOr, LLogicOr, Operator),

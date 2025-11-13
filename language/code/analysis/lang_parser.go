@@ -354,6 +354,9 @@ func (p *LangParser) makeBinary(opToken *l.Token, left ast.Expr, right ast.Expr)
 		} else if listGet, ok := left.(*list.Get); ok {
 			return &list.Set{List: listGet.List, Index: listGet.Index, Value: right}
 		}
+	case l.Remainder:
+		// an AI compensating remainder operator
+		return makeFuncCall("rem", left, right)
 	}
 	return &common.BinaryExpr{Where: opToken, Operands: []ast.Expr{left, right}, Operator: opToken.Type}
 }

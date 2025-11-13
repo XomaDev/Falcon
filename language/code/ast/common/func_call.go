@@ -21,6 +21,9 @@ func (f *FuncCall) Yail() string {
 }
 
 func (f *FuncCall) String() string {
+	if f.Name == "rem" {
+		return f.Args[0].String() + " % " + f.Args[1].String()
+	}
 	return sugar.Format("%(%)", f.Name, ast.JoinExprs(", ", f.Args))
 }
 
