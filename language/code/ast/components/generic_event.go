@@ -53,7 +53,7 @@ func (g *GenericEvent) Continuous() bool {
 	return false
 }
 
-func (g *GenericEvent) Consumable() bool {
+func (g *GenericEvent) Consumable(flags ...bool) bool {
 	return false
 }
 

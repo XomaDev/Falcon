@@ -52,7 +52,7 @@ func (v *Var) Continuous() bool {
 	return false
 }
 
-func (v *Var) Consumable() bool {
+func (v *Var) Consumable(flags ...bool) bool {
 	return false
 }
 

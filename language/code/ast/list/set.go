@@ -35,7 +35,7 @@ func (s *Set) Continuous() bool {
 	return false
 }
 
-func (s *Set) Consumable() bool {
+func (s *Set) Consumable(flags ...bool) bool {
 	return false
 }
 

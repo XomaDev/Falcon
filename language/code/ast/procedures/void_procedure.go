@@ -44,7 +44,7 @@ func (v *VoidProcedure) Continuous() bool {
 	return false
 }
 
-func (v *VoidProcedure) Consumable() bool {
+func (v *VoidProcedure) Consumable(flags ...bool) bool {
 	return false
 }
 

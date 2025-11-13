@@ -27,7 +27,7 @@ func (n *Number) Continuous() bool {
 	return true
 }
 
-func (n *Number) Consumable() bool {
+func (n *Number) Consumable(flags ...bool) bool {
 	return true
 }
 

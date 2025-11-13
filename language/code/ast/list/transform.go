@@ -106,7 +106,7 @@ func (t *Transformer) Continuous() bool {
 	return true
 }
 
-func (t *Transformer) Consumable() bool {
+func (t *Transformer) Consumable(flags ...bool) bool {
 	return true
 }
 

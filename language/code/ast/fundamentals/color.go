@@ -30,7 +30,7 @@ func (c *Color) Continuous() bool {
 	return true
 }
 
-func (c *Color) Consumable() bool {
+func (c *Color) Consumable(flags ...bool) bool {
 	return true
 }
 

@@ -51,7 +51,7 @@ func (v *SimpleVar) Continuous() bool {
 	return false
 }
 
-func (v *SimpleVar) Consumable() bool {
+func (v *SimpleVar) Consumable(flags ...bool) bool {
 	return false
 }
 

@@ -29,7 +29,7 @@ func (c *Component) Continuous() bool {
 	return true
 }
 
-func (c *Component) Consumable() bool {
+func (c *Component) Consumable(flags ...bool) bool {
 	return true
 }
 

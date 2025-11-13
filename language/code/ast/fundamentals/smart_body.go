@@ -87,7 +87,7 @@ func (s *SmartBody) Continuous() bool {
 	return false
 }
 
-func (s *SmartBody) Consumable() bool {
+func (s *SmartBody) Consumable(flags ...bool) bool {
 	return true
 }
 

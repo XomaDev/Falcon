@@ -29,7 +29,7 @@ func (e *EveryComponent) Continuous() bool {
 	return true
 }
 
-func (e *EveryComponent) Consumable() bool {
+func (e *EveryComponent) Consumable(flags ...bool) bool {
 	return true
 }
 

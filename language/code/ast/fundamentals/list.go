@@ -30,7 +30,7 @@ func (l *List) Continuous() bool {
 	return true
 }
 
-func (l *List) Consumable() bool {
+func (l *List) Consumable(flags ...bool) bool {
 	return true
 }
 

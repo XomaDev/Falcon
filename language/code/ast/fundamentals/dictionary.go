@@ -35,7 +35,7 @@ func (d *Dictionary) Continuous() bool {
 	return true
 }
 
-func (d *Dictionary) Consumable() bool {
+func (d *Dictionary) Consumable(flags ...bool) bool {
 	return true
 }
 
@@ -67,7 +67,7 @@ func (p *Pair) Continuous() bool {
 	return false
 }
 
-func (p *Pair) Consumable() bool {
+func (p *Pair) Consumable(flags ...bool) bool {
 	return true
 }
 
@@ -94,7 +94,7 @@ func (w *WalkAll) Continuous() bool {
 	return true
 }
 
-func (w *WalkAll) Consumable() bool {
+func (w *WalkAll) Consumable(flags ...bool) bool {
 	return true
 }
 

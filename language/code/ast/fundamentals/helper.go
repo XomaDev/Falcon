@@ -30,7 +30,7 @@ func (h *HelperDropdown) Continuous() bool {
 	return true
 }
 
-func (h *HelperDropdown) Consumable() bool {
+func (h *HelperDropdown) Consumable(flags ...bool) bool {
 	return true
 }
 

@@ -49,7 +49,7 @@ func (g *GenericPropertySet) Continuous() bool {
 	return false
 }
 
-func (g *GenericPropertySet) Consumable() bool {
+func (g *GenericPropertySet) Consumable(flags ...bool) bool {
 	return false
 }
 

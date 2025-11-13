@@ -54,7 +54,7 @@ func (v *VarResult) Continuous() bool {
 	return true
 }
 
-func (v *VarResult) Consumable() bool {
+func (v *VarResult) Consumable(flags ...bool) bool {
 	return true
 }
 

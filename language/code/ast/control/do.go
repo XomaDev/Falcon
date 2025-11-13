@@ -35,7 +35,7 @@ func (d *Do) Continuous() bool {
 	return false
 }
 
-func (d *Do) Consumable() bool {
+func (d *Do) Consumable(flags ...bool) bool {
 	return false
 }
 
