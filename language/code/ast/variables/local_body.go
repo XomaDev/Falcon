@@ -28,16 +28,15 @@ func (v *Var) Yail() string {
 
 func (v *Var) String() string {
 	var builder strings.Builder
-	builder.WriteString("local(\n")
-
-	var varLines []string
-	for i, name := range v.Names {
-		varLines = append(varLines, ast.PadDirect(name+" = "+v.Values[i].String()))
+	builder.WriteString("{\n")
+	for k, name := range v.Names {
+		builder.WriteString("local ")
+		builder.WriteString(name)
+		builder.WriteString(" = ")
+		builder.WriteString(v.Values[k].String())
+		builder.WriteString("\n")
 	}
-	builder.WriteString(strings.Join(varLines, ",\n"))
-	builder.WriteString("\n) {\n")
 	builder.WriteString(ast.PadBody(v.Body))
-	builder.WriteString("}")
 	return builder.String()
 }
 
