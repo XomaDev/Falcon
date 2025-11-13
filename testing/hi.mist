@@ -1,1 +1,9 @@
-println(10 ? odd)
+func check(age) {
+  if (age < 18) {
+    println("You are a kid :D")
+  } else if (age == 18) {
+    println("Congrats! You are an adult!")
+  } else {
+    println("Hola, grown person!")
+  }
+}

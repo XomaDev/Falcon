@@ -49,7 +49,7 @@ func (i *If) String() string {
 		builder.WriteString("}")
 		currI++
 		if currI < numConditions {
-			builder.WriteString(" elif ")
+			builder.WriteString(" else if ")
 		} else {
 			break
 		}
