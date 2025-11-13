@@ -1,0 +1,47 @@
+package variables
+
+import "Falcon/code/ast"
+
+// Set Used internally, never for parsing
+type Set struct {
+	Global bool
+	Name   string
+	Expr   ast.Expr
+}
+
+func (s Set) String() string {
+	if s.Global {
+		return "this." + s.Name + " = " + s.Expr.String()
+	}
+	return s.Name + " = " + s.Expr.String()
+}
+
+func (s Set) Yail() string {
+	panic("not required")
+}
+
+func (s Set) Blockly() ast.Block {
+	var name string
+	if s.Global {
+		name = "global " + s.Name
+	} else {
+		name = s.Name
+	}
+	return ast.Block{
+		Type:   "lexical_variable_set",
+		Fields: []ast.Field{{Name: "VAR", Value: name}},
+		Values: []ast.Value{{Name: "VALUE", Block: s.Expr.Blockly()}},
+	}
+}
+
+func (s Set) Continuous() bool {
+	return false
+}
+
+func (s Set) Consumable() bool {
+	return false
+}
+
+func (s Set) Signature() []ast.Signature {
+	return s.Expr.Signature()
+}
