@@ -175,14 +175,20 @@ func (p *LangParser) funcSmt() ast.Expr {
 }
 
 func (p *LangParser) globVar() ast.Expr {
-	p.skip()
+	where := p.next()
+	if !p.ScopeCursor.AtRoot() {
+		where.Error("Global variables can only be defined at the root.")
+	}
 	name := p.name()
 	p.expect(l.Assign)
 	return &variables.Global{Name: name, Value: p.parse()}
 }
 
 func (p *LangParser) varExpr() ast.Expr {
-	p.skip()
+	where := p.next()
+	if p.ScopeCursor.AtRoot() {
+		where.Error("Cannot define a local variable at the root level.")
+	}
 	// a clean full scope variable
 	name := p.name()
 	p.expect(l.Assign)

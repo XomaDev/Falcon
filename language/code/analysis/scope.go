@@ -21,8 +21,21 @@ type ScopeCursor struct {
 }
 
 func (s *ScopeCursor) Enter(where *lex.Token, t Scope) {
-	// TODO: check for bad scoping
+	s.checkScope(where, t)
 	s.currScopes = append(s.currScopes, t)
+}
+
+func (s *ScopeCursor) checkScope(where *lex.Token, t Scope) {
+	depth := len(s.currScopes)
+	if t == ScopeRetProc || t == ScopeProc {
+		if depth != 0 {
+			where.Error("Functions can only be defined at the root.")
+		}
+	} else if t == ScopeGenericEvent || t == ScopeEvent {
+		if depth != 0 {
+			where.Error("Events can only be defined at the root.")
+		}
+	}
 }
 
 func (s *ScopeCursor) Exit(t Scope) {
@@ -41,4 +54,8 @@ func (s *ScopeCursor) In(t Scope) bool {
 		}
 	}
 	return false
+}
+
+func (s *ScopeCursor) AtRoot() bool {
+	return len(s.currScopes) == 0
 }
