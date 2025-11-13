@@ -51,7 +51,6 @@ var Keywords = map[string]StaticToken{
 	"false": staticOf(False, Value, ConstantValue),
 
 	"if":        staticOf(If),
-	"elif":      staticOf(Elif),
 	"else":      staticOf(Else),
 	"for":       staticOf(For),
 	"to":        staticOf(To),

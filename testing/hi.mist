@@ -1,10 +1,8 @@
+global just18 = false
+
 func fooBar(x) =
   if (x < 18) "Child"
-  else {
-    if (x == 18) {
-      println("hehe")
-      "New adult!"
-    } else {
-      "Old adult!"
-    }
-  }
+  else if (x == 18) {
+    this.just18 = true
+    "Adult"
+  } else "Adult"

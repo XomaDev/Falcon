@@ -163,13 +163,16 @@ func (p *LangParser) event() ast.Expr {
 }
 
 func (p *LangParser) funcSmt() ast.Expr {
-	p.skip()
+	where := p.next()
 	name := p.name()
 	var parameters = p.parameters()
 	returning := p.consume(l.Assign)
 	p.Resolver.Procedures[name] = Procedure{Name: name, Parameters: parameters, Returning: returning}
 	if returning {
-		return &procedures.RetProcedure{Name: name, Parameters: parameters, Result: p.parse()}
+		p.ScopeCursor.Enter(where, ScopeSmartBody)
+		result := p.parse()
+		p.ScopeCursor.Enter(where, ScopeSmartBody)
+		return &procedures.RetProcedure{Name: name, Parameters: parameters, Result: result}
 	} else {
 		return &procedures.VoidProcedure{Name: name, Parameters: parameters, Body: p.body(ScopeProc)}
 	}
@@ -247,22 +250,29 @@ func (p *LangParser) forExpr() *control.For {
 
 func (p *LangParser) ifExpr() ast.Expr {
 	p.skip()
-	if p.isNext(l.OpenCurve) {
+	if p.ScopeCursor.In(ScopeSmartBody) {
 		return p.simpleIf()
 	}
 	var conditions []ast.Expr
 	var bodies [][]ast.Expr
 
+	p.expect(l.OpenCurve)
 	conditions = append(conditions, p.expr(0))
+	p.expect(l.CloseCurve)
 	bodies = append(bodies, p.body(ScopeIfBody))
 
-	for p.notEOF() && p.consume(l.Elif) {
-		conditions = append(conditions, p.expr(0))
-		bodies = append(bodies, p.body(ScopeIfBody))
-	}
 	var elseBody []ast.Expr
-	if p.notEOF() && p.consume(l.Else) {
-		elseBody = p.body(ScopeIfBody)
+	for p.notEOF() && p.consume(l.Else) {
+		if p.consume(l.If) {
+			p.expect(l.OpenCurve)
+			conditions = append(conditions, p.expr(0))
+			p.expect(l.CloseCurve)
+			bodies = append(bodies, p.body(ScopeIfBody))
+		} else {
+			elseBody = p.body(ScopeIfBody)
+			break
+		}
+
 	}
 	return &control.If{Conditions: conditions, Bodies: bodies, ElseBody: elseBody}
 }
@@ -702,7 +712,7 @@ func (p *LangParser) isNext(checkTypes ...l.Type) bool {
 
 func (p *LangParser) peek() *l.Token {
 	if p.isEOF() {
-		panic("Early EOF! Expected more content.")
+		panic("Early EOF!")
 	}
 	return p.Tokens[p.currIndex]
 }
