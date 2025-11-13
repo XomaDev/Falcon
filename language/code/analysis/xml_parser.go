@@ -221,7 +221,7 @@ func (p *XMLParser) parseBlock(block ast.Block) ast.Expr {
 	case "lists_is_in":
 		return p.listContainsItem(block)
 	case "lists_length":
-		return p.makePropCall("listLength", p.singleExpr(block))
+		return p.makePropCall("listLen", p.singleExpr(block))
 	case "lists_is_empty":
 		return p.makeQuestion(lex.OpenSquare, block, "emptyList")
 	case "lists_pick_random_item":

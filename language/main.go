@@ -8,7 +8,6 @@ import (
 	"Falcon/code/context"
 	"Falcon/code/diff"
 	"Falcon/code/lex"
-
 	designAnalysis "Falcon/design"
 	"encoding/xml"
 	"os"
