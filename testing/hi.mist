@@ -1,9 +1,5 @@
-func check(age) {
-  if (age < 18) {
-    println("You are a kid :D")
-  } else if (age == 18) {
-    println("Congrats! You are an adult!")
+  if (n < 18) {
+    println("Child!")
   } else {
-    println("Hola, grown person!")
+    println("Adult!")
   }
-}
