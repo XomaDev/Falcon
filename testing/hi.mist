@@ -1,5 +1,1 @@
-  if (n < 18) {
-    println("Child!")
-  } else {
-    println("Adult!")
-  }
+println(  if (x > y) "X is greater" else if  (y > x) "Y is greater" else "They both are equal!"  )
