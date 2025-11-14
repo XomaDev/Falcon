@@ -1,29 +1,28 @@
 global membersAge = [45, 12, 34, 17, 32, 88, 12, 4, 6, 24]
 
-// Function to count the number of kids (age < 18)
+// Function to count the number of kids (assuming age < 18 is a kid)
 func CountKids() = {
   this.membersAge
-    .filter { age -> age < 18 } // Keep ages less than 18
-    .map { age -> 1 }           // Map each kid's age to 1
-    .reduce(0) { count, xSoFar -> xSoFar + count } // Sum up the 1s to get the total count
+    .filter { age -> age < 18 } // Filter ages less than 18
+    .reduce(0) { count, _ -> count + 1 } // Count the remaining elements
 }
 
-// Function to find the average age of the adult population (age >= 18)
+// Function to find the average age of the adult population (assuming age >= 18 is an adult)
 func AverageAdultAge() = {
   local adults = this.membersAge
-    .filter { age -> age >= 18 } // Filter for adults
+    .filter { age -> age ? number and age >= 18 } // Filter for numbers >= 18
 
-  local adultCount = adults
-    .reduce(0) { count, xSoFar -> count + xSoFar } // Count the number of adults
+  local adultCount = adults.reduce(0) { count, _ -> count + 1 } // Count adults
 
-  local totalAge = adults
-    .reduce(0) { sum, age -> sum + age } // Sum the ages of the adults
-
-  // Return the average (total age / adult count).
-  // Division is expected to result in a Number type.
-  totalAge / adultCount
+  // Check to prevent division by zero
+  if (adultCount == 0) {
+    0 // Return 0 or handle error if no adults
+  } else {
+    local sumOfAges = adults.reduce(0) { sum, age -> sum + age } // Sum adult ages
+    sumOfAges / adultCount // The last expression is the return value
+  }
 }
 
-// Example usage:
+// Example Usage:
 println("Number of kids: " _ CountKids())
 println("Average adult age: " _ AverageAdultAge())
