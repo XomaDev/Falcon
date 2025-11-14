@@ -1,7 +1,4 @@
-func fooBar() {
-  local animalInfo = { "Animal": "Tiger", "Scientific Name": "Panthera tigris" }
-
-  for (key, value) in animalDetail {
-    println(key _ " : " _ value) // e.g prints  "Animal: Tiger" to the console
-  }
-}
+func Fibonacci(n) =
+  if (n < 2) n
+  else if (true) Fibonacci(n - 1) + Fibonacci(n - 2)
+  else 1
