@@ -186,13 +186,14 @@ To indicate a returning function, use an equals sign:
 ```go
 global just18 = false
 
-func fooBar(n) =
+func fooBar(n) = {
   if (n < 18) "Child"
   else if (n == 18) {
     this.just18 = true
     "Adult" // Like Kotlin
   }
   else "Adult"
+}
 ```
 
 ## Functions
