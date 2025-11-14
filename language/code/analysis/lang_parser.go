@@ -192,10 +192,6 @@ func (p *LangParser) globVar() ast.Expr {
 }
 
 func (p *LangParser) varExpr() ast.Expr {
-	where := p.next()
-	if p.ScopeCursor.AtRoot() {
-		where.Error("Cannot define a local variable at the root level.")
-	}
 	p.back()
 	// a clean full scope variable
 	var names []string

@@ -1,26 +1,22 @@
-// Iterative function to calculate the Nth Fibonacci number
-func FibIterative(n) = {
-  if (n <= 1) {
-    n // Returns 0 for n=0, and 1 for n=1
-  } else {
-    local a = 0
-    local b = 1
-    local count = 2 // Start from the 2nd iteration (to calculate F(2))
-    local result
+// Calculates the softmax activation for a list of numbers (logits)
+// Result is a list of probabilities where the sum of elements is 1.
+func softmax(logitsList) = {
+  // 1. Calculate e^x for each element
+  local expValues = logitsList.map { x -> exp(x) }
 
-    while (count <= n) {
-      result = a + b
-      a = b
-      b = result
-      count = count + 1
-    }
-    result // The last expression evaluated is returned
-  }
+  // 2. Calculate the sum of all exponentiated values
+  local sumOfExps = expValues.reduce(0) { x, totalSoFar -> x + totalSoFar }
+
+  // 3. Divide each exponentiated value by the sum to get the probabilities
+  local probabilities = expValues.map { expX -> expX / sumOfExps }
+
+  probabilities // The last expression is the return value
 }
 
 // Example usage:
-// Calculate the 8th Fibonacci number (F(8) = 21, assuming F(0)=0, F(1)=1)
-println("FibIterative(8) = " _ FibIterative(8))
+local inputLogits = [1.0, 2.0, 3.0]
+local outputProbabilities = softmax(inputLogits)
 
-// Calculate the 10th Fibonacci number (F(10) = 55)
-println("FibIterative(10) = " _ FibIterative(10))
+// Output will be approximately: [0.09003, 0.24473, 0.66524] (Sum is 1)
+println("Input Logits: " _ inputLogits)
+println("Softmax Probabilities: " _ outputProbabilities)
