@@ -326,6 +326,7 @@ func (f *FuncCall) openScreen() ast.Block {
 }
 
 func (f *FuncCall) println() ast.Block {
+	println("yeah called")
 	f.assertArgLen(1)
 	return ast.Block{
 		Type:   "controls_eval_but_ignore",
