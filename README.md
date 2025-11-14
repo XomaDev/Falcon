@@ -196,6 +196,8 @@ func fooBar(n) = {
 }
 ```
 
+Remember that there is no `return` keyword! Everything is an expression!
+
 ## Functions
 
 ### Math
