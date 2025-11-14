@@ -1,22 +1,10 @@
-// Calculates the softmax activation for a list of numbers (logits)
-// Result is a list of probabilities where the sum of elements is 1.
-func softmax(logitsList) = {
-  // 1. Calculate e^x for each element
-  local expValues = logitsList.map { x -> exp(x) }
-  
-  // 2. Calculate the sum of all exponentiated values
-  local sumOfExps = expValues.reduce(0) { x, totalSoFar -> x + totalSoFar }
-  
-  // 3. Divide each exponentiated value by the sum to get the probabilities
-  local probabilities = expValues.map { expX -> expX / sumOfExps }
-  
-  probabilities // The last expression is the return value
+func generateStarTree(n) = {
+  while (lineIndex <= n) {
+    local starLine = ""
+    local count = 1
+    while (count <= lineIndex) {
+      starLine = starLine _ "*" // Join operator for string concatenation
+      count = count + 1
+    }
+  }
 }
-
-// Example usage:
-local inputLogits = [1.0, 2.0, 3.0]
-local outputProbabilities = softmax(inputLogits)
-
-// Output will be approximately: [0.09003, 0.24473, 0.66524] (Sum is 1)
-println("Input Logits: " _ inputLogits)
-println("Softmax Probabilities: " _ outputProbabilities)

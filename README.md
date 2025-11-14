@@ -9,6 +9,7 @@ Falcon is a language designed for App Inventor to enable syntax-based programmin
 6. Only single-line comments using double slash `//` are supported.
 7. Do not use `_` in place of unused variables
 8. Variables can never be in the uninitialized state.
+9. Always keep the last expression for returning functions.
 
 ## Data types
 1. String `"Hello, world!"`
