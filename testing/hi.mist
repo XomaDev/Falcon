@@ -1,4 +1,29 @@
-func Fibonacci(n) =
-  if (n < 2) n
-  else if (true) Fibonacci(n - 1) + Fibonacci(n - 2)
-  else 1
+global membersAge = [45, 12, 34, 17, 32, 88, 12, 4, 6, 24]
+
+// Function to count the number of kids (age < 18)
+func CountKids() = {
+  this.membersAge
+    .filter { age -> age < 18 } // Keep ages less than 18
+    .map { age -> 1 }           // Map each kid's age to 1
+    .reduce(0) { count, xSoFar -> xSoFar + count } // Sum up the 1s to get the total count
+}
+
+// Function to find the average age of the adult population (age >= 18)
+func AverageAdultAge() = {
+  local adults = this.membersAge
+    .filter { age -> age >= 18 } // Filter for adults
+
+  local adultCount = adults
+    .reduce(0) { count, xSoFar -> count + xSoFar } // Count the number of adults
+
+  local totalAge = adults
+    .reduce(0) { sum, age -> sum + age } // Sum the ages of the adults
+
+  // Return the average (total age / adult count).
+  // Division is expected to result in a Number type.
+  totalAge / adultCount
+}
+
+// Example usage:
+println("Number of kids: " _ CountKids())
+println("Average adult age: " _ AverageAdultAge())
