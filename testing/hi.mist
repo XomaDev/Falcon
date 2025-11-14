@@ -1,28 +1,26 @@
-global membersAge = [45, 12, 34, 17, 32, 88, 12, 4, 6, 24]
-
-// Function to count the number of kids (assuming age < 18 is a kid)
-func CountKids() = {
-  this.membersAge
-    .filter { age -> age < 18 } // Filter ages less than 18
-    .reduce(0) { count, _ -> count + 1 } // Count the remaining elements
-}
-
-// Function to find the average age of the adult population (assuming age >= 18 is an adult)
-func AverageAdultAge() = {
-  local adults = this.membersAge
-    .filter { age -> age ? number and age >= 18 } // Filter for numbers >= 18
-
-  local adultCount = adults.reduce(0) { count, _ -> count + 1 } // Count adults
-
-  // Check to prevent division by zero
-  if (adultCount == 0) {
-    0 // Return 0 or handle error if no adults
+// Iterative function to calculate the Nth Fibonacci number
+func FibIterative(n) = {
+  if (n <= 1) {
+    n // Returns 0 for n=0, and 1 for n=1
   } else {
-    local sumOfAges = adults.reduce(0) { sum, age -> sum + age } // Sum adult ages
-    sumOfAges / adultCount // The last expression is the return value
+    local a = 0
+    local b = 1
+    local count = 2 // Start from the 2nd iteration (to calculate F(2))
+    local result
+
+    while (count <= n) {
+      result = a + b
+      a = b
+      b = result
+      count = count + 1
+    }
+    result // The last expression evaluated is returned
   }
 }
 
-// Example Usage:
-println("Number of kids: " _ CountKids())
-println("Average adult age: " _ AverageAdultAge())
+// Example usage:
+// Calculate the 8th Fibonacci number (F(8) = 21, assuming F(0)=0, F(1)=1)
+println("FibIterative(8) = " _ FibIterative(8))
+
+// Calculate the 10th Fibonacci number (F(10) = 55)
+println("FibIterative(10) = " _ FibIterative(10))
