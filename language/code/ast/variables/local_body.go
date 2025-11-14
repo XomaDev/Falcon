@@ -39,10 +39,7 @@ func (v *Var) String() string {
 }
 
 func (v *Var) Blockly(flags ...bool) ast.Block {
-	// TODO:
-	//  It's better if we split off into multiple local declarations
-	//  If the second declaration depends on the first declaration, then they cannot
-	//  exist in the same group.
+	// TODO: handle for empty statements...
 	return ast.Block{
 		Type:       "local_declaration_statement",
 		Mutation:   &ast.Mutation{LocalNames: ast.MakeLocalNames(v.Names...)},

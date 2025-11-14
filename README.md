@@ -1,441 +1,271 @@
-![screenshot|690x317](https://community.appinventor.mit.edu/uploads/default/original/3X/a/b/abe359f9b8cd8090412d5fc98fa3da874db0b26b.png)
+Falcon is a language designed for App Inventor to enable syntax-based programming and for incorporating agenting coding abilities.
 
-
-This page assumes you have some experience in Programming and App Inventor.
-
-*Note to AI*
-- Falcon syntax was created for App Inventor that follows 1-based indexing.
-- List, and Dictionaries are passed as references, only text and number are copied.
-- Tags of various languages are used only for syntax highlighting
-- Falcon does not have a do clause, nor a switch clause
+## Quirks
+1. Falcon follows 1-based indexing.
+2. Falcon is a type-blind language.
+3. Lists and dictionaries are passed as references.
+4. Falcon follows Kotlin's style of functional expressions.
+5. Falcon does not have a return statement; the last expression in a body is returned.
+6. Only single-line comments using double slash `//` are supported.
 
 ## Data types
-
-- Text
-	- `"Hello, World!"`
-- Boolean
-	 - `true` and `false`
-- Number
-	- `123`, `3.14`
-- List
-	- `[1, 2, 3, 4, ...]`
-- Dictionary
-	- `{"Animal": "Royal Bengal Tiger", "country": "India"}`
-- Color
-    - `#ffffff`
-
+1. String `"Hello, world!"`
+2. Boolean `true` and `false`
+3. Number `123` and `3.14`
+4. List `[1, 2, 3, 4]`
+5. Dictionary `{"Animal": "Tiger", "Scientific Name": "Panthera tigris"}`
+6. Colour `#FFFFFF`
 
 ## Operators
 
-- Arithmetic operators
-	- `+`, `-`, `*`, `/`, `^` (*power*), `%` (*remainder*)
-- Logical operators
-	- `||` , `&&`, 
-- Bit-wise operators
-	- `|`,`&`, `~` (*xor*)
-- Equality operators
-	- `==`, `!=`
-- Relational operators
-	- `<`, `<=`, `>`, `>=`
-- Text comparison operators
-	- `===` (*text equals*)
-	- `!==` (*text not equals*)
-	- `<<` (*text less than*)
-	- `>>` (text greater than)
-- Unary operators
-	- `!` (*not*)
-- Text join operator `_`
-	- e.g. `"Hello " + "World!"`
-- Pair operator
-	- e.g. `"Fruit" : "Melon"`
-- Question operator (`?`)
-	- Check if a value is of a certain type
-		- e.g. `x ? text`, or `number`, or `list` or `dict`
-	- Is of a number type
-		- e.g. `"123" ? number`, or `base10`, `hexa`, `bin`
-	- Check for a empty text or a list
-		- e.g. `namesList ? emptyList` or `"hello" ? emptyText"`
+1. Arithmetic: `+`, `-`, `*`, `/`, `%` (remainder), `^` (power)
+2. Logical: `&&`, and `||`
+3. Bitwise: `&`, `|`, `~` (xor)
+4. Equality: `==`, and `!=`
+5. Relational: `<`, `<=`, `>`, and `>=`
+6. Text lexicographic: `===` (text equals), `!==` (text not equals), `<<` (text less than), `>>` (text greater than)
+7. Unary: `!` (not)
+8. Join: `"Hello " _ "World!"`
+9. Pair: `"Fruit": "Mango"`
+10. Question (`?`):
+    - To check a value for a specific type (`text`, `number`, `list`, `dict`)
+        - E.g.,”Hello” ? text`
+    - Check for a number type (`number`, `base10`, `hexa`, `bin`)
+        - E.g. `”1010” ? bin` is a true expression.
+    - Check for empty text (`emptyText`) or an empty list (`emptyList`)
+        - E.g. `[] ? emptyList` or `”Cat” ? emptyText`
 
-## Operator precedence
+Operator precedence
+The precedence of an operator dictates its parse order. E.g. `*` and `/` is parsed before `+` and `-`.
 
-Precedence of operators dictates which operation is prioritized. (`*` and `/` parsed before `+` and `-`)
+It is similar to that of Java. Below is a ranking from the lowest to the highest precedence.
 
-In Falcon, it is similar to that of Java. Below is the list, ranked from the lowest priority to the highest.
+1. Assignment `=`
+2. Pair `:`
+3. TextJoin `_`
+4. LogicOr `||`
+5. LogicAnd `&&`
+6. BitwiseOr `|`
+7. BitwiseAnd `&`
+8. BitwiseXor `~`
+9. Equality `==`, `!=`, `===`, and `!==`
+10. Relational `<`, `<=`, `>`, `>=`, `<<`, and `>>`
+11. Binary `+`, and `-`
+12. BinaryL1 `*`, `/`, and `%`
+13. BinaryL2 `^`
 
-1. `AssignmentType` (`=`)
-2. `Pair` (`:`)
-3. `TextJoin` (`_`) 
-4. `LLogicOr` (`||`)
-5. `LLogicAnd` (`&&`)
-6. `BBitwiseOr` (`|`)
-7. `BBitwiseAnd` (`&`)
-8. `BBitwiseXor` (`~`)
-9. `Equality`  (`==`, `!=`, `===`, and `!==`)
-10. `Relational` (`<`, `<=`, `>`, `>=`, `<<`, and `>>`)
-11. `Binary` (`+` and `-`)
-12. `BinaryL1` (`*` and `\`, `%`)
-13. `BinaryL2` (`^`)
 
 ## Variables
 
-A global variable:
+### Global variable
 
-```python
-// always at the root level
-global name = "Kumaraswamy"
+A global variable is always declared at the root:
+```
+global name = “Kumaraswamy B G”
 
-// access global var
+// access the global variable
 println(this.name)
 ```
 
-A simple local variable:
+### Local variable
 
-```python
-local age = 12
+```
+local age = 17
 
-// accessing local var
+// access the local variable
 println(age)
 ```
 
-## Conditions and loops
+## If else
 
-### If statement
+If-else can be a statement or an expression depending on the context.
 
-```go
-local age = 8
+```
+local x = 8
+local y = 12
 
-if (age < 18) {
-  println("You are a kid :D")
-} else if (age == 18) {
-  println("Congrats! You are an adult!")
+if (x > y) {
+  println(“X is greater”)
+} else if (y > x) {
+  println(“Y is greater”)
 } else {
-  println("Hola, grown person!")
+  println(“They both are equal!”)
 }
 ```
 
-### if-else expression
+Used an expression:
 
-Ternary like expression for returning values.
-Unlike If statement, use `()` between your condition.
-
-```go
-local a = 8
-local b = 12
-local max = if (a > b) a else b
+```
+println(  if (x > y) “X is greater” else if  (y > x) “Y is greater” else “They both are equal!”  )
 ```
 
-### Loops
 
-`while` statement to iterate till the condition is true.
+## While loop
 
-```go
-local x = 0
+```
+local x = 8
 
-while true {
+while (true) {
   x = x + 1
   if (x == 5) {
-    break
-  }  
-}
-```
-
-`for` statement for index based iteration:
-
-```go
-for x: 1 to 10 by 2 {
-  println(x)
-}
-```
-
-`each` statement is used to iterate over a list:
-
-```python
-local countries = ["India", "Japan", "Russia", "Germany"]
-
-each name in countries {
-  println(name)
-}
-```
-
-or a dictionary:
-
-```go
-local personality = { 
-  "food": "Masala Dosa",
-  "fruit": "Mango",
-  "animal": "The Royal Bengal Tiger"
-}
-
-each (key, value) in personality {
-   println("My favourite " _ key _ " is " _ value)
-}
-```
-
-## Functions
-
-A void function:
-
-```go
-func funcName(x, y, z) {
-  ...
-}
-```
-
-To indicate a returning function, use an equals sign:
-
-```go
-global just18 = false
-
-func fooBar(n) = {
-  if (n < 18) "Child"
-  else if (n == 18) {
-    this.just18 = true
-    "Adult" // Like Kotlin
+    break  
   }
-  else "Adult"
 }
 ```
 
-Remember that there is no `return` keyword! Everything is an expression!
+## For n loop
+
+```
+for i: 1 to 10 by 2 {
+  println(i)
+}
+```
+
+The `by` clause is optional and defaults to 1.
+
+
+## Each loop
+
+To iterate over a list:
+
+```
+local names = [“India”, “Japan”, “Russia”, “Germany”]
+
+for country in names {
+  println(country)
+}
+```
+
+Or over a dictionary:
+
+```
+local animalInfo = { "Animal": "Tiger", "Scientific Name": "Panthera tigris" }
+
+for (key, value) in animalDetail {
+  println(key _ “ : ” _ value) // e.g prints  “Animal: Tiger” to the console
+}
+```
+
 
 ## Functions
 
-### Math
+Functions are declared using the `func` keyword.
 
--  `dec(string)`, `bin(string)`, `octal(string)`, `hexa(string)` parses string from respective base. The string provided must be a static constant i.e. no variables or function calls.
-
-
-- `root(number)`
-- `abs(number)`
-- `neg(number)`
-- `log(number)`
-- `exp(number)`
-- `round(number)`
-- `ceil(number)`
-- `floor(number)`
-- `sin(number)`
-- `cos(number)`
-- `tan(number)`
-- `asin(number)`
-- `acos(number)`
-- `atan(number)`
-- `degrees(number)`
-- `radians(number)`
-- `decToHex(number)`
-- `decToBin(number)`
-- `hexToDec(number)`
-- `binToDec(number)`
+### Void function
 
 
-- `randInt(from, to)`
-- `randFloat()`
-- `setRandSeed(number)` sets the random generator seed
-- `min(...)` and `max(...)`
-- `avgOf(list)`, `maxOf(list)`, `minOf(list)`, `geoMeanOf()`, `stdDevOf()`, `stdErrOf()`
-- `modeOf(list)`
-- `mod(x, y)`, `rem(x, y)`, `quot(x, y)` for modulus, remainder and quotient
-- `atan2(a, b)`
-- `formatDecimal(number, places)`
-
-### Control
-
-- `println(any)`
-- `openScreen(name)` opens an App Inventor screen
-- `openScreenWithValue()` opens App Inventor screen with a value
-- `closeScreenWithValue()` closes the screen with a val
-- `getStartValue()` returns start value of the App
-- `closeSceen()` closes current App Inventor screen
-- `closeApp()` closes the Android App
-- `getPlainStartText()` returns plain start text of the App
-
-### Values
-
-- `copyList(list)`
-- `copyDict(dict)`
-- `makeColor(rgb list)`
-- `splitColor(number)`
-
-### Generic calls
-
-
-- `set(comonent_group, instance_name, property_name, value)` generic property set call<br>
-  e.g. `set(Button, Button1, Text, "Hello, World")`<br>
-  > The first three arguments must be call time constants, no expressions or variables allowed
-
-- `get(component_group, instance_name, property_name)` generic property get call<br>
-  e.g. `get(Button, Button1, Text)`
-<br><br>
-
-- `call(component_group, instance_name, method_name)` generic method call<br>
-  e.g. `call(Notifier, Notifier1, ShowAlert, "Hello, World")`
-<br><br>
-- `every(component_type)` returns a list of all component instances belonging to that type<br>
-  e.g. `every(Button)`
-
-## Methods
-
-e.g. `"Hello  ".trim()`
-
-### Text
-
-- `textLen()`
-- `trim()`
-- `uppercase()`
-- `lowercase()`
-- `startsWith(piece)`
-- `contains(piece)`
-- `containsAny(word list)`
-- `containsAll(word list)`
-- `split(at)`
-- `splitAtFirst(at)`
-- `splitAtAny(word list)`
-- `splitAtFirstOfAny(word list)`
-- `splitAtSpaces()`
-- `reverse()`
-- `csvRowToList()`
-- `csvTableToList()`
-- `segment(from number, length number)`
-- `replace(target, replacement)`
-- `replaceFrom(map dictionary)`
-- `replaceFromLongestFirst(map dictionary)`
-
-### List
-
-- `listLen()`
-- `add(any...)`
-- `containsItem(any)`
-- `indexOf(any)`
-- `insert(at_index, any)`
-- `remove(at_index)`
-- `appendList(another list)`
-- `lookupInPairs(key, notfound)`
-- `join(text separator)`
-- `slice(index1, index2)`
-- `random()`
-- `reverseList()`
-- `toCsvRow()`
-- `toCsvTable()`
-- `sort()`
-- `allButFirst()`
-- `allButLast()`
-- `pairsToDict()`
-
-### Dictionary
-
-- `dictLen()`
-- `get(key)`
-- `set(key, value)`
-- `delete(key)`
-- `getAtPath(path_list, notfound)`
-- `setAtPath(path_list, value)`
-- `containsKey(key)`
-- `mergeInto(another_dict)`
-- `walkTree(path)`
-- `keys()`
-- `values()`
-- `toPairs()`
-
-## List access
-
-```python
-local numbers = [1, 2, 4]
-
-# access second element (1 based indexing)
-println(numbers[2])
-
-# change the first element
-numbers[1] = 8
 ```
-
-## Dictionary access
-
-```python
-local personality = {
-  "food": "Masala Dosa",
-  "fruit": "Mango",
-  "animal": "The Royal Bengal Tiger"
+func fooBar(x, y) {
+  println(x + y)
 }
-
-println(personality.get("food", 0))
 ```
 
-## List transformer
+### Result function
 
-Style inspired from Kotlin, falcon has list transformers (*aka lambdas*).
+Use the `=` symbol followed by an expression between curly braces.
 
-Let's say I have a list of number of lemons sold each day for a week. Although some days were missed and were marked `N/A`.
-
-```python
-global LemonadeSold = [9, 12, "N/A", 15, 18, "N/A", 8]
+```
+func double(n) = { n * 2 }
 ```
 
-Now I got to calculate the revenue of the week, knowing that each lemon costs two dollars.
+Or multiple expressions:
 
-This can be done by using list transformers/lambdas.
+```
+func FibSum(n) = {
+  if (n < 2) {
+    n  
+  } else {
+    FibSum(n - 1) + FibSum(n - 2)
+  }
+}
+```
+Note that there is no `return` statement in Falcon. The last statement in a body is taken as the output of an expression.
 
-```python
+
+## List lambdas
+
+Inspired by Kotlin, list lambdas allow for list manipulation.
+
+### Map lambda
+
+Maps each element of a list to a new value.
+
+```
+local numbers = [1, 2, 3]
+local doubled = numbers.map { n -> n * 2 }
+println(doubled)  // Output: [2, 4, 6]
+```
+
+### Filter lambda
+
+Filters out unwanted elements.
+
+```
+local numbers = [1, 2, 3, 4]
+local evens = numbers.filter { n -> n % 2 == 0 }
+println(evens)  // Output: [2, 4]
+```
+
+### Sort lambda
+
+Helps to define a custom sort method.
+Usage `.sort { m, n -> bool_m_preceeds_n } `
+
+```
+local names = ["Bob", "Alice", "John"]
+// Sort names in descending order
+local namesSorted = names
+  .sort { m, n -> m.textLen() > m.textLen() }
+println(namesSorted) // Output:  ["John", "Alice", "Bob"]
+```
+
+### Min and Max lambdas
+
+Sorts the elements in a list and returns the maximum or minimum value.
+Usage `.min { m, n -> bool_m_preceeds_n }` and `.max { m, n -> bool_m_preceeds_n }`
+
+```
+local names = ["Bob", "Alice", "John"]
+// Find the longest name
+local longestName = names
+  .max { m, n -> n.textLen() > m.textLen() }  // use min { } for the shortest name
+println(longestName)
+```
+
+### Reduce lambda
+
+Reduce lambda reduces many elements to a single element.
+Usage `.reduce(initValue) { x, valueSoFar -> newValue }`
+
+```
+local numbers = [1, 2, 3, 4, 5, 6, 7]
+local numbersSum  = numbers.reduce(0) { x, soFar -> x + soFar }
+println(numbersSum) // Output: 28
+```
+
+### Example
+
+For example, let’s say Bob has a list of lemons sold per day for the last week and he’d like to calculate his revenue for lemon priced at $2 each.
+
+The days he missed are marked as “N/A”
+
+```
 global LemonadeSold = [9, 12, "N/A", 15, 18, "N/A", 8]
+``` 
 
-func GetTotalRevenue() = 
+Then we create a function that calculates the total revenue using list lambdas:
+
+```
+func GetTotalRevenue() = {
   this.LemonadeSold
-     .filter { n -> n ? number}
-     .map { n -> n * 2}
-     .reduce(0) { x, soFar -> x + soFar }
-
-println("Weekly revenue selling lemons was " _ GetTotalRevenue())
-```
-
-These are available list transformers:
-
-- `map { x -> expr }` maps each element of the list to a new value
-- `filter { x -> bool_expr }` filters out unwanted elements from a list
-- `sort { m, n -> bool_m_preceeds_n_expr }` helps to define a custom sort 
-- `sortByKey { n -> key_of_n }` sorts the list by first calling key function
-- `min { m, n -> bool_m_preceeds_n_expr }` returns minimum of a list
-- `max { m, n -> bool_m_preceeds_n_expr }` returns maximum of a list
-- `reduce(initValue) { x, valueSoFar -> new_value_expr }` helps to reduce values of a list to a single value
-
-## Helper Blocks
-
-By default, any asset helper block is mapped to a equivalent text block.
-
-For enums: `key@option`<br>
-e.g. `FileScope@App`
-
-## Component access
-
-### Property Get/Set
-
-```kotlin
-println(Button1.Text) # get and print Button1' text
-```
-
-```kotlin
-// change Button1's text to "Hello, World!"
-Button1.Text = "Hello, World!"
-```
-
-### Method calls
-
-```kotlin
-// Show a toast for "Hello World"
-Notifier1.ShowAlert("Hello, World!")
-```
-
-### Events
-
-You do not need to explicitly define parameters.
-
-```kotlin
-when Button1.Click {
-  // do something
+    .filter { n -> n ? number }    // Filters for numeric entries, “N/A” is dropped
+    .map { n -> n * 2 }	    // Multiply lemons sold in a day by the price of a lemon
+    .reduce(0) { x, soFar -> x + soFar }  // Sum up all the entries
 }
 ```
 
-for a generic event:
+Now, when we call `GetTotalRevenue()`:
 
-```kotlin
-when any Button.Click {
-  // do something
-}
+```
+println(“Last week’s revenue was ” _ GetTotalRevenue())
 ```
