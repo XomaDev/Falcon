@@ -182,6 +182,144 @@ func FibSum(n) = {
 ```
 Note that there is no `return` statement in Falcon. The last statement in a body is taken as the output of an expression.
 
+## Functions
+
+
+### Math
+
+-  `dec(string)`, `bin(string)`, `octal(string)`, `hexa(string)`
+  <br>Parse a static constant string from the respective base.
+  e.g. `bin("1010")`
+
+- `root(number)`
+- `abs(number)`
+- `neg(number)`
+- `log(number)`
+- `exp(number)`
+- `round(number)`
+- `ceil(number)`
+- `floor(number)`
+- `sin(number)`
+- `cos(number)`
+- `tan(number)`
+- `asin(number)`
+- `acos(number)`
+- `atan(number)`
+- `degrees(number)`
+- `radians(number)`
+- `decToHex(number)`
+- `decToBin(number)`
+- `hexToDec(number)`
+- `binToDec(number)`
+
+- `randInt(from, to)`
+- `randFloat()`
+- `setRandSeed(number)` sets the random generator seed
+- `min(...)` and `max(...)`
+- `avgOf(list)`, `maxOf(list)`, `minOf(list)`, `geoMeanOf()`, `stdDevOf()`, `stdErrOf()`
+- `modeOf(list)`
+- `mod(x, y)`, `rem(x, y)`, `quot(x, y)` for modulus, remainder and quotient
+- `atan2(a, b)`
+- `formatDecimal(number, places)`
+
+### Control
+
+- `println(any)`
+- `openScreen(name)` opens an App Inventor screen
+- `openScreenWithValue()` opens App Inventor screen with a value
+- `closeScreenWithValue()` closes the screen with a val
+- `getStartValue()` returns start value of the App
+- `closeSceen()` closes current App Inventor screen
+- `closeApp()` closes the Android App
+- `getPlainStartText()` returns plain start text of the App
+
+### Values
+
+- `copyList(list)`
+- `copyDict(dict)`
+- `makeColor(rgb list)`
+- `splitColor(number)`
+
+## Methods
+
+e.g. `"Hello  ".trim()`
+
+### Text
+
+- `textLen()`
+- `trim()`
+- `uppercase()`
+- `lowercase()`
+- `startsWith(piece)`
+- `contains(piece)`
+- `containsAny(word list)`
+- `containsAll(word list)`
+- `split(at)`
+- `splitAtFirst(at)`
+- `splitAtAny(word list)`
+- `splitAtFirstOfAny(word list)`
+- `splitAtSpaces()`
+- `reverse()`
+- `csvRowToList()`
+- `csvTableToList()`
+- `segment(from number, length number)`
+- `replace(target, replacement)`
+- `replaceFrom(map dictionary)`
+- `replaceFromLongestFirst(map dictionary)`
+
+### List
+
+- `listLen()`
+- `add(any...)`
+- `containsItem(any)`
+- `indexOf(any)`
+- `insert(at_index, any)`
+- `remove(at_index)`
+- `appendList(another list)`
+- `lookupInPairs(key, notfound)`
+- `join(text separator)`
+- `slice(index1, index2)`
+- `random()`
+- `reverseList()`
+- `toCsvRow()`
+- `toCsvTable()`
+- `sort()`
+- `allButFirst()`
+- `allButLast()`
+- `pairsToDict()`
+
+### Dictionary
+
+- `dictLen()`
+- `get(key)`
+- `set(key, value)`
+- `delete(key)`
+- `getAtPath(path_list, notfound)`
+- `setAtPath(path_list, value)`
+- `containsKey(key)`
+- `mergeInto(another_dict)`
+- `walkTree(path)`
+- `keys()`
+- `values()`
+- `toPairs()`
+
+## List access
+
+```
+local numbers = [1, 2, 4]
+// access second element (1 based indexing)
+println(numbers[2])
+// change the first element
+numbers[1] = 8
+```
+
+## Dictionary access
+
+```
+local animalInfo = { "Animal": "Tiger", "Scientific Name": "Panthera tigris" }
+// Get a value by key
+println(animalInfo.get("Scientific Name", "Not found"))
+```
 
 ## List lambdas
 
@@ -193,6 +331,7 @@ Maps each element of a list to a new value.
 
 ```
 local numbers = [1, 2, 3]
+// Double all the numbers
 local doubled = numbers.map { n -> n * 2 }
 println(doubled)  // Output: [2, 4, 6]
 ```
@@ -203,6 +342,7 @@ Filters out unwanted elements.
 
 ```
 local numbers = [1, 2, 3, 4]
+// Filter for even numbers
 local evens = numbers.filter { n -> n % 2 == 0 }
 println(evens)  // Output: [2, 4]
 ```
