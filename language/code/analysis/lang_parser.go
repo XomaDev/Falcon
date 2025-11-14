@@ -99,7 +99,7 @@ func (p *LangParser) defineStatements() {
 func (p *LangParser) parse() ast.Expr {
 	switch p.peek().Type {
 	case l.If:
-		return p.ifExpr()
+		return p.ifSmt()
 	case l.For:
 		return p.forExpr()
 	case l.Each:
@@ -272,21 +272,33 @@ func (p *LangParser) forExpr() *control.For {
 	}
 }
 
-func (p *LangParser) ifExpr() ast.Expr {
+func (p *LangParser) ifSmt() ast.Expr {
 	p.skip()
 	var conditions []ast.Expr
 	var bodies [][]ast.Expr
 
 	conditions = append(conditions, p.expr(0))
-	bodies = append(bodies, p.body(ScopeIfBody))
+	if p.isNext(l.OpenCurly) {
+		bodies = append(bodies, p.body(ScopeIfBody))
+	} else {
+		bodies = append(bodies, []ast.Expr{p.parse()})
+	}
 
 	var elseBody []ast.Expr
 	for p.notEOF() && p.consume(l.Else) {
 		if p.consume(l.If) {
 			conditions = append(conditions, p.expr(0))
-			bodies = append(bodies, p.body(ScopeIfBody))
+			if p.isNext(l.OpenCurly) {
+				bodies = append(bodies, p.body(ScopeIfBody))
+			} else {
+				bodies = append(bodies, []ast.Expr{p.parse()})
+			}
 		} else {
-			elseBody = p.body(ScopeIfBody)
+			if p.isNext(l.OpenCurly) {
+				elseBody = p.body(ScopeIfBody)
+			} else {
+				elseBody = []ast.Expr{p.parse()}
+			}
 			break
 		}
 	}
@@ -518,7 +530,7 @@ func (p *LangParser) term() ast.Expr {
 		return &fundamentals.Not{Expr: p.element()}
 	case l.If:
 		p.back()
-		return p.ifExpr()
+		return p.ifSmt()
 	case l.Compute:
 		return p.computeExpr()
 	case l.WalkAll:

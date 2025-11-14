@@ -31,16 +31,25 @@ func (s *SimpleIf) Yail() string {
 }
 
 func (s *SimpleIf) String() string {
-	format := "if (%) {\n%} else "
+	format := "if (%) "
+	var stringThen string
+	if len(s.normalThen) == 1 {
+		format += "%"
+		stringThen = s.normalThen[0].String()
+	} else {
+		format += "{\n%}"
+		stringThen = ast.PadBody(s.normalThen)
+	}
+	format += " else "
 	var stringElse string
-	if _, ok := s.normalElse[0].(*SimpleIf); ok && len(s.normalElse) == 1 {
+	if len(s.normalElse) == 1 {
 		format += "%"
 		stringElse = ast.JoinExprs("\n", s.normalElse)
 	} else {
 		format += "{\n%}"
 		stringElse = ast.PadBody(s.normalElse)
 	}
-	return sugar.Format(format, s.condition.String(), ast.PadBody(s.normalThen), stringElse)
+	return sugar.Format(format, s.condition.String(), stringThen, stringElse)
 }
 
 func (s *SimpleIf) Blockly(flags ...bool) ast.Block {

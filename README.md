@@ -29,11 +29,11 @@ Falcon is a language designed for App Inventor to enable syntax-based programmin
 9. Pair: `"Fruit": "Mango"`
 10. Question (`?`):
     - To check a value for a specific type (`text`, `number`, `list`, `dict`)
-        - E.g.,”Hello” ? text`
+        - E.g.,"Hello" ? text`
     - Check for a number type (`number`, `base10`, `hexa`, `bin`)
-        - E.g. `”1010” ? bin` is a true expression.
+        - E.g. `"1010" ? bin` is a true expression.
     - Check for empty text (`emptyText`) or an empty list (`emptyList`)
-        - E.g. `[] ? emptyList` or `”Cat” ? emptyText`
+        - E.g. `[] ? emptyList` or `"Cat" ? emptyText`
 
 Operator precedence
 The precedence of an operator dictates its parse order. E.g. `*` and `/` is parsed before `+` and `-`.
@@ -61,7 +61,7 @@ It is similar to that of Java. Below is a ranking from the lowest to the highest
 
 A global variable is always declared at the root:
 ```
-global name = “Kumaraswamy B G”
+global name = "Kumaraswamy B G"
 
 // access the global variable
 println(this.name)
@@ -85,18 +85,18 @@ local x = 8
 local y = 12
 
 if (x > y) {
-  println(“X is greater”)
+  println("X is greater")
 } else if (y > x) {
-  println(“Y is greater”)
+  println("Y is greater")
 } else {
-  println(“They both are equal!”)
+  println("They both are equal!")
 }
 ```
 
 Used an expression:
 
 ```
-println(  if (x > y) “X is greater” else if  (y > x) “Y is greater” else “They both are equal!”  )
+println(  if (x > y) "X is greater" else if  (y > x) "Y is greater" else "They both are equal!"  )
 ```
 
 
@@ -129,7 +129,7 @@ The `by` clause is optional and defaults to 1.
 To iterate over a list:
 
 ```
-local names = [“India”, “Japan”, “Russia”, “Germany”]
+local names = ["India", "Japan", "Russia", "Germany"]
 
 for country in names {
   println(country)
@@ -142,7 +142,7 @@ Or over a dictionary:
 local animalInfo = { "Animal": "Tiger", "Scientific Name": "Panthera tigris" }
 
 for (key, value) in animalDetail {
-  println(key _ “ : ” _ value) // e.g prints  “Animal: Tiger” to the console
+  println(key _ " : " _ value) // e.g prints  "Animal: Tiger" to the console
 }
 ```
 
@@ -247,7 +247,7 @@ println(numbersSum) // Output: 28
 
 For example, let’s say Bob has a list of lemons sold per day for the last week and he’d like to calculate his revenue for lemon priced at $2 each.
 
-The days he missed are marked as “N/A”
+The days he missed are marked as "N/A"
 
 ```
 global LemonadeSold = [9, 12, "N/A", 15, 18, "N/A", 8]
@@ -258,7 +258,7 @@ Then we create a function that calculates the total revenue using list lambdas:
 ```
 func GetTotalRevenue() = {
   this.LemonadeSold
-    .filter { n -> n ? number }    // Filters for numeric entries, “N/A” is dropped
+    .filter { n -> n ? number }    // Filters for numeric entries, "N/A" is dropped
     .map { n -> n * 2 }	    // Multiply lemons sold in a day by the price of a lemon
     .reduce(0) { x, soFar -> x + soFar }  // Sum up all the entries
 }
@@ -267,5 +267,5 @@ func GetTotalRevenue() = {
 Now, when we call `GetTotalRevenue()`:
 
 ```
-println(“Last week’s revenue was ” _ GetTotalRevenue())
+println("Last week’s revenue was " _ GetTotalRevenue())
 ```
