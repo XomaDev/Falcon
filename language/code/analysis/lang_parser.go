@@ -102,8 +102,6 @@ func (p *LangParser) parse() ast.Expr {
 		return p.ifSmt()
 	case l.For:
 		return p.forExpr()
-	case l.Each:
-		return p.eachExpr()
 	case l.While:
 		return p.whileExpr()
 	case l.Break:
@@ -249,26 +247,42 @@ func (p *LangParser) eachExpr() ast.Expr {
 	}
 }
 
-func (p *LangParser) forExpr() *control.For {
+func (p *LangParser) forExpr() ast.Expr {
 	p.skip()
-	iName := p.name()
-	p.expect(l.Colon)
-	from := p.expr(0)
-	p.expect(l.To)
-	to := p.expr(0)
-	var by ast.Expr
-	if p.consume(l.By) {
-		by = p.expr(0)
-	} else {
-		by = &fundamentals.Number{Content: "1"}
+
+	if p.consume(l.OpenCurve) {
+		keyName := p.name()
+		// Dictionary For each loop
+		p.expect(l.Comma)
+		valueName := p.name()
+		p.expect(l.CloseCurve)
+		p.expect(l.In)
+		return &control.EachPair{KeyName: keyName, ValueName: valueName, Iterable: p.element(), Body: p.body(ScopeLoop)}
 	}
-	body := p.body(ScopeLoop)
-	return &control.For{
-		IName: iName,
-		From:  from,
-		To:    to,
-		By:    by,
-		Body:  body,
+	iName := p.name()
+	if p.consume(l.In) {
+		// For each loop
+		return &control.Each{IName: iName, Iterable: p.element(), Body: p.body(ScopeLoop)}
+	} else {
+		// For I loop
+		p.expect(l.Colon)
+		from := p.expr(0)
+		p.expect(l.To)
+		to := p.expr(0)
+		var by ast.Expr
+		if p.consume(l.By) {
+			by = p.expr(0)
+		} else {
+			by = &fundamentals.Number{Content: "1"}
+		}
+		body := p.body(ScopeLoop)
+		return &control.For{
+			IName: iName,
+			From:  from,
+			To:    to,
+			By:    by,
+			Body:  body,
+		}
 	}
 }
 
@@ -321,6 +335,7 @@ func (p *LangParser) bodyUntilCurly() []ast.Expr {
 	}
 	for p.notEOF() && !p.isNext(l.CloseCurly) {
 		expressions = append(expressions, p.parse())
+		p.consume(l.Comma)
 	}
 	return expressions
 }

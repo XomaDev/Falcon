@@ -1,1 +1,7 @@
-println(  if (x > y) "X is greater" else if  (y > x) "Y is greater" else "They both are equal!"  )
+func fooBar() {
+  local animalInfo = { "Animal": "Tiger", "Scientific Name": "Panthera tigris" }
+
+  for (key, value) in animalDetail {
+    println(key _ " : " _ value) // e.g prints  "Animal: Tiger" to the console
+  }
+}
