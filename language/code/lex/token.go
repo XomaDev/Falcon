@@ -21,7 +21,7 @@ func (t *Token) String() string {
 }
 
 func (t *Token) Debug() string {
-	return sugar.Format("(%:% % %)", strconv.Itoa(t.Row), strconv.Itoa(t.Column), t.Type.String(), *t.Content)
+	return sugar.Format("(%:% % %)", strconv.Itoa(t.Column), strconv.Itoa(t.Row), t.Type.String(), *t.Content)
 }
 
 func (t *Token) HasFlag(flag Flag) bool {

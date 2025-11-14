@@ -3,13 +3,13 @@
 func softmax(logitsList) = {
   // 1. Calculate e^x for each element
   local expValues = logitsList.map { x -> exp(x) }
-
+  
   // 2. Calculate the sum of all exponentiated values
   local sumOfExps = expValues.reduce(0) { x, totalSoFar -> x + totalSoFar }
-
+  
   // 3. Divide each exponentiated value by the sum to get the probabilities
   local probabilities = expValues.map { expX -> expX / sumOfExps }
-
+  
   probabilities // The last expression is the return value
 }
 
