@@ -61,7 +61,6 @@ const (
 	For
 	To
 	By
-	Each
 	In
 	While
 	Do

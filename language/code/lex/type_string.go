@@ -56,25 +56,24 @@ func _() {
 	_ = x[For-45]
 	_ = x[To-46]
 	_ = x[By-47]
-	_ = x[Each-48]
-	_ = x[In-49]
-	_ = x[While-50]
-	_ = x[Do-51]
-	_ = x[Break-52]
-	_ = x[WalkAll-53]
-	_ = x[Global-54]
-	_ = x[Local-55]
-	_ = x[Compute-56]
-	_ = x[This-57]
-	_ = x[Func-58]
-	_ = x[When-59]
-	_ = x[Any-60]
-	_ = x[Undefined-61]
+	_ = x[In-48]
+	_ = x[While-49]
+	_ = x[Do-50]
+	_ = x[Break-51]
+	_ = x[WalkAll-52]
+	_ = x[Global-53]
+	_ = x[Local-54]
+	_ = x[Compute-55]
+	_ = x[This-56]
+	_ = x[Func-57]
+	_ = x[When-58]
+	_ = x[Any-59]
+	_ = x[Undefined-60]
 }
 
-const _Type_name = "PlusDashTimesSlashPowerRemainderLogicOrLogicAndBitwiseOrBitwiseAndBitwiseXorEqualsNotEqualsLessThanLessThanEqualGreatThanGreaterThanEqualTextEqualsTextNotEqualsTextLessThanTextGreaterThanOpenCurveCloseCurveOpenSquareCloseSquareOpenCurlyCloseCurlyAssignDotCommaQuestionNotColonDoubleColonRightArrowUnderscoreAtTrueFalseTextNumberNameColorCodeIfElseForToByEachInWhileDoBreakWalkAllGlobalLocalComputeThisFuncWhenAnyUndefined"
+const _Type_name = "PlusDashTimesSlashPowerRemainderLogicOrLogicAndBitwiseOrBitwiseAndBitwiseXorEqualsNotEqualsLessThanLessThanEqualGreatThanGreaterThanEqualTextEqualsTextNotEqualsTextLessThanTextGreaterThanOpenCurveCloseCurveOpenSquareCloseSquareOpenCurlyCloseCurlyAssignDotCommaQuestionNotColonDoubleColonRightArrowUnderscoreAtTrueFalseTextNumberNameColorCodeIfElseForToByInWhileDoBreakWalkAllGlobalLocalComputeThisFuncWhenAnyUndefined"
 
-var _Type_index = [...]uint16{0, 4, 8, 13, 18, 23, 32, 39, 47, 56, 66, 76, 82, 91, 99, 112, 121, 137, 147, 160, 172, 187, 196, 206, 216, 227, 236, 246, 252, 255, 260, 268, 271, 276, 287, 297, 307, 309, 313, 318, 322, 328, 332, 341, 343, 347, 350, 352, 354, 358, 360, 365, 367, 372, 379, 385, 390, 397, 401, 405, 409, 412, 421}
+var _Type_index = [...]uint16{0, 4, 8, 13, 18, 23, 32, 39, 47, 56, 66, 76, 82, 91, 99, 112, 121, 137, 147, 160, 172, 187, 196, 206, 216, 227, 236, 246, 252, 255, 260, 268, 271, 276, 287, 297, 307, 309, 313, 318, 322, 328, 332, 341, 343, 347, 350, 352, 354, 356, 361, 363, 368, 375, 381, 386, 393, 397, 401, 405, 408, 417}
 
 func (i Type) String() string {
 	if i < 0 || i >= Type(len(_Type_index)-1) {
