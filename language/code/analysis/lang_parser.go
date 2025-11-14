@@ -192,7 +192,6 @@ func (p *LangParser) globVar() ast.Expr {
 }
 
 func (p *LangParser) varExpr() ast.Expr {
-	p.back()
 	// a clean full scope variable
 	var names []string
 	var values []ast.Expr
