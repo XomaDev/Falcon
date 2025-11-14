@@ -4,6 +4,7 @@ import (
 	"Falcon/code/ast"
 	"Falcon/code/ast/fundamentals"
 	"Falcon/code/sugar"
+	"strings"
 )
 
 type SimpleIf struct {
@@ -31,25 +32,62 @@ func (s *SimpleIf) Yail() string {
 }
 
 func (s *SimpleIf) String() string {
-	format := "if (%) "
-	var stringThen string
-	if len(s.normalThen) == 1 {
-		format += "%"
-		stringThen = s.normalThen[0].String()
-	} else {
-		format += "{\n%}"
-		stringThen = ast.PadBody(s.normalThen)
+	// TODO:
+	//  We got to pretty print all of them
+	//  1. First flatten out all else conditions
+	//  2. Multi line if:
+	//    a. More than 2 branches
+	//    b. Any of them has a non continuous statement
+
+	var branches []string
+	currIf := s
+	var hasDiscontinuity = false
+
+	for {
+		if !currIf.normalThen[0].Continuous() || !currIf.normalElse[0].Continuous() {
+			hasDiscontinuity = true
+		}
+		// append If branch
+		ifFormat := ""
+		if currIf != s {
+			// we are in a nested if
+			ifFormat += "else "
+		}
+		var thenString string
+		if len(currIf.normalThen) == 1 {
+			ifFormat += "if (%) % "
+			thenString = currIf.normalThen[0].String()
+		} else {
+			ifFormat += "if (%) {\n%} "
+			thenString = ast.PadBody(currIf.normalThen)
+		}
+		branches = append(branches, sugar.Format(ifFormat, currIf.condition.String(), thenString))
+		// check for nested If branch
+		nextIf, hasNextIf := currIf.normalElse[0].(*SimpleIf)
+		if len(currIf.normalElse) == 1 && hasNextIf {
+			// break it, let it be handled in the next iteration
+			currIf = nextIf
+			continue
+		}
+		// append Else branch
+		var elseFormat string
+		var elseString string
+		if len(currIf.normalElse) == 1 {
+			elseFormat = "else %"
+			elseString = currIf.normalElse[0].String()
+		} else {
+			elseFormat = "else {\n%}"
+			elseString = ast.PadBody(currIf.normalElse)
+		}
+		branches = append(branches, sugar.Format(elseFormat, elseString))
+		if !hasNextIf {
+			break
+		}
 	}
-	format += " else "
-	var stringElse string
-	if len(s.normalElse) == 1 {
-		format += "%"
-		stringElse = ast.JoinExprs("\n", s.normalElse)
-	} else {
-		format += "{\n%}"
-		stringElse = ast.PadBody(s.normalElse)
+	if len(branches) > 2 || hasDiscontinuity {
+		return strings.Join(branches, "\n")
 	}
-	return sugar.Format(format, s.condition.String(), stringThen, stringElse)
+	return strings.Join(branches, "")
 }
 
 func (s *SimpleIf) Blockly(flags ...bool) ast.Block {
