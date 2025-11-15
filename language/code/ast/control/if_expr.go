@@ -1,28 +1,108 @@
 package control
 
 import (
-	ast2 "Falcon/code/ast"
+	"Falcon/code/ast"
+	"Falcon/code/ast/fundamentals"
 	"Falcon/code/sugar"
+	"strings"
 )
 
 type SimpleIf struct {
-	Condition ast2.Expr
-	Then      ast2.Expr
-	Else      ast2.Expr
+	condition ast.Expr
+
+	smartThen ast.Expr
+	smartElse ast.Expr
+
+	normalThen []ast.Expr
+	normalElse []ast.Expr
+}
+
+func MakeSimpleIf(condition ast.Expr, then []ast.Expr, elze []ast.Expr) *SimpleIf {
+	return &SimpleIf{
+		condition:  condition,
+		smartThen:  &fundamentals.SmartBody{Body: then},
+		smartElse:  &fundamentals.SmartBody{Body: elze},
+		normalThen: then,
+		normalElse: elze,
+	}
 }
 
 func (s *SimpleIf) Yail() string {
-	return "(if " + s.Condition.Yail() + " " + s.Then.Yail() + " " + s.Else.Yail() + ")"
+	return "(if " + s.condition.Yail() + " " + s.smartThen.Yail() + " " + s.smartElse.Yail() + ")"
 }
 
 func (s *SimpleIf) String() string {
-	return sugar.Format("if (%) % else %", s.Condition.String(), s.Then.String(), s.Else.String())
+	// TODO:
+	//  We got to pretty print all of them
+	//  1. First flatten out all else conditions
+	//  2. Multi line if:
+	//    a. More than 2 branches
+	//    b. Any of them has a non continuous statement
+
+	var branches []string
+	currIf := s
+	var hasDiscontinuity = false
+
+	for {
+		if !currIf.normalThen[0].Continuous() || !currIf.normalElse[0].Continuous() {
+			hasDiscontinuity = true
+		}
+		// append If branch
+		ifFormat := ""
+		if currIf != s {
+			// we are in a nested if
+			ifFormat += "else "
+		}
+		var thenString string
+		if len(currIf.normalThen) == 1 {
+			ifFormat += "if (%) % "
+			thenString = currIf.normalThen[0].String()
+		} else {
+			ifFormat += "if (%) {\n%} "
+			thenString = ast.PadBody(currIf.normalThen)
+		}
+		branches = append(branches, sugar.Format(ifFormat, currIf.condition.String(), thenString))
+		// check for nested If branch
+		nextIf, hasNextIf := currIf.normalElse[0].(*SimpleIf)
+		if len(currIf.normalElse) == 1 && hasNextIf {
+			// break it, let it be handled in the next iteration
+			currIf = nextIf
+			continue
+		}
+		// append Else branch
+		var elseFormat string
+		var elseString string
+		if len(currIf.normalElse) == 1 {
+			elseFormat = "else %"
+			elseString = currIf.normalElse[0].String()
+		} else {
+			elseFormat = "else {\n%}"
+			elseString = ast.PadBody(currIf.normalElse)
+		}
+		branches = append(branches, sugar.Format(elseFormat, elseString))
+		if !hasNextIf {
+			break
+		}
+	}
+	if len(branches) > 2 || hasDiscontinuity {
+		return strings.Join(branches, "\n")
+	}
+	return strings.Join(branches, "")
 }
 
-func (s *SimpleIf) Blockly() ast2.Block {
-	return ast2.Block{
+func (s *SimpleIf) Blockly(flags ...bool) ast.Block {
+	if len(flags) > 0 && flags[0] {
+		// Blockly expects a statement here, we have to mutate
+		fullIf := If{
+			Conditions: []ast.Expr{s.condition},
+			Bodies:     [][]ast.Expr{s.normalThen},
+			ElseBody:   s.normalElse,
+		}
+		return fullIf.Blockly()
+	}
+	return ast.Block{
 		Type:   "controls_choose",
-		Values: ast2.MakeValues([]ast2.Expr{s.Condition, s.Then, s.Else}, "TEST", "THENRETURN", "ELSERETURN"),
+		Values: ast.MakeValues([]ast.Expr{s.condition, s.smartThen, s.smartElse}, "TEST", "THENRETURN", "ELSERETURN"),
 	}
 }
 
@@ -30,6 +110,10 @@ func (s *SimpleIf) Continuous() bool {
 	return false
 }
 
-func (s *SimpleIf) Consumable() bool {
-	return true
+func (s *SimpleIf) Consumable(flags ...bool) bool {
+	return !(len(flags) > 0 && flags[0])
+}
+
+func (s *SimpleIf) Signature() []ast.Signature {
+	return ast.CombineSignatures(s.smartThen.Signature(), s.smartElse.Signature())
 }

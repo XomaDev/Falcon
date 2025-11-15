@@ -18,7 +18,7 @@ func (h *HelperDropdown) String() string {
 	return h.Key + "@" + h.Option
 }
 
-func (h *HelperDropdown) Blockly() ast.Block {
+func (h *HelperDropdown) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:     "helpers_dropdown",
 		Mutation: &ast.Mutation{Key: h.Key},
@@ -30,6 +30,10 @@ func (h *HelperDropdown) Continuous() bool {
 	return true
 }
 
-func (h *HelperDropdown) Consumable() bool {
+func (h *HelperDropdown) Consumable(flags ...bool) bool {
 	return true
+}
+
+func (h *HelperDropdown) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignHelper}
 }

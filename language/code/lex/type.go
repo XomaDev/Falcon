@@ -9,6 +9,7 @@ const (
 	Times
 	Slash
 	Power
+	Remainder
 
 	LogicOr
 	LogicAnd
@@ -56,12 +57,10 @@ const (
 	ColorCode
 
 	If
-	Elif
 	Else
 	For
 	To
 	By
-	Each
 	In
 	While
 	Do

@@ -1,14 +1,14 @@
 package variables
 
 import (
-	ast2 "Falcon/code/ast"
+	"Falcon/code/ast"
 	"strings"
 )
 
 type Var struct {
 	Names  []string
-	Values []ast2.Expr
-	Body   []ast2.Expr
+	Values []ast.Expr
+	Body   []ast.Expr
 }
 
 func (v *Var) Yail() string {
@@ -21,33 +21,31 @@ func (v *Var) Yail() string {
 		yail += ") "
 	}
 	yail += ") "
-	yail += ast2.PadBodyYail(v.Body)
+	yail += ast.PadBodyYail(v.Body)
 	yail += ")"
 	return yail
 }
 
 func (v *Var) String() string {
 	var builder strings.Builder
-	builder.WriteString("local(\n")
-
-	var varLines []string
-	for i, name := range v.Names {
-		varLines = append(varLines, ast2.PadDirect(name+" = "+v.Values[i].String()))
+	localLines := make([]string, len(v.Names))
+	for k, name := range v.Names {
+		localLines[k] = "local " + name + " = " + v.Values[k].String()
 	}
-	builder.WriteString(strings.Join(varLines, ",\n"))
-	builder.WriteString("\n) {\n")
-	builder.WriteString(ast2.PadBody(v.Body))
-	builder.WriteString("}")
+	builder.WriteString(strings.Join(localLines, "\n"))
+	builder.WriteString("\n")
+	builder.WriteString(ast.JoinExprs("\n", v.Body))
 	return builder.String()
 }
 
-func (v *Var) Blockly() ast2.Block {
-	return ast2.Block{
+func (v *Var) Blockly(flags ...bool) ast.Block {
+	// TODO: handle for empty statements...
+	return ast.Block{
 		Type:       "local_declaration_statement",
-		Mutation:   &ast2.Mutation{LocalNames: ast2.MakeLocalNames(v.Names...)},
-		Fields:     ast2.ToFields("VAR", v.Names),
-		Values:     ast2.ValuesByPrefix("DECL", v.Values),
-		Statements: []ast2.Statement{ast2.CreateStatement("STACK", v.Body)},
+		Mutation:   &ast.Mutation{LocalNames: ast.MakeLocalNames(v.Names...)},
+		Fields:     ast.ToFields("VAR", v.Names),
+		Values:     ast.ValuesByPrefix("DECL", v.Values),
+		Statements: []ast.Statement{ast.CreateStatement("STACK", v.Body)},
 	}
 }
 
@@ -55,6 +53,10 @@ func (v *Var) Continuous() bool {
 	return false
 }
 
-func (v *Var) Consumable() bool {
+func (v *Var) Consumable(flags ...bool) bool {
 	return false
+}
+
+func (v *Var) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignVoid}
 }

@@ -9,7 +9,7 @@ func Pad(code string) string {
 }
 
 func PadDirect(code string) string {
-	return " " + strings.Replace(code, "\n", "\n  ", -1)
+	return "  " + strings.Replace(code, "\n", "\n  ", -1)
 }
 
 func PadBody(blocks []Expr) string {

@@ -3,9 +3,10 @@ package ast
 type Expr interface {
 	String() string
 	Yail() string
-	Blockly() Block
+	Blockly(flags ...bool) Block
 	Continuous() bool
-	Consumable() bool
+	Consumable(flags ...bool) bool
+	Signature() []Signature
 }
 
 func (b *Block) String() string {

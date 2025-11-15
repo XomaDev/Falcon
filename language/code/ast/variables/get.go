@@ -1,7 +1,7 @@
 package variables
 
 import (
-	blky "Falcon/code/ast"
+	"Falcon/code/ast"
 	"Falcon/code/lex"
 )
 
@@ -30,16 +30,16 @@ func (g *Get) String() string {
 	return g.Name
 }
 
-func (g *Get) Blockly() blky.Block {
+func (g *Get) Blockly(flags ...bool) ast.Block {
 	var name string
 	if g.Global {
 		name = "global " + g.Name
 	} else {
 		name = g.Name
 	}
-	return blky.Block{
+	return ast.Block{
 		Type:   "lexical_variable_get",
-		Fields: []blky.Field{{Name: "VAR", Value: name}},
+		Fields: []ast.Field{{Name: "VAR", Value: name}},
 	}
 }
 
@@ -47,6 +47,11 @@ func (g *Get) Continuous() bool {
 	return true
 }
 
-func (g *Get) Consumable() bool {
+func (g *Get) Consumable(flags ...bool) bool {
 	return true
+}
+
+func (g *Get) Signature() []ast.Signature {
+	// TODO: later define a variable lookup table
+	return []ast.Signature{ast.SignAny}
 }

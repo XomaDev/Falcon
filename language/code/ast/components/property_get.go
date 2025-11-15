@@ -24,7 +24,7 @@ func (p *PropertyGet) String() string {
 	return sugar.Format("%.%", p.ComponentName, p.Property)
 }
 
-func (p *PropertyGet) Blockly() ast.Block {
+func (p *PropertyGet) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type: "component_set_get",
 		Mutation: &ast.Mutation{
@@ -45,6 +45,10 @@ func (p *PropertyGet) Continuous() bool {
 	return false
 }
 
-func (p *PropertyGet) Consumable() bool {
+func (p *PropertyGet) Consumable(flags ...bool) bool {
 	return true
+}
+
+func (p *PropertyGet) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignAny}
 }

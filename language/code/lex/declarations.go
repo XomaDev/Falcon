@@ -5,6 +5,7 @@ var Symbols = map[string]StaticToken{
 	"-": staticOf(Dash, Binary, Operator, Unary),
 	"*": staticOf(Times, BinaryL1, Operator, PreserveOrder),
 	"/": staticOf(Slash, BinaryL1, Operator, PreserveOrder),
+	"%": staticOf(Remainder, BinaryL1, Operator, PreserveOrder),
 	"^": staticOf(Power, BinaryL2, Operator, PreserveOrder),
 
 	"||": staticOf(LogicOr, LLogicOr, Operator),
@@ -51,12 +52,10 @@ var Keywords = map[string]StaticToken{
 	"false": staticOf(False, Value, ConstantValue),
 
 	"if":        staticOf(If),
-	"elif":      staticOf(Elif),
 	"else":      staticOf(Else),
 	"for":       staticOf(For),
 	"to":        staticOf(To),
 	"by":        staticOf(By),
-	"each":      staticOf(Each),
 	"in":        staticOf(In),
 	"while":     staticOf(While),
 	"do":        staticOf(Do),

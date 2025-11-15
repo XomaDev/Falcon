@@ -4,7 +4,7 @@ import (
 	"Falcon/code/ast"
 )
 
-func (c *Call) dictMethods(signature *Signature) ast.Block {
+func (c *Call) dictMethods(signature *CallSignature) ast.Block {
 	switch signature.BlocklyName {
 	case "dictionaries_length", "dictionaries_dict_to_alist":
 		return c.simpleOperand(signature.BlocklyName, "DICT")

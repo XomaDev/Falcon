@@ -1,14 +1,14 @@
 package variables
 
 import (
-	ast2 "Falcon/code/ast"
+	"Falcon/code/ast"
 	"strings"
 )
 
 type VarResult struct {
 	Names  []string
-	Values []ast2.Expr
-	Result ast2.Expr
+	Values []ast.Expr
+	Result ast.Expr
 }
 
 func (v *VarResult) Yail() string {
@@ -21,32 +21,52 @@ func (v *VarResult) Yail() string {
 		yail += ") "
 	}
 	yail += ") "
-	yail += ast2.PadDirect(v.Result.Yail())
+	yail += ast.PadDirect(v.Result.Yail())
 	yail += " )"
 	return yail
 }
 
 func (v *VarResult) String() string {
-	var builder strings.Builder
-	builder.WriteString("compute(\n")
+	var result ast.Expr
+	var combinedNames []string
+	var combinedValues []ast.Expr
 
-	var varLines []string
-	for i, name := range v.Names {
-		varLines = append(varLines, ast2.PadDirect(name+" = "+v.Values[i].String()))
+	result = v.Result
+	combinedNames = v.Names
+	combinedValues = v.Values
+
+	for {
+		// check for nested var results!
+		if vr, ok := result.(*VarResult); ok {
+			combinedNames = append(combinedNames, vr.Names...)
+			combinedValues = append(combinedValues, vr.Values...)
+			result = vr.Result
+		} else {
+			break
+		}
 	}
-	builder.WriteString(strings.Join(varLines, ",\n"))
-	builder.WriteString("\n) -> ")
-	builder.WriteString(v.Result.String())
+
+	var builder strings.Builder
+	builder.WriteString("{\n")
+	localLines := make([]string, len(combinedNames))
+	for k, name := range combinedNames {
+		localLines[k] = "local " + name + " = " + combinedValues[k].String()
+	}
+	builder.WriteString(ast.PadDirect(strings.Join(localLines, "\n")))
+	builder.WriteString("\n")
+	builder.WriteString(ast.PadDirect(result.String()))
+	builder.WriteString("\n}")
 	return builder.String()
 }
 
-func (v *VarResult) Blockly() ast2.Block {
-	return ast2.Block{
+func (v *VarResult) Blockly(flags ...bool) ast.Block {
+	println("called!")
+	return ast.Block{
 		Type:     "local_declaration_expression",
-		Mutation: &ast2.Mutation{LocalNames: ast2.MakeLocalNames(v.Names...)},
-		Fields:   ast2.ToFields("VAR", v.Names),
-		Values: append(ast2.ValuesByPrefix("DECL", v.Values),
-			ast2.Value{Name: "RETURN", Block: v.Result.Blockly()}),
+		Mutation: &ast.Mutation{LocalNames: ast.MakeLocalNames(v.Names...)},
+		Fields:   ast.ToFields("VAR", v.Names),
+		Values: append(ast.ValuesByPrefix("DECL", v.Values),
+			ast.Value{Name: "RETURN", Block: v.Result.Blockly()}),
 	}
 }
 
@@ -54,6 +74,10 @@ func (v *VarResult) Continuous() bool {
 	return true
 }
 
-func (v *VarResult) Consumable() bool {
+func (v *VarResult) Consumable(flags ...bool) bool {
 	return true
+}
+
+func (v *VarResult) Signature() []ast.Signature {
+	return v.Result.Signature()
 }

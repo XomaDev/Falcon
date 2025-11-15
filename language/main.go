@@ -8,7 +8,6 @@ import (
 	"Falcon/code/context"
 	"Falcon/code/diff"
 	"Falcon/code/lex"
-
 	designAnalysis "Falcon/design"
 	"encoding/xml"
 	"os"
@@ -114,7 +113,7 @@ func analyzeSyntax() {
 
 	blocks := make([]ast.Block, len(expressions))
 	for i, expression := range expressions {
-		blocks[i] = expression.Blockly()
+		blocks[i] = expression.Blockly(true)
 	}
 	xmlBlock := ast.XmlRoot{
 		Blocks: blocks,

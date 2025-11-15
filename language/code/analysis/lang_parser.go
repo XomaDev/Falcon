@@ -28,22 +28,26 @@ type Procedure struct {
 }
 
 type LangParser struct {
-	Tokens    []*l.Token
-	currIndex int
-	tokenSize int
-	Resolver  *NameResolver
+	Tokens         []*l.Token
+	currIndex      int
+	tokenSize      int
+	currCheckpoint int
+	Resolver       *NameResolver
+	ScopeCursor    *ScopeCursor
 }
 
 func NewLangParser(tokens []*l.Token) *LangParser {
 	return &LangParser{
-		Tokens:    tokens,
-		tokenSize: len(tokens),
-		currIndex: 0,
+		Tokens:         tokens,
+		tokenSize:      len(tokens),
+		currIndex:      0,
+		currCheckpoint: 0,
 		Resolver: &NameResolver{
 			Procedures:        map[string]Procedure{},
 			ComponentTypesMap: map[string]string{},
 			ComponentNameMap:  map[string][]string{},
 		},
+		ScopeCursor: &ScopeCursor{currScopes: []Scope{}},
 	}
 }
 
@@ -95,19 +99,14 @@ func (p *LangParser) defineStatements() {
 func (p *LangParser) parse() ast.Expr {
 	switch p.peek().Type {
 	case l.If:
-		return p.ifExpr()
+		return p.ifSmt()
 	case l.For:
 		return p.forExpr()
-	case l.Each:
-		return p.eachExpr()
 	case l.While:
 		return p.whileExpr()
 	case l.Break:
 		p.skip()
 		return &control.Break{}
-	case l.WalkAll:
-		p.skip()
-		return &fundamentals.WalkAll{}
 	case l.Local:
 		return p.varExpr()
 	case l.Global:
@@ -121,6 +120,7 @@ func (p *LangParser) parse() ast.Expr {
 		}
 		return p.event()
 	default:
+		// It cannot be consumable
 		return p.expr(0)
 	}
 }
@@ -133,7 +133,7 @@ func (p *LangParser) genericEvent() ast.Expr {
 	if p.isNext(l.OpenCurve) {
 		parameters = p.parameters()
 	}
-	body := p.body()
+	body := p.body(ScopeGenericEvent)
 	return &components.GenericEvent{
 		ComponentType: componentType,
 		Event:         eventName,
@@ -150,7 +150,7 @@ func (p *LangParser) event() ast.Expr {
 	if p.isNext(l.OpenCurve) {
 		parameters = p.parameters()
 	}
-	body := p.body()
+	body := p.body(ScopeEvent)
 	return &components.Event{
 		ComponentName: component.Name,
 		ComponentType: component.Type,
@@ -161,60 +161,67 @@ func (p *LangParser) event() ast.Expr {
 }
 
 func (p *LangParser) funcSmt() ast.Expr {
-	p.skip()
+	where := p.next()
 	name := p.name()
 	var parameters = p.parameters()
 	returning := p.consume(l.Assign)
 	p.Resolver.Procedures[name] = Procedure{Name: name, Parameters: parameters, Returning: returning}
 	if returning {
-		return &procedures.RetProcedure{Name: name, Parameters: parameters, Result: p.parse()}
+		p.ScopeCursor.Enter(where, ScopeSmartBody)
+		var result ast.Expr
+		if p.isNext(l.OpenCurly) {
+			result = p.smartBody()
+		} else {
+			result = p.parse()
+		}
+		p.ScopeCursor.Exit(ScopeSmartBody)
+		return &procedures.RetProcedure{Name: name, Parameters: parameters, Result: result}
 	} else {
-		return &procedures.VoidProcedure{Name: name, Parameters: parameters, Body: p.body()}
+		return &procedures.VoidProcedure{Name: name, Parameters: parameters, Body: p.body(ScopeProc)}
 	}
 }
 
 func (p *LangParser) globVar() ast.Expr {
-	p.skip()
+	where := p.next()
+	if !p.ScopeCursor.AtRoot() {
+		where.Error("Global variables can only be defined at the root.")
+	}
 	name := p.name()
 	p.expect(l.Assign)
 	return &variables.Global{Name: name, Value: p.parse()}
 }
 
 func (p *LangParser) varExpr() ast.Expr {
-	p.skip()
-
-	var varNames []string
-	var varValues []ast.Expr
-	if p.consume(l.OpenCurve) {
-		// a result local var
-		for p.notEOF() && !p.isNext(l.CloseCurve) {
-			name := p.name()
-			p.expect(l.Assign)
-			value := p.parse()
-
-			varNames = append(varNames, name)
-			varValues = append(varValues, value)
-
-			if !p.consume(l.Comma) {
-				break
-			}
+	// a clean full scope variable
+	var names []string
+	var values []ast.Expr
+	for {
+		p.createCheckpoint()
+		if !p.consume(l.Local) {
+			break
 		}
-		p.expect(l.CloseCurve)
-		return &variables.Var{Names: varNames, Values: varValues, Body: p.body()}
-	} else {
-		// a clean full scope variable
 		name := p.name()
 		p.expect(l.Assign)
 		value := p.parse()
-		// we have to parse rest of the body here
-		return &variables.SimpleVar{Name: name, Value: value, Body: p.bodyUntilCurly()}
+
+		if ast.DependsOnVariables(value, names) {
+			// Since this variable depends on the last variable, we cannot include
+			// it in the current set.
+			p.backToPast()
+			break
+		}
+
+		names = append(names, name)
+		values = append(values, value)
 	}
+	// we have to parse rest of the body here
+	return &variables.Var{Names: names, Values: values, Body: p.bodyUntilCurly()}
 }
 
 func (p *LangParser) whileExpr() *control.While {
 	p.skip()
 	condition := p.expr(0)
-	body := p.body()
+	body := p.body(ScopeLoop)
 	return &control.While{Condition: condition, Body: body}
 }
 
@@ -227,72 +234,91 @@ func (p *LangParser) eachExpr() ast.Expr {
 		valueName := p.name()
 		p.expect(l.CloseCurve)
 		p.expect(l.In)
-		return &control.EachPair{KeyName: keyName, ValueName: valueName, Iterable: p.element(), Body: p.body()}
+		return &control.EachPair{KeyName: keyName, ValueName: valueName, Iterable: p.element(), Body: p.body(ScopeLoop)}
 	} else {
 		keyName := p.name()
 		p.expect(l.In)
-		return &control.Each{IName: keyName, Iterable: p.element(), Body: p.body()}
+		return &control.Each{IName: keyName, Iterable: p.element(), Body: p.body(ScopeLoop)}
 	}
 }
 
-func (p *LangParser) forExpr() *control.For {
+func (p *LangParser) forExpr() ast.Expr {
 	p.skip()
+
+	if p.consume(l.OpenCurve) {
+		keyName := p.name()
+		// Dictionary For each loop
+		p.expect(l.Comma)
+		valueName := p.name()
+		p.expect(l.CloseCurve)
+		p.expect(l.In)
+		return &control.EachPair{KeyName: keyName, ValueName: valueName, Iterable: p.element(), Body: p.body(ScopeLoop)}
+	}
 	iName := p.name()
-	p.expect(l.Colon)
-	from := p.expr(0)
-	p.expect(l.To)
-	to := p.expr(0)
-	var by ast.Expr
-	if p.consume(l.By) {
-		by = p.expr(0)
+	if p.consume(l.In) {
+		// For each loop
+		return &control.Each{IName: iName, Iterable: p.element(), Body: p.body(ScopeLoop)}
 	} else {
-		by = &fundamentals.Number{Content: "1"}
-	}
-	body := p.body()
-	return &control.For{
-		IName: iName,
-		From:  from,
-		To:    to,
-		By:    by,
-		Body:  body,
+		// For I loop
+		p.expect(l.Colon)
+		from := p.expr(0)
+		p.expect(l.To)
+		to := p.expr(0)
+		var by ast.Expr
+		if p.consume(l.By) {
+			by = p.expr(0)
+		} else {
+			by = &fundamentals.Number{Content: "1"}
+		}
+		body := p.body(ScopeLoop)
+		return &control.For{
+			IName: iName,
+			From:  from,
+			To:    to,
+			By:    by,
+			Body:  body,
+		}
 	}
 }
 
-func (p *LangParser) ifExpr() ast.Expr {
+func (p *LangParser) ifSmt() ast.Expr {
 	p.skip()
-	if p.isNext(l.OpenCurve) {
-		return p.simpleIf()
-	}
 	var conditions []ast.Expr
 	var bodies [][]ast.Expr
 
 	conditions = append(conditions, p.expr(0))
-	bodies = append(bodies, p.body())
-
-	for p.notEOF() && p.consume(l.Elif) {
-		conditions = append(conditions, p.expr(0))
-		bodies = append(bodies, p.body())
+	if p.isNext(l.OpenCurly) {
+		bodies = append(bodies, p.body(ScopeIfBody))
+	} else {
+		bodies = append(bodies, []ast.Expr{p.parse()})
 	}
+
 	var elseBody []ast.Expr
-	if p.notEOF() && p.consume(l.Else) {
-		elseBody = p.body()
+	for p.notEOF() && p.consume(l.Else) {
+		if p.consume(l.If) {
+			conditions = append(conditions, p.expr(0))
+			if p.isNext(l.OpenCurly) {
+				bodies = append(bodies, p.body(ScopeIfBody))
+			} else {
+				bodies = append(bodies, []ast.Expr{p.parse()})
+			}
+		} else {
+			if p.isNext(l.OpenCurly) {
+				elseBody = p.body(ScopeIfBody)
+			} else {
+				elseBody = []ast.Expr{p.parse()}
+			}
+			break
+		}
 	}
 	return &control.If{Conditions: conditions, Bodies: bodies, ElseBody: elseBody}
 }
 
-func (p *LangParser) simpleIf() *control.SimpleIf {
-	p.expect(l.OpenCurve)
-	condition := p.parse()
-	p.expect(l.CloseCurve)
-	then := p.parse()
-	p.expect(l.Else)
-	elze := p.parse()
-	return &control.SimpleIf{Condition: condition, Then: then, Else: elze}
-}
-
-func (p *LangParser) body() []ast.Expr {
-	p.expect(l.OpenCurly)
+func (p *LangParser) body(scope Scope) []ast.Expr {
+	where := p.expect(l.OpenCurly)
+	p.ScopeCursor.Enter(where, scope)
 	expressions := p.bodyUntilCurly()
+	p.ScopeCursor.Exit(scope)
 	p.expect(l.CloseCurly)
 	return expressions
 }
@@ -304,6 +330,9 @@ func (p *LangParser) bodyUntilCurly() []ast.Expr {
 	}
 	for p.notEOF() && !p.isNext(l.CloseCurly) {
 		expressions = append(expressions, p.parse())
+		// workaround for dictionary and smart block to coexist
+		//  TODO: work on a better solution later
+		p.consume(l.Comma)
 	}
 	return expressions
 }
@@ -335,10 +364,27 @@ func (p *LangParser) expr(minPrecedence int) ast.Expr {
 			lBinExpr.Operands = append(lBinExpr.Operands, right)
 		} else {
 			// a new binary node
-			left = &common.BinaryExpr{Where: opToken, Operands: []ast.Expr{left, right}, Operator: opToken.Type}
+			left = p.makeBinary(opToken, left, right)
 		}
 	}
 	return left
+}
+
+func (p *LangParser) makeBinary(opToken *l.Token, left ast.Expr, right ast.Expr) ast.Expr {
+	switch opToken.Type {
+	case l.Colon:
+		return &fundamentals.Pair{Key: left, Value: right}
+	case l.Assign:
+		if nameExpr, ok := left.(*variables.Get); ok {
+			return &variables.Set{Global: nameExpr.Global, Name: nameExpr.Name, Expr: right}
+		} else if listGet, ok := left.(*list.Get); ok {
+			return &list.Set{List: listGet.List, Index: listGet.Index, Value: right}
+		}
+	case l.Remainder:
+		// an AI compensating remainder operator
+		return makeFuncCall("rem", left, right)
+	}
+	return &common.BinaryExpr{Where: opToken, Operands: []ast.Expr{left, right}, Operator: opToken.Type}
 }
 
 func precedenceOf(flag l.Flag) int {
@@ -375,6 +421,7 @@ func precedenceOf(flag l.Flag) int {
 }
 
 func (p *LangParser) element() ast.Expr {
+	leftRow := p.peek().Column
 	left := p.term()
 	for p.notEOF() {
 		pe := p.peek()
@@ -393,9 +440,6 @@ func (p *LangParser) element() ast.Expr {
 		case l.Dot:
 			left = p.objectCall(left)
 			continue
-		//case l.RightArrow:
-		//left = &common.Convert{Where: p.next(), On: left, Name: p.name()}
-		//continue
 		case l.Question:
 			left = &common.Question{Where: p.next(), On: left, Question: p.name()}
 			continue
@@ -403,11 +447,13 @@ func (p *LangParser) element() ast.Expr {
 			// constant value transformer
 			left = &common.Transform{Where: p.next(), On: left, Name: p.name()}
 		case l.OpenSquare:
-			p.skip()
-			// an index element access
-			left = &list.Get{List: left, Index: p.parse()}
-			p.expect(l.CloseSquare)
-			continue
+			if leftRow == p.peek().Column {
+				p.skip()
+				// an index element access
+				left = &list.Get{List: left, Index: p.parse()}
+				p.expect(l.CloseSquare)
+				continue
+			}
 		}
 		break
 	}
@@ -489,40 +535,58 @@ func (p *LangParser) term() ast.Expr {
 	case l.OpenSquare:
 		return p.list()
 	case l.OpenCurly:
-		return p.dictionary()
+		p.back()
+		return p.smartBody()
 	case l.OpenCurve:
 		e := p.parse()
 		p.expect(l.CloseCurve)
 		return e
 	case l.Not:
 		return &fundamentals.Not{Expr: p.element()}
-	case l.Do:
-		return p.doExpr()
+	case l.Dash:
+		return makeFuncCall("neg", p.element())
 	case l.If:
-		return p.simpleIf()
+		p.back()
+		return p.ifSmt()
 	case l.Compute:
 		return p.computeExpr()
+	case l.WalkAll:
+		return &fundamentals.WalkAll{}
 	default:
 		if token.HasFlag(l.Value) {
-			value := p.value(token)
-			if nameExpr, ok := value.(*variables.Get); ok && p.notEOF() && p.isNext(l.OpenCurve) {
-				signature, ok := p.Resolver.Procedures[nameExpr.Name]
-				if ok {
-					return &procedures.Call{
-						Name:       nameExpr.Name,
-						Parameters: signature.Parameters,
-						Arguments:  p.arguments(),
-						Returning:  signature.Returning}
-				} else {
-					return &common.FuncCall{Where: nameExpr.Where, Name: nameExpr.Name, Args: p.arguments()}
-				}
-			}
-			return value
+			return p.checkCall(token)
 		}
 		token.Error("Unexpected! %", token.String())
 		panic("") // unreachable
 	}
-	// TODO: a returning local statement might be possible here
+}
+
+func (p *LangParser) smartBody() ast.Expr {
+	body := p.body(ScopeSmartBody)
+	k := 0
+	for ; k < len(body); k++ {
+		if _, ok := body[k].(*fundamentals.Pair); !ok {
+			break
+		}
+	}
+	if k == len(body) {
+		// It's actually a dictionary!
+		return &fundamentals.Dictionary{Elements: body}
+	}
+	return &fundamentals.SmartBody{Body: body}
+}
+
+func (p *LangParser) checkCall(token *l.Token) ast.Expr {
+	value := p.value(token)
+	if nameExpr, ok := value.(*variables.Get); ok && p.notEOF() && p.isNext(l.OpenCurve) {
+		signature, ok := p.Resolver.Procedures[nameExpr.Name]
+		if ok {
+			return &procedures.Call{Name: nameExpr.Name, Parameters: signature.Parameters, Arguments: p.arguments(), Returning: signature.Returning}
+		} else {
+			return &common.FuncCall{Where: nameExpr.Where, Name: nameExpr.Name, Args: p.arguments()}
+		}
+	}
+	return value
 }
 
 func (p *LangParser) computeExpr() *variables.VarResult {
@@ -546,13 +610,6 @@ func (p *LangParser) computeExpr() *variables.VarResult {
 	p.expect(l.CloseCurve)
 	p.expect(l.RightArrow)
 	return &variables.VarResult{Names: varNames, Values: varValues, Result: p.parse()}
-}
-
-func (p *LangParser) doExpr() *control.Do {
-	body := p.body()
-	p.expect(l.RightArrow)
-	result := p.expr(0)
-	return &control.Do{Body: body, Result: result}
 }
 
 func (p *LangParser) dictionary() *fundamentals.Dictionary {
@@ -696,7 +753,7 @@ func (p *LangParser) isNext(checkTypes ...l.Type) bool {
 
 func (p *LangParser) peek() *l.Token {
 	if p.isEOF() {
-		panic("Early EOF! Expected more content.")
+		panic("Early EOF!")
 	}
 	return p.Tokens[p.currIndex]
 }
@@ -705,6 +762,18 @@ func (p *LangParser) next() *l.Token {
 	token := p.Tokens[p.currIndex]
 	p.currIndex++
 	return token
+}
+
+func (p *LangParser) createCheckpoint() {
+	p.currCheckpoint = p.currIndex
+}
+
+func (p *LangParser) backToPast() {
+	p.currIndex = p.currCheckpoint
+}
+
+func (p *LangParser) back() {
+	p.currIndex--
 }
 
 func (p *LangParser) skip() {

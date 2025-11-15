@@ -16,7 +16,7 @@ func (b *Break) String() string {
 	return "break"
 }
 
-func (b *Break) Blockly() ast.Block {
+func (b *Break) Blockly(flags ...bool) ast.Block {
 	return ast.Block{Type: "controls_break"}
 }
 
@@ -24,6 +24,10 @@ func (b *Break) Continuous() bool {
 	return true
 }
 
-func (b *Break) Consumable() bool {
+func (b *Break) Consumable(flags ...bool) bool {
 	return false
+}
+
+func (b *Break) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignVoid}
 }

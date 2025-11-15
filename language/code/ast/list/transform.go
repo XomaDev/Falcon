@@ -1,7 +1,7 @@
 package list
 
 import (
-	ast2 "Falcon/code/ast"
+	"Falcon/code/ast"
 	"Falcon/code/lex"
 	"Falcon/code/sugar"
 	"strconv"
@@ -10,11 +10,11 @@ import (
 
 type Transformer struct {
 	Where       *lex.Token
-	List        ast2.Expr
+	List        ast.Expr
 	Name        string
-	Args        []ast2.Expr
+	Args        []ast.Expr
 	Names       []string
-	Transformer ast2.Expr
+	Transformer ast.Expr
 }
 
 func (t *Transformer) Yail() string {
@@ -22,16 +22,16 @@ func (t *Transformer) Yail() string {
 	panic("implement me")
 }
 
-type Signature struct {
+type transformerSignature struct {
 	ArgSize  int
 	NameSize int
 }
 
-func makeSignature(argSize int, nameSize int) *Signature {
-	return &Signature{ArgSize: argSize, NameSize: nameSize}
+func makeSignature(argSize int, nameSize int) *transformerSignature {
+	return &transformerSignature{ArgSize: argSize, NameSize: nameSize}
 }
 
-var transformers = map[string]*Signature{
+var transformers = map[string]*transformerSignature{
 	"map":       makeSignature(0, 1),
 	"filter":    makeSignature(0, 1),
 	"reduce":    makeSignature(1, 2),
@@ -43,9 +43,9 @@ var transformers = map[string]*Signature{
 
 func (t *Transformer) String() string {
 	if len(t.Args) == 0 {
-		pFormat := "%.% { % -> % }"
+		pFormat := "%\n  .% { % -> % }"
 		if !t.List.Continuous() {
-			pFormat = "(%).% { % -> %} "
+			pFormat = "(%)\n  .% { % -> %} "
 		}
 		return sugar.Format(pFormat,
 			t.List.String(),
@@ -53,20 +53,20 @@ func (t *Transformer) String() string {
 			strings.Join(t.Names, ", "),
 			t.Transformer.String())
 	} else {
-		pFormat := "%.%(%) { % -> % }"
+		pFormat := "%\n  .%(%) { % -> % }"
 		if !t.List.Continuous() {
-			pFormat = "(%).%(%) { % -> % }"
+			pFormat = "(%)\n  .%(%) { % -> % }"
 		}
 		return sugar.Format(pFormat,
 			t.List.String(),
 			t.Name,
-			ast2.JoinExprs(", ", t.Args),
+			ast.JoinExprs(", ", t.Args),
 			strings.Join(t.Names, ", "),
 			t.Transformer.String())
 	}
 }
 
-func (t *Transformer) Blockly() ast2.Block {
+func (t *Transformer) Blockly(flags ...bool) ast.Block {
 	signature, ok := transformers[t.Name]
 	if !ok {
 		t.Where.Error("Unknown transformer '%'", t.Name)
@@ -106,71 +106,78 @@ func (t *Transformer) Continuous() bool {
 	return true
 }
 
-func (t *Transformer) Consumable() bool {
+func (t *Transformer) Consumable(flags ...bool) bool {
 	return true
 }
 
-func (t *Transformer) max() ast2.Block {
-	return ast2.Block{
+func (t *Transformer) Signature() []ast.Signature {
+	if t.Name == "min" || t.Name == "max" || t.Name == "reduce" {
+		return t.Transformer.Signature()
+	}
+	return []ast.Signature{ast.SignList}
+}
+
+func (t *Transformer) max() ast.Block {
+	return ast.Block{
 		Type: "lists_maximum_value",
-		Fields: []ast2.Field{
+		Fields: []ast.Field{
 			{Name: "VAR1", Value: t.Names[0]},
 			{Name: "VAR2", Value: t.Names[1]},
 		},
-		Values: []ast2.Value{
+		Values: []ast.Value{
 			{Name: "LIST", Block: t.List.Blockly()},
 			{Name: "COMPARE", Block: t.Transformer.Blockly()},
 		},
 	}
 }
 
-func (t *Transformer) min() ast2.Block {
-	return ast2.Block{
+func (t *Transformer) min() ast.Block {
+	return ast.Block{
 		Type: "lists_minimum_value",
-		Fields: []ast2.Field{
+		Fields: []ast.Field{
 			{Name: "VAR1", Value: t.Names[0]},
 			{Name: "VAR2", Value: t.Names[1]},
 		},
-		Values: []ast2.Value{
+		Values: []ast.Value{
 			{Name: "LIST", Block: t.List.Blockly()},
 			{Name: "COMPARE", Block: t.Transformer.Blockly()},
 		},
 	}
 }
 
-func (t *Transformer) listSortByKey() ast2.Block {
-	return ast2.Block{
+func (t *Transformer) listSortByKey() ast.Block {
+	return ast.Block{
 		Type:   "lists_sort_key",
-		Fields: []ast2.Field{{Name: "VAR", Value: t.Names[0]}},
-		Values: []ast2.Value{
+		Fields: []ast.Field{{Name: "VAR", Value: t.Names[0]}},
+		Values: []ast.Value{
 			{Name: "LIST", Block: t.List.Blockly()},
 			{Name: "KEY", Block: t.Transformer.Blockly()},
 		},
 	}
 }
 
-func (t *Transformer) listSort() ast2.Block {
-	return ast2.Block{
+func (t *Transformer) listSort() ast.Block {
+	return ast.Block{
 		Type: "lists_sort_comparator",
-		Fields: []ast2.Field{
+		Fields: []ast.Field{
 			{Name: "VAR1", Value: t.Names[0]},
 			{Name: "VAR2", Value: t.Names[1]},
 		},
-		Values: []ast2.Value{
+		Values: []ast.Value{
 			{Name: "LIST", Block: t.List.Blockly()},
 			{Name: "COMPARE", Block: t.Transformer.Blockly()},
 		},
 	}
 }
 
-func (t *Transformer) listReduce() ast2.Block {
-	return ast2.Block{
+func (t *Transformer) listReduce() ast.Block {
+	return ast.Block{
 		Type: "lists_reduce",
-		Fields: []ast2.Field{
+		Fields: []ast.Field{
 			{Name: "VAR1", Value: t.Names[0]},
 			{Name: "VAR2", Value: t.Names[1]},
 		},
-		Values: []ast2.Value{
+		Values: []ast.Value{
 			{Name: "LIST", Block: t.List.Blockly()},
 			{Name: "INITANSWER", Block: t.Args[0].Blockly()},
 			{Name: "COMBINE", Block: t.Transformer.Blockly()},
@@ -178,22 +185,22 @@ func (t *Transformer) listReduce() ast2.Block {
 	}
 }
 
-func (t *Transformer) listFilter() ast2.Block {
-	return ast2.Block{
+func (t *Transformer) listFilter() ast.Block {
+	return ast.Block{
 		Type:   "lists_filter",
-		Fields: []ast2.Field{{Name: "VAR", Value: t.Names[0]}},
-		Values: []ast2.Value{
+		Fields: []ast.Field{{Name: "VAR", Value: t.Names[0]}},
+		Values: []ast.Value{
 			{Name: "LIST", Block: t.List.Blockly()},
 			{Name: "TEST", Block: t.Transformer.Blockly()},
 		},
 	}
 }
 
-func (t *Transformer) listMap() ast2.Block {
-	return ast2.Block{
+func (t *Transformer) listMap() ast.Block {
+	return ast.Block{
 		Type:   "lists_map",
-		Fields: []ast2.Field{{Name: "VAR", Value: t.Names[0]}},
-		Values: []ast2.Value{
+		Fields: []ast.Field{{Name: "VAR", Value: t.Names[0]}},
+		Values: []ast.Value{
 			{Name: "LIST", Block: t.List.Blockly()},
 			{Name: "TO", Block: t.Transformer.Blockly()},
 		},

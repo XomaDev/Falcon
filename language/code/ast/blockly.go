@@ -139,19 +139,21 @@ func MakeValueArgs(on Expr, onName string, operands []Expr, names ...string) []V
 }
 
 func CreateStatement(name string, body []Expr) Statement {
-	headBlock := body[0].Blockly()
-	if body[0].Consumable() {
-		panic("Cannot include a consumable call in a body")
+	headBlock := body[0].Blockly(true)
+	currBlock := &headBlock
+	if body[0].Consumable(true) {
+		panic("Cannot include a consumable in a statement! " + currBlock.Type)
 	}
 	bodyLen := len(body)
 	currI := 1
 
 	for currI < bodyLen {
-		if body[currI].Consumable() {
-			panic("Cannot include a consumable call in a body")
+		aBlock := body[currI].Blockly(true)
+		if body[currI].Consumable(true) {
+			panic("Cannot include a consumable in a statement! " + aBlock.Type)
 		}
-		aBlock := body[currI].Blockly()
-		headBlock.Next = &Next{Block: &aBlock}
+		currBlock.Next = &Next{Block: &aBlock}
+		currBlock = &aBlock
 		currI++
 	}
 	return Statement{Name: name, Block: &headBlock}

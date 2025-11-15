@@ -221,7 +221,7 @@ func (p *XMLParser) parseBlock(block ast.Block) ast.Expr {
 	case "lists_is_in":
 		return p.listContainsItem(block)
 	case "lists_length":
-		return p.makePropCall("listLength", p.singleExpr(block))
+		return p.makePropCall("listLen", p.singleExpr(block))
 	case "lists_is_empty":
 		return p.makeQuestion(lex.OpenSquare, block, "emptyList")
 	case "lists_pick_random_item":
@@ -462,7 +462,9 @@ func (p *XMLParser) componentProp(block ast.Block) ast.Expr {
 
 func (p *XMLParser) ctrlChoose(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return &control.SimpleIf{Condition: pVals.get("TEST"), Then: pVals.get("THENRETURN"), Else: pVals.get("ELSERETURN")}
+	then := pVals.get("THENRETURN")
+	elze := pVals.get("ELSERETURN")
+	return control.MakeSimpleIf(pVals.get("TEST"), []ast.Expr{then}, []ast.Expr{elze})
 }
 
 func (p *XMLParser) ctrlForEachDict(block ast.Block) ast.Expr {
@@ -597,16 +599,7 @@ func (p *XMLParser) variableSet(block ast.Block) ast.Expr {
 	if isGlobal {
 		varName = varName[len("global "):]
 	}
-	return p.makeBinary("=",
-		[]ast.Expr{
-			&variables.Get{
-				Where:  makeFakeToken(lex.Global),
-				Global: isGlobal,
-				Name:   varName,
-			},
-			p.singleExpr(block),
-		},
-	)
+	return variables.Set{Global: isGlobal, Name: varName, Expr: p.singleExpr(block)}
 }
 
 func (p *XMLParser) variableGet(block ast.Block) ast.Expr {
@@ -676,7 +669,7 @@ func (p *XMLParser) dictLookup(block ast.Block) ast.Expr {
 
 func (p *XMLParser) dictPair(block ast.Block) ast.Expr {
 	pVals := p.makeValueMap(block.Values)
-	return p.makeBinary(":", []ast.Expr{pVals.get("KEY"), pVals.get("VALUE")})
+	return &fundamentals.Pair{Key: pVals.get("KEY"), Value: pVals.get("VALUE")}
 }
 
 func (p *XMLParser) listTransMax(block ast.Block) ast.Expr {
