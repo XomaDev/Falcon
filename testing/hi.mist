@@ -1,8 +1,39 @@
+// Function to solve the quadratic equation ax^2 + bx + c = 0
+// Returns a list containing the real roots.
+// Returns an empty list if there are no real roots (discriminant < 0).
 func solveQuadratic(a, b, c) = {
+  // Calculate the discriminant: b^2 - 4ac
+  local discriminant = (b * b) - (4 * a * c)
+  
+  if (discriminant < 0) {
+    // No real roots
+    [] // Return an empty list
+  } else {
+    local sqrtDiscriminant = root(discriminant) // Using the built-in root() function
+    local denominator = 2 * a
+    
     if (discriminant == 0) {
-      local root = 2
-      [root]
+      // One real root (repeated root)
+      local root = -b / denominator
+      [root] // Return a list with one element
     } else {
-      local root1 = 1
+      // Two distinct real roots
+      local root1 = (-b + sqrtDiscriminant) / denominator
+      local root2 = (-b - sqrtDiscriminant) / denominator
+      [root1, root2] // Return a list with two elements
     }
+  }
 }
+
+// Example Usage:
+// 1. Equation: x^2 - 3x + 2 = 0  (Roots should be 1 and 2)
+// local roots1 = solveQuadratic(1, -3, 2)
+// println("Roots for x^2 - 3x + 2 = 0: " _ roots1) // Output: [2.0, 1.0] (Order depends on calculation)
+
+// 2. Equation: x^2 + 4 = 0 (No real roots)
+// local roots2 = solveQuadratic(1, 0, 4)
+// println("Roots for x^2 + 4 = 0: " _ roots2) // Output: []
+
+// 3. Equation: x^2 - 4x + 4 = 0 (One real root at 2)
+// local roots3 = solveQuadratic(1, -4, 4)
+// println("Roots for x^2 - 4x + 4 = 0: " _ roots3) // Output: [2.0]
