@@ -27,7 +27,7 @@ Falcon is a language designed for App Inventor to enable syntax-based programmin
 4. Equality: `==`, and `!=`
 5. Relational: `<`, `<=`, `>`, and `>=`
 6. Text lexicographic: `===` (text equals), `!==` (text not equals), `<<` (text less than), `>>` (text greater than)
-7. Unary: `!` (not)
+7. Unary: `!` (not), and `-` (negate)
 8. Join: `"Hello " _ "World!"`
 9. Pair: `"Fruit": "Mango"`
 10. Question (`?`):
