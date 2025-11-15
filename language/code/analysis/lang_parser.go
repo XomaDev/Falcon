@@ -330,6 +330,8 @@ func (p *LangParser) bodyUntilCurly() []ast.Expr {
 	}
 	for p.notEOF() && !p.isNext(l.CloseCurly) {
 		expressions = append(expressions, p.parse())
+		// workaround for dictionary and smart block to coexist
+		//  TODO: work on a better solution later
 		p.consume(l.Comma)
 	}
 	return expressions
@@ -419,6 +421,7 @@ func precedenceOf(flag l.Flag) int {
 }
 
 func (p *LangParser) element() ast.Expr {
+	leftRow := p.peek().Column
 	left := p.term()
 	for p.notEOF() {
 		pe := p.peek()
@@ -444,11 +447,13 @@ func (p *LangParser) element() ast.Expr {
 			// constant value transformer
 			left = &common.Transform{Where: p.next(), On: left, Name: p.name()}
 		case l.OpenSquare:
-			p.skip()
-			// an index element access
-			left = &list.Get{List: left, Index: p.parse()}
-			p.expect(l.CloseSquare)
-			continue
+			if leftRow == p.peek().Column {
+				p.skip()
+				// an index element access
+				left = &list.Get{List: left, Index: p.parse()}
+				p.expect(l.CloseSquare)
+				continue
+			}
 		}
 		break
 	}
@@ -538,6 +543,8 @@ func (p *LangParser) term() ast.Expr {
 		return e
 	case l.Not:
 		return &fundamentals.Not{Expr: p.element()}
+	case l.Dash:
+		return makeFuncCall("neg", p.element())
 	case l.If:
 		p.back()
 		return p.ifSmt()

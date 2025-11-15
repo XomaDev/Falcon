@@ -1,13 +1,2 @@
-func printStarTree(n) {
-  local lineIndex = 1
-  while lineIndex < n {
-    local starLine = ""
-    local count = 1
-    while count < lineIndex {
-      starLine = starLine _ "*"
-      println(starLine)
-      count = count + 1
-    }
-    lineIndex = lineIndex + 1
-  }
-}
+local a = 3
+[1, 2]

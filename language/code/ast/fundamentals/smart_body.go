@@ -22,6 +22,7 @@ func (s *SmartBody) Blockly(flags ...bool) ast.Block {
 	// a single expression, just inline it
 	if v, ok := s.Body[0].(*variables.Var); ok {
 		// it's a var body, but we want a var result!
+		// TODO: check for negative ranges!!!
 		doExpr := s.createDoSmt(v.Body[len(v.Body)-1], v.Body[:len(v.Body)-1])
 		return s.createLocalResult(v.Names, v.Values, doExpr)
 	}
