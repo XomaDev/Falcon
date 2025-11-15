@@ -23,7 +23,7 @@ func (s *SmartBody) Blockly(flags ...bool) ast.Block {
 	if v, ok := s.Body[0].(*variables.Var); ok {
 		// it's a var body, but we want a var result!
 		var doExpr ast.Block
-		if len(v.Body) > 1 {
+		if len(v.Body) > 0 {
 			doExpr = s.createDoSmt(v.Body[len(v.Body)-1], v.Body[:len(v.Body)-1])
 		} else {
 			doExpr = createEmptyDoSmt(v)
@@ -64,7 +64,7 @@ func (s *SmartBody) createDoSmt(doResult ast.Expr, doBody []ast.Expr) ast.Block 
 	if len(doBody) == 0 {
 		if v, ok := doResult.(*variables.Var); ok {
 			// it's a var body, but we want a var result!
-			if len(v.Body) > 1 {
+			if len(v.Body) > 0 {
 				doExpr = s.createDoSmt(v.Body[len(v.Body)-1], v.Body[:len(v.Body)-1])
 			} else {
 				doExpr = createEmptyDoSmt(v)
