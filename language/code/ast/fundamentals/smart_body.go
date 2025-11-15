@@ -22,8 +22,12 @@ func (s *SmartBody) Blockly(flags ...bool) ast.Block {
 	// a single expression, just inline it
 	if v, ok := s.Body[0].(*variables.Var); ok {
 		// it's a var body, but we want a var result!
-		// TODO: check for negative ranges!!!
-		doExpr := s.createDoSmt(v.Body[len(v.Body)-1], v.Body[:len(v.Body)-1])
+		var doExpr ast.Block
+		if len(v.Body) > 1 {
+			doExpr = s.createDoSmt(v.Body[len(v.Body)-1], v.Body[:len(v.Body)-1])
+		} else {
+			doExpr = createEmptyDoSmt(v)
+		}
 		return s.createLocalResult(v.Names, v.Values, doExpr)
 	}
 	if len(s.Body) == 1 {
@@ -60,7 +64,11 @@ func (s *SmartBody) createDoSmt(doResult ast.Expr, doBody []ast.Expr) ast.Block 
 	if len(doBody) == 0 {
 		if v, ok := doResult.(*variables.Var); ok {
 			// it's a var body, but we want a var result!
-			doExpr = s.createDoSmt(v.Body[len(v.Body)-1], v.Body[:len(v.Body)-1])
+			if len(v.Body) > 1 {
+				doExpr = s.createDoSmt(v.Body[len(v.Body)-1], v.Body[:len(v.Body)-1])
+			} else {
+				doExpr = createEmptyDoSmt(v)
+			}
 			return s.createLocalResult(v.Names, v.Values, doExpr)
 		}
 		doExpr = doResult.Blockly()
@@ -72,6 +80,13 @@ func (s *SmartBody) createDoSmt(doResult ast.Expr, doBody []ast.Expr) ast.Block 
 		}
 	}
 	return doExpr
+}
+
+func createEmptyDoSmt(v *variables.Var) ast.Block {
+	return ast.Block{
+		Type:   "lexical_variable_get",
+		Fields: []ast.Field{{Name: "VAR", Value: v.Names[len(v.Names)-1]}},
+	}
 }
 
 // mutateVars returns a name list of declared variables, and the declarations are mutated to a set call.

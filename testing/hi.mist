@@ -1,2 +1,8 @@
-local a = 3
-[1, 2]
+func solveQuadratic(a, b, c) = {
+    if (discriminant == 0) {
+      local root = 2
+      [root]
+    } else {
+      local root1 = 1
+    }
+}
