@@ -1,10 +1,20 @@
-func solveQuadratic(a, b, c) = {
-  local discriminant = (b ^ 2) - 4 * a * c
-  if (discriminant >= 0) {
-    local x1 = (-b + root(discriminant)) / (2 * a)
-    local x2 = (-b - root(discriminant)) / (2 * a)
-    [x1, x2] // Return a list of solutions
-  } else {
-    [] // Return an empty list if no real solutions
+func sumFibonacci(n) =
+  {
+    local fibSequence = []
+    local a = 0
+    local b = 1
+    local sum = 0
+    if (n < 0) 0
+    else if (n == 1) 1
+    else fibSequence.add(a)
+    fibSequence.add(b)
+    sum = a + b
+    for i: 2 to n - 1 by 1 {
+      local nextFib = a + b
+      fibSequence.add(nextFib)
+      sum = sum + nextFib
+      a = b
+      b = nextFib
+    }
+    sum
   }
-}
