@@ -10,6 +10,7 @@ Falcon is a language designed for App Inventor to enable syntax-based programmin
 7. Do not use `_` in place of unused variables
 8. Variables can never be in the uninitialized state.
 9. Always keep the last expression for returning functions.
+10. Always generate codes between ```.
 
 ## Data types
 1. String `"Hello, world!"`
