@@ -39,7 +39,7 @@ func (v *RetProcedure) Blockly(flags ...bool) ast.Block {
 		Type:     "procedures_defreturn",
 		Mutation: &ast.Mutation{Args: ast.ToArgs(v.Parameters)},
 		Fields:   append(ast.ToFields("VAR", v.Parameters), ast.Field{Name: "NAME", Value: v.Name}),
-		Values:   []ast.Value{{Name: "RETURN", Block: v.Result.Blockly(flags...)}},
+		Values:   []ast.Value{{Name: "RETURN", Block: v.Result.Blockly(false)}},
 	}
 }
 
