@@ -63,7 +63,7 @@ func (i *If) String() string {
 }
 
 func (i *If) Blockly(flags ...bool) ast.Block {
-	if !(len(flags) > 0 && flags[0]) {
+	if len(flags) > 0 && flags[0] {
 		// Default to an if expression
 		return i.createSimpleIf()
 	}
