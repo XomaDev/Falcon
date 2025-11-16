@@ -71,12 +71,12 @@ func (s *SmartBody) createDoSmt(doResult ast.Expr, doBody []ast.Expr) ast.Block 
 			}
 			return s.createLocalResult(v.Names, v.Values, doExpr)
 		}
-		doExpr = doResult.Blockly()
+		doExpr = doResult.Blockly(false)
 	} else {
 		doExpr = ast.Block{
 			Type:       "controls_do_then_return",
 			Statements: []ast.Statement{ast.CreateStatement("STM", doBody)},
-			Values:     []ast.Value{{Name: "VALUE", Block: doResult.Blockly()}},
+			Values:     []ast.Value{{Name: "VALUE", Block: doResult.Blockly(true)}},
 		}
 	}
 	return doExpr

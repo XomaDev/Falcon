@@ -101,7 +101,7 @@ func ToArgs(names []string) []Arg {
 func ValuesByPrefix(namePrefix string, operands []Expr) []Value {
 	values := make([]Value, len(operands))
 	for i, operand := range operands {
-		values[i] = Value{Name: namePrefix + strconv.Itoa(i), Block: operand.Blockly(true)}
+		values[i] = Value{Name: namePrefix + strconv.Itoa(i), Block: operand.Blockly(false)}
 	}
 	return values
 }
@@ -110,7 +110,7 @@ func ValueArgsByPrefix(on Expr, onName string, namePrefix string, operands []Exp
 	values := make([]Value, len(operands)+1)
 	values[0] = Value{Name: onName, Block: on.Blockly()}
 	for i, operand := range operands {
-		values[i+1] = Value{Name: namePrefix + strconv.Itoa(i), Block: operand.Blockly(true)}
+		values[i+1] = Value{Name: namePrefix + strconv.Itoa(i), Block: operand.Blockly(false)}
 	}
 	return values
 }
@@ -121,7 +121,7 @@ func MakeValues(operands []Expr, names ...string) []Value {
 	}
 	values := make([]Value, len(operands))
 	for i, operand := range operands {
-		values[i] = Value{Name: names[i], Block: operand.Blockly()}
+		values[i] = Value{Name: names[i], Block: operand.Blockly(false)}
 	}
 	return values
 }
@@ -133,7 +133,7 @@ func MakeValueArgs(on Expr, onName string, operands []Expr, names ...string) []V
 	values := make([]Value, len(operands)+1)
 	values[0] = Value{Name: onName, Block: on.Blockly()}
 	for i, operand := range operands {
-		values[i+1] = Value{Name: names[i], Block: operand.Blockly()}
+		values[i+1] = Value{Name: names[i], Block: operand.Blockly(false)}
 	}
 	return values
 }

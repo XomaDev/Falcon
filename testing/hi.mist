@@ -1,3 +1,5 @@
 func Fib(n) =
-  if (n < 2) n
-  else Fib(n - 1) + Fib(n - 2)
+  {
+    local name = n
+    Fib(if (true) n else 2)
+  }
