@@ -1,3 +1,10 @@
-func Fib(n) =
-  if (n < 2) n
-  else Fib(n - 1) + Fib(n  - 2)
+func solveQuadratic(a, b, c) = {
+  local discriminant = (b ^ 2) - 4 * a * c
+  if (discriminant >= 0) {
+    local x1 = (-b + root(discriminant)) / (2 * a)
+    local x2 = (-b - root(discriminant)) / (2 * a)
+    [x1, x2] // Return a list of solutions
+  } else {
+    [] // Return an empty list if no real solutions
+  }
+}

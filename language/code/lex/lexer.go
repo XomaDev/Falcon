@@ -73,6 +73,8 @@ func (l *Lexer) parse() {
 		l.createOp("/")
 	case '%':
 		l.createOp("%")
+	case '^':
+		l.createOp("^")
 	case '|':
 		if l.consume('|') {
 			l.createOp("||")
