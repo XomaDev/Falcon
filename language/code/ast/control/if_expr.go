@@ -32,13 +32,6 @@ func (s *SimpleIf) Yail() string {
 }
 
 func (s *SimpleIf) String() string {
-	// TODO:
-	//  We got to pretty print all of them
-	//  1. First flatten out all else conditions
-	//  2. Multi line if:
-	//    a. More than 2 branches
-	//    b. Any of them has a non continuous statement
-
 	var branches []string
 	currIf := s
 	var hasDiscontinuity = false
