@@ -1065,11 +1065,7 @@ func (p *XMLParser) makePropCall(name string, on ast.Expr, args ...ast.Expr) ast
 
 func (p *XMLParser) makeBinary(operator string, operands []ast.Expr) ast.Expr {
 	token := makeToken(operator)
-	return &common.BinaryExpr{
-		Where:    token,
-		Operator: token.Type,
-		Operands: operands,
-	}
+	return &common.BinaryExpr{Where: token, Operator: token.Type, Operands: operands}
 }
 
 func makeFuncCall(name string, args ...ast.Expr) ast.Expr {

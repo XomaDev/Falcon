@@ -24,6 +24,12 @@ func (f *FuncCall) String() string {
 	if f.Name == "rem" {
 		return f.Args[0].String() + " % " + f.Args[1].String()
 	}
+	if f.Name == "neg" {
+		if f.Args[0].Continuous() {
+			return "-" + f.Args[0].String()
+		}
+		return "-(" + f.Args[0].String() + ")"
+	}
 	return sugar.Format("%(%)", f.Name, ast.JoinExprs(", ", f.Args))
 }
 

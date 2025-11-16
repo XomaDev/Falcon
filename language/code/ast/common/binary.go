@@ -4,6 +4,7 @@ import (
 	"Falcon/code/ast"
 	"Falcon/code/lex"
 	"strconv"
+	"strings"
 )
 
 type BinaryExpr struct {
@@ -18,7 +19,20 @@ func (b *BinaryExpr) Yail() string {
 }
 
 func (b *BinaryExpr) String() string {
-	return ast.JoinExprs(" "+*b.Where.Content+" ", b.Operands)
+	myPrecedence := lex.PrecedenceOf(b.Where.Flags[0])
+	stringified := make([]string, len(b.Operands))
+	for i, operand := range b.Operands {
+		operandStr := operand.String()
+		// If operand is a BinaryExpr with lower precedence, wrap it
+		if binExpr, ok := operand.(*BinaryExpr); ok {
+			if lex.PrecedenceOf(binExpr.Where.Flags[0]) < myPrecedence {
+				operandStr = "(" + operandStr + ")"
+			}
+		}
+
+		stringified[i] = operandStr
+	}
+	return strings.Join(stringified, " "+*b.Where.Content+" ")
 }
 
 // CanRepeat: return true if the binary expr can be optimized into one struct
