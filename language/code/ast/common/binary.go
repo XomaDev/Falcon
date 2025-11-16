@@ -148,13 +148,13 @@ func (b *BinaryExpr) boolExpr() ast.Block {
 		fieldOp = "OR"
 	}
 	values := []ast.Value{
-		{Name: "A", Block: b.Operands[0].Blockly()},
-		{Name: "B", Block: b.Operands[1].Blockly()},
+		{Name: "A", Block: b.Operands[0].Blockly(false)},
+		{Name: "B", Block: b.Operands[1].Blockly(false)},
 	}
 	lenOperands := len(b.Operands)
 	if lenOperands > 2 {
 		for i := 2; i < lenOperands; i++ {
-			values = append(values, ast.Value{Name: "BOOL" + strconv.Itoa(i), Block: b.Operands[i].Blockly()})
+			values = append(values, ast.Value{Name: "BOOL" + strconv.Itoa(i), Block: b.Operands[i].Blockly(false)})
 		}
 	}
 	return ast.Block{

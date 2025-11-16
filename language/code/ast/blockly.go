@@ -101,7 +101,7 @@ func ToArgs(names []string) []Arg {
 func ValuesByPrefix(namePrefix string, operands []Expr) []Value {
 	values := make([]Value, len(operands))
 	for i, operand := range operands {
-		values[i] = Value{Name: namePrefix + strconv.Itoa(i), Block: operand.Blockly()}
+		values[i] = Value{Name: namePrefix + strconv.Itoa(i), Block: operand.Blockly(true)}
 	}
 	return values
 }
@@ -110,7 +110,7 @@ func ValueArgsByPrefix(on Expr, onName string, namePrefix string, operands []Exp
 	values := make([]Value, len(operands)+1)
 	values[0] = Value{Name: onName, Block: on.Blockly()}
 	for i, operand := range operands {
-		values[i+1] = Value{Name: namePrefix + strconv.Itoa(i), Block: operand.Blockly()}
+		values[i+1] = Value{Name: namePrefix + strconv.Itoa(i), Block: operand.Blockly(true)}
 	}
 	return values
 }
@@ -139,6 +139,7 @@ func MakeValueArgs(on Expr, onName string, operands []Expr, names ...string) []V
 }
 
 func CreateStatement(name string, body []Expr) Statement {
+	// Pass true to indicate a statement
 	headBlock := body[0].Blockly(true)
 	currBlock := &headBlock
 	if body[0].Consumable(true) {

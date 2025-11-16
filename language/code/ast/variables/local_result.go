@@ -66,7 +66,7 @@ func (v *VarResult) Blockly(flags ...bool) ast.Block {
 		Mutation: &ast.Mutation{LocalNames: ast.MakeLocalNames(v.Names...)},
 		Fields:   ast.ToFields("VAR", v.Names),
 		Values: append(ast.ValuesByPrefix("DECL", v.Values),
-			ast.Value{Name: "RETURN", Block: v.Result.Blockly()}),
+			ast.Value{Name: "RETURN", Block: v.Result.Blockly(false)}),
 	}
 }
 

@@ -47,7 +47,7 @@ func (e *EachPair) Blockly(flags ...bool) ast.Block {
 			{Name: "KEY", Value: e.KeyName},
 			{Name: "VALUE", Value: e.ValueName},
 		},
-		Values:     []ast.Value{{Name: "DICT", Block: e.Iterable.Blockly()}},
+		Values:     []ast.Value{{Name: "DICT", Block: e.Iterable.Blockly(false)}},
 		Statements: []ast.Statement{ast.CreateStatement("DO", e.Body)},
 	}
 }

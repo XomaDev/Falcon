@@ -36,7 +36,7 @@ func (g *GenericPropertyGet) Blockly(flags ...bool) ast.Block {
 			ComponentType: g.ComponentType,
 		},
 		Fields: []ast.Field{{Name: "PROP", Value: g.Property}},
-		Values: []ast.Value{{Name: "COMPONENT", Block: g.Component.Blockly()}},
+		Values: []ast.Value{{Name: "COMPONENT", Block: g.Component.Blockly(false)}},
 	}
 }
 

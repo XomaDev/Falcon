@@ -42,7 +42,7 @@ func (v *SimpleVar) Blockly(flags ...bool) ast.Block {
 		Type:       "local_declaration_statement",
 		Mutation:   &ast.Mutation{LocalNames: ast.MakeLocalNames(v.Name)},
 		Fields:     []ast.Field{{Name: "VAR0", Value: v.Name}},
-		Values:     []ast.Value{{Name: "DECL0", Block: v.Value.Blockly()}},
+		Values:     []ast.Value{{Name: "DECL0", Block: v.Value.Blockly(false)}},
 		Statements: statements,
 	}
 }

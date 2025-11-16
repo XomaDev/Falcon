@@ -174,5 +174,5 @@ func (c *Call) Signature() []ast.Signature {
 }
 
 func (c *Call) simpleOperand(blockType string, valueName string) ast.Block {
-	return ast.Block{Type: blockType, Values: []ast.Value{{Name: valueName, Block: c.On.Blockly()}}}
+	return ast.Block{Type: blockType, Values: []ast.Value{{Name: valueName, Block: c.On.Blockly(false)}}}
 }

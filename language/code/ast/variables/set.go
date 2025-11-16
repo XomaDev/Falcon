@@ -29,7 +29,7 @@ func (s Set) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:   "lexical_variable_set",
 		Fields: []ast.Field{{Name: "VAR", Value: name}},
-		Values: []ast.Value{{Name: "VALUE", Block: s.Expr.Blockly()}},
+		Values: []ast.Value{{Name: "VALUE", Block: s.Expr.Blockly(false)}},
 	}
 }
 

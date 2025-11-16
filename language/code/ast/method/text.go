@@ -47,7 +47,7 @@ func (c *Call) textChangeCase() ast.Block {
 	return ast.Block{
 		Type:   "text_changeCase",
 		Fields: []ast.Field{{Name: "OP", Value: fieldOp}},
-		Values: []ast.Value{{Name: "TEXT", Block: c.On.Blockly()}},
+		Values: []ast.Value{{Name: "TEXT", Block: c.On.Blockly(false)}},
 	}
 }
 
@@ -62,8 +62,8 @@ func (c *Call) textReplaceFrom() ast.Block {
 		Type:   "text_replace_mappings",
 		Fields: []ast.Field{{Name: "OP", Value: fieldOp}},
 		Values: []ast.Value{
-			{Name: "MAPPINGS", Block: c.Args[0].Blockly()},
-			{Name: "TEXT", Block: c.On.Blockly()},
+			{Name: "MAPPINGS", Block: c.Args[0].Blockly(false)},
+			{Name: "TEXT", Block: c.On.Blockly(false)},
 		},
 	}
 }

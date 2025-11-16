@@ -31,7 +31,7 @@ func (s *SmartBody) Blockly(flags ...bool) ast.Block {
 		return s.createLocalResult(v.Names, v.Values, doExpr)
 	}
 	if len(s.Body) == 1 {
-		return s.Body[0].Blockly()
+		return s.Body[0].Blockly(flags...)
 	}
 	// prepare a do expression out of the then
 	doExpr := s.createDoSmt(s.Body[len(s.Body)-1], s.Body[:len(s.Body)-1])
