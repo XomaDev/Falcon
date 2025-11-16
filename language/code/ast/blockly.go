@@ -35,9 +35,9 @@ type Value struct {
 
 type Mutation struct {
 	XMLName       xml.Name    `xml:"mutation"`
-	ItemCount     int         `xml:"items,attr,omitempty"`
-	ElseIfCount   int         `xml:"elseif,attr,omitempty"`
-	ElseCount     int         `xml:"else,attr,omitempty"`
+	ItemCount     int         `xml:"items,attr"`
+	ElseIfCount   int         `xml:"elseif,attr"`
+	ElseCount     int         `xml:"else,attr"`
 	LocalNames    []LocalName `xml:"localname"`
 	Args          []Arg       `xml:"arg"`
 	Key           string      `xml:"key,attr,omitempty"`
