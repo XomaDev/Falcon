@@ -72,7 +72,7 @@ func mistToXml(this js.Value, p []js.Value) any {
 
 		for _, expression := range expressions {
 			xmlBlock := ast.XmlRoot{
-				Blocks: []ast.Block{expression.Blockly()},
+				Blocks: []ast.Block{expression.Blockly(true)},
 				XMLNS:  "https://developers.google.com/blockly/xml",
 			}
 			bytes, _ := xml.MarshalIndent(xmlBlock, "", "  ")
@@ -99,7 +99,7 @@ func xmlToMist(this js.Value, p []js.Value) any {
 			builder.WriteString(expr.String())
 			builder.WriteString("\n")
 
-			block := expr.Blockly()
+			block := expr.Blockly(true)
 			if block.Order() > 0 {
 				builder.WriteString("\n")
 			}

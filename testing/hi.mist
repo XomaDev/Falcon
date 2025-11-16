@@ -1,20 +1,7 @@
-func sumFibonacci(n) =
+func a(n) =
   {
-    local fibSequence = []
-    local a = 0
-    local b = 1
-    local sum = 0
     if (n < 0) 0
-    else if (n == 1) 1
     else fibSequence.add(a)
     fibSequence.add(b)
-    sum = a + b
-    for i: 2 to n - 1 by 1 {
-      local nextFib = a + b
-      fibSequence.add(nextFib)
-      sum = sum + nextFib
-      a = b
-      b = nextFib
-    }
     sum
   }

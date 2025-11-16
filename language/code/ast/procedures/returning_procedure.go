@@ -2,6 +2,7 @@ package procedures
 
 import (
 	"Falcon/code/ast"
+	"Falcon/code/ast/control"
 	"Falcon/code/sugar"
 	"strings"
 )
@@ -24,7 +25,13 @@ func (v *RetProcedure) Yail() string {
 }
 
 func (v *RetProcedure) String() string {
-	return sugar.Format("func %(%) =\n%", v.Name, strings.Join(v.Parameters, ", "), ast.Pad(v.Result.String()))
+	var resultString string
+	if _, ok := v.Result.(*control.Do); !ok {
+		resultString = ast.Pad(v.Result.String())
+	} else {
+		resultString = ast.Pad("{\n" + ast.Pad(v.Result.String()) + "}")
+	}
+	return sugar.Format("func %(%) =\n%", v.Name, strings.Join(v.Parameters, ", "), resultString)
 }
 
 func (v *RetProcedure) Blockly(flags ...bool) ast.Block {
@@ -32,7 +39,7 @@ func (v *RetProcedure) Blockly(flags ...bool) ast.Block {
 		Type:     "procedures_defreturn",
 		Mutation: &ast.Mutation{Args: ast.ToArgs(v.Parameters)},
 		Fields:   append(ast.ToFields("VAR", v.Parameters), ast.Field{Name: "NAME", Value: v.Name}),
-		Values:   []ast.Value{{Name: "RETURN", Block: v.Result.Blockly()}},
+		Values:   []ast.Value{{Name: "RETURN", Block: v.Result.Blockly(flags...)}},
 	}
 }
 

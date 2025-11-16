@@ -36,6 +36,7 @@ func (i *If) Yail() string {
 }
 
 func (i *If) String() string {
+	// TODO: accept flags here too
 	var builder strings.Builder
 
 	numConditions := len(i.Conditions)
