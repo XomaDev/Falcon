@@ -64,7 +64,7 @@ func (n *Not) String() string {
 func (n *Not) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:   "logic_negate",
-		Values: []ast.Value{{Name: "BOOL", Block: n.Expr.Blockly()}},
+		Values: []ast.Value{{Name: "BOOL", Block: n.Expr.Blockly(false)}},
 	}
 }
 

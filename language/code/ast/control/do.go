@@ -26,7 +26,7 @@ func (d *Do) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:       "controls_do_then_return",
 		Statements: []ast.Statement{ast.CreateStatement("STM", d.Body)},
-		Values:     []ast.Value{{Name: "VALUE", Block: d.Result.Blockly()}},
+		Values:     []ast.Value{{Name: "VALUE", Block: d.Result.Blockly(false)}},
 	}
 }
 

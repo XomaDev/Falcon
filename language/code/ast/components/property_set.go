@@ -42,7 +42,7 @@ func (p *PropertySet) Blockly(flags ...bool) ast.Block {
 			"COMPONENT_SELECTOR": p.ComponentName,
 			"PROP":               p.Property,
 		}),
-		Values: []ast.Value{{Name: "VALUE", Block: p.Value.Blockly()}},
+		Values: []ast.Value{{Name: "VALUE", Block: p.Value.Blockly(false)}},
 	}
 }
 

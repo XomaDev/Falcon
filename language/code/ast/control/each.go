@@ -30,7 +30,7 @@ func (e *Each) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:       "controls_forEach",
 		Fields:     []ast.Field{{Name: "VAR", Value: e.IName}},
-		Values:     []ast.Value{{Name: "LIST", Block: e.Iterable.Blockly()}},
+		Values:     []ast.Value{{Name: "LIST", Block: e.Iterable.Blockly(false)}},
 		Statements: []ast.Statement{ast.CreateStatement("DO", e.Body)},
 	}
 }

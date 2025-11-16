@@ -77,41 +77,41 @@ func (q *Question) evenOrOdd() ast.Block {
 		Operands: []ast.Expr{remainderCall, &fundamentals.Number{Content: remainder}},
 		Operator: lex.Equals,
 	}
-	return comparison.Blockly()
+	return comparison.Blockly(false)
 }
 
 func (q *Question) listIsEmpty() ast.Block {
 	return ast.Block{
 		Type:   "lists_is_empty",
-		Values: []ast.Value{{Name: "LIST", Block: q.On.Blockly()}},
+		Values: []ast.Value{{Name: "LIST", Block: q.On.Blockly(false)}},
 	}
 }
 
 func (q *Question) textIsEmpty() ast.Block {
 	return ast.Block{
 		Type:   "text_isEmpty",
-		Values: []ast.Value{{Name: "VALUE", Block: q.On.Blockly()}},
+		Values: []ast.Value{{Name: "VALUE", Block: q.On.Blockly(false)}},
 	}
 }
 
 func (q *Question) dictQuestion() ast.Block {
 	return ast.Block{
 		Type:   "dictionaries_is_dict",
-		Values: []ast.Value{{Name: "THING", Block: q.On.Blockly()}},
+		Values: []ast.Value{{Name: "THING", Block: q.On.Blockly(false)}},
 	}
 }
 
 func (q *Question) listQuestion() ast.Block {
 	return ast.Block{
 		Type:   "lists_is_list",
-		Values: []ast.Value{{Name: "ITEM", Block: q.On.Blockly()}},
+		Values: []ast.Value{{Name: "ITEM", Block: q.On.Blockly(false)}},
 	}
 }
 
 func (q *Question) textQuestion() ast.Block {
 	return ast.Block{
 		Type:   "text_is_string",
-		Values: []ast.Value{{Name: "ITEM", Block: q.On.Blockly()}},
+		Values: []ast.Value{{Name: "ITEM", Block: q.On.Blockly(false)}},
 	}
 }
 
@@ -130,6 +130,6 @@ func (q *Question) mathQuestion() ast.Block {
 	return ast.Block{
 		Type:   "math_is_a_number",
 		Fields: []ast.Field{{Name: "OP", Value: fieldOp}},
-		Values: []ast.Value{{Name: "NUM", Block: q.On.Blockly()}},
+		Values: []ast.Value{{Name: "NUM", Block: q.On.Blockly(false)}},
 	}
 }

@@ -125,8 +125,8 @@ func (t *Transformer) max() ast.Block {
 			{Name: "VAR2", Value: t.Names[1]},
 		},
 		Values: []ast.Value{
-			{Name: "LIST", Block: t.List.Blockly()},
-			{Name: "COMPARE", Block: t.Transformer.Blockly()},
+			{Name: "LIST", Block: t.List.Blockly(false)},
+			{Name: "COMPARE", Block: t.Transformer.Blockly(false)},
 		},
 	}
 }
@@ -139,8 +139,8 @@ func (t *Transformer) min() ast.Block {
 			{Name: "VAR2", Value: t.Names[1]},
 		},
 		Values: []ast.Value{
-			{Name: "LIST", Block: t.List.Blockly()},
-			{Name: "COMPARE", Block: t.Transformer.Blockly()},
+			{Name: "LIST", Block: t.List.Blockly(false)},
+			{Name: "COMPARE", Block: t.Transformer.Blockly(false)},
 		},
 	}
 }
@@ -150,8 +150,8 @@ func (t *Transformer) listSortByKey() ast.Block {
 		Type:   "lists_sort_key",
 		Fields: []ast.Field{{Name: "VAR", Value: t.Names[0]}},
 		Values: []ast.Value{
-			{Name: "LIST", Block: t.List.Blockly()},
-			{Name: "KEY", Block: t.Transformer.Blockly()},
+			{Name: "LIST", Block: t.List.Blockly(false)},
+			{Name: "KEY", Block: t.Transformer.Blockly(false)},
 		},
 	}
 }
@@ -164,8 +164,8 @@ func (t *Transformer) listSort() ast.Block {
 			{Name: "VAR2", Value: t.Names[1]},
 		},
 		Values: []ast.Value{
-			{Name: "LIST", Block: t.List.Blockly()},
-			{Name: "COMPARE", Block: t.Transformer.Blockly()},
+			{Name: "LIST", Block: t.List.Blockly(false)},
+			{Name: "COMPARE", Block: t.Transformer.Blockly(false)},
 		},
 	}
 }
@@ -178,9 +178,9 @@ func (t *Transformer) listReduce() ast.Block {
 			{Name: "VAR2", Value: t.Names[1]},
 		},
 		Values: []ast.Value{
-			{Name: "LIST", Block: t.List.Blockly()},
-			{Name: "INITANSWER", Block: t.Args[0].Blockly()},
-			{Name: "COMBINE", Block: t.Transformer.Blockly()},
+			{Name: "LIST", Block: t.List.Blockly(false)},
+			{Name: "INITANSWER", Block: t.Args[0].Blockly(false)},
+			{Name: "COMBINE", Block: t.Transformer.Blockly(false)},
 		},
 	}
 }
@@ -190,8 +190,8 @@ func (t *Transformer) listFilter() ast.Block {
 		Type:   "lists_filter",
 		Fields: []ast.Field{{Name: "VAR", Value: t.Names[0]}},
 		Values: []ast.Value{
-			{Name: "LIST", Block: t.List.Blockly()},
-			{Name: "TEST", Block: t.Transformer.Blockly()},
+			{Name: "LIST", Block: t.List.Blockly(false)},
+			{Name: "TEST", Block: t.Transformer.Blockly(false)},
 		},
 	}
 }
@@ -201,8 +201,8 @@ func (t *Transformer) listMap() ast.Block {
 		Type:   "lists_map",
 		Fields: []ast.Field{{Name: "VAR", Value: t.Names[0]}},
 		Values: []ast.Value{
-			{Name: "LIST", Block: t.List.Blockly()},
-			{Name: "TO", Block: t.Transformer.Blockly()},
+			{Name: "LIST", Block: t.List.Blockly(false)},
+			{Name: "TO", Block: t.Transformer.Blockly(false)},
 		},
 	}
 }

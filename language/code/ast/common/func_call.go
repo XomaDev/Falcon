@@ -234,7 +234,7 @@ func (f *FuncCall) genericGet() ast.Block {
 			ComponentType: compType.Name,
 		},
 		Fields: []ast.Field{{Name: "PROP", Value: vGet.Name}},
-		Values: []ast.Value{{Name: "COMPONENT", Block: f.Args[1].Blockly()}},
+		Values: []ast.Value{{Name: "COMPONENT", Block: f.Args[1].Blockly(false)}},
 	}
 }
 
@@ -377,7 +377,7 @@ func (f *FuncCall) mathConversions() ast.Block {
 	return ast.Block{
 		Type:   blockType,
 		Fields: []ast.Field{{Name: "OP", Value: fieldOp}},
-		Values: []ast.Value{{Name: "NUM", Block: f.Args[0].Blockly()}},
+		Values: []ast.Value{{Name: "NUM", Block: f.Args[0].Blockly(false)}},
 	}
 }
 

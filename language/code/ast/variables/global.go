@@ -26,7 +26,7 @@ func (g *Global) Blockly(flags ...bool) ast.Block {
 	return ast.Block{
 		Type:   "global_declaration",
 		Fields: []ast.Field{{Name: "NAME", Value: g.Name}},
-		Values: []ast.Value{{Name: "VALUE", Block: g.Value.Blockly()}},
+		Values: []ast.Value{{Name: "VALUE", Block: g.Value.Blockly(false)}},
 	}
 }
 

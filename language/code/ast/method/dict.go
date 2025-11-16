@@ -41,7 +41,7 @@ func (c *Call) dictGetters() ast.Block {
 	return ast.Block{
 		Type:   "dictionaries_getters",
 		Fields: []ast.Field{{Name: "OP", Value: fieldOp}},
-		Values: []ast.Value{{Name: "DICT", Block: c.On.Blockly()}},
+		Values: []ast.Value{{Name: "DICT", Block: c.On.Blockly(false)}},
 	}
 }
 
@@ -56,8 +56,8 @@ func (c *Call) dictMergeInto() ast.Block {
 	return ast.Block{
 		Type: "dictionaries_combine_dicts",
 		Values: []ast.Value{
-			{Name: "DICT1", Block: c.Args[0].Blockly()},
-			{Name: "DICT2", Block: c.On.Blockly()},
+			{Name: "DICT1", Block: c.Args[0].Blockly(false)},
+			{Name: "DICT2", Block: c.On.Blockly(false)},
 		},
 	}
 }
