@@ -1,5 +1,1 @@
-func Fib(n) =
-  {
-    local name = n
-    Fib(if (true) n else 2)
-  }
+quadraticFormula(1, 5, 6)

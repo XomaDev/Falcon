@@ -344,7 +344,7 @@ func (p *LangParser) expr(minPrecedence int) ast.Expr {
 		if !opToken.HasFlag(l.Operator) {
 			break
 		}
-		precedence := precedenceOf(opToken.Flags[0])
+		precedence := l.PrecedenceOf(opToken.Flags[0])
 		if precedence == -1 || precedence < minPrecedence {
 			break
 		}
@@ -385,39 +385,6 @@ func (p *LangParser) makeBinary(opToken *l.Token, left ast.Expr, right ast.Expr)
 		return makeFuncCall("rem", left, right)
 	}
 	return &common.BinaryExpr{Where: opToken, Operands: []ast.Expr{left, right}, Operator: opToken.Type}
-}
-
-func precedenceOf(flag l.Flag) int {
-	switch flag {
-	case l.AssignmentType:
-		return 0
-	case l.Pair:
-		return 1
-	case l.TextJoin:
-		return 2
-	case l.LLogicOr:
-		return 3
-	case l.LLogicAnd:
-		return 4
-	case l.BBitwiseOr:
-		return 5
-	case l.BBitwiseAnd:
-		return 6
-	case l.BBitwiseXor:
-		return 7
-	case l.Equality:
-		return 8
-	case l.Relational:
-		return 9
-	case l.Binary:
-		return 10
-	case l.BinaryL1:
-		return 11
-	case l.BinaryL2:
-		return 12
-	default:
-		return -1
-	}
 }
 
 func (p *LangParser) element() ast.Expr {
