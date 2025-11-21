@@ -1036,7 +1036,7 @@ func (p *XMLParser) mathExpr(block ast.Block) ast.Expr {
 		mathOp = ">="
 	case "BITAND":
 		mathOp = "&"
-	case "BITOR":
+	case "BITIOR":
 		mathOp = "|"
 	case "BITXOR":
 		mathOp = "~"
