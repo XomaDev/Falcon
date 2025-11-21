@@ -5,7 +5,7 @@ Falcon is a language designed for App Inventor to enable syntax-based programmin
 ## Quirks
 1. Falcon follows 1-based indexing.
 2. Falcon variables are dynamically typed. Do not declare variables.
-U3. Lists and dictionaries are passed as references.
+3. Lists and dictionaries are passed as references.
 4. Falcon follows Kotlin's style of functional expressions.
 5. Falcon does not have a return statement; the last expression in a body is returned.
 6. Only single-line comments using double slash `//` are supported.
