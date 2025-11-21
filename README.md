@@ -196,7 +196,7 @@ Note that there is no `return` statement in Falcon. The last statement in a body
   <br>Parse a static constant string from the respective base.
   e.g. `bin("1010")`
 
-- `root(number)`
+- `sqrt(number)`
 - `abs(number)`
 - `neg(number)`
 - `log(number)`

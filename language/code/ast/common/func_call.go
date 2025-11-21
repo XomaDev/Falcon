@@ -35,7 +35,7 @@ func (f *FuncCall) String() string {
 
 func (f *FuncCall) Blockly(flags ...bool) ast.Block {
 	switch f.Name {
-	case "root", "abs", "neg", "log", "exp", "round", "ceil", "floor",
+	case "sqrt", "abs", "neg", "log", "exp", "round", "ceil", "floor",
 		"sin", "cos", "tan", "asin", "acos", "atan", "degrees", "radians",
 		"decToHex", "decToBin", "hexToDec", "binToDec":
 		return f.mathConversions()
