@@ -1,1 +1,27 @@
-quadraticFormula(1, 5, 6)
+func RunLengthEncode(input_string) = {
+  local encoded_string = ""
+  local current_char = input_string.segment(1, 1)
+  local current_count = 1
+
+  // Falcon uses 1-based indexing, so loop from the second character
+  for (i: 2 to input_string.textLen()) {
+    local next_char = input_string.segment(i, 1)
+    if (next_char === current_char) {
+      current_count = current_count + 1
+    } else {
+      encoded_string = encoded_string _ current_char _ current_count
+      current_char = next_char
+      current_count = 1
+    }
+  }
+
+  // Append the last character and its count
+  encoded_string = encoded_string _ current_char _ current_count
+  encoded_string
+}
+
+func encodeGeneCode() = {
+  RunLengthEncode(geneCode)
+}
+
+println(encodeGeneCode())

@@ -122,7 +122,7 @@ while (true) {
 ## For n loop
 
 ```
-for i: 1 to 10 by 2 {
+for (i: 1 to 10 by 2) {
   println(i)
 }
 ```
@@ -137,7 +137,7 @@ To iterate over a list:
 ```
 local names = ["India", "Japan", "Russia", "Germany"]
 
-for country in names {
+for (country in names) {
   println(country)
 }
 ```
@@ -147,7 +147,7 @@ Or over a dictionary:
 ```
 local animalInfo = { "Animal": "Tiger", "Scientific Name": "Panthera tigris" }
 
-for (key, value) in animalDetail {
+for (key, value in animalDetail) {
   println(key _ " : " _ value) // e.g prints  "Animal: Tiger" to the console
 }
 ```

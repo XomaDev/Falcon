@@ -44,8 +44,9 @@ func (i *If) String() string {
 
 	builder.WriteString("if ")
 	for {
+		builder.WriteString("(")
 		builder.WriteString(i.Conditions[currI].String())
-		builder.WriteString(" {\n")
+		builder.WriteString(") {\n")
 		builder.WriteString(ast.PadBody(i.Bodies[currI]))
 		builder.WriteString("}")
 		currI++

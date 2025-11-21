@@ -220,7 +220,10 @@ func (p *LangParser) varExpr() ast.Expr {
 
 func (p *LangParser) whileExpr() *control.While {
 	p.skip()
-	condition := p.expr(0)
+	// TODO: earlier we were using p.expr(0), check the side effects
+	p.expect(l.OpenCurve)
+	condition := p.parse()
+	p.expect(l.CloseCurve)
 	body := p.body(ScopeLoop)
 	return &control.While{Condition: condition, Body: body}
 }
@@ -244,41 +247,35 @@ func (p *LangParser) eachExpr() ast.Expr {
 
 func (p *LangParser) forExpr() ast.Expr {
 	p.skip()
-
-	if p.consume(l.OpenCurve) {
-		keyName := p.name()
+	p.expect(l.OpenCurve)
+	firstName := p.name()
+	if p.consume(l.Comma) {
 		// Dictionary For each loop
-		p.expect(l.Comma)
 		valueName := p.name()
-		p.expect(l.CloseCurve)
 		p.expect(l.In)
-		return &control.EachPair{KeyName: keyName, ValueName: valueName, Iterable: p.element(), Body: p.body(ScopeLoop)}
-	}
-	iName := p.name()
-	if p.consume(l.In) {
+		iterable := p.element()
+		p.expect(l.CloseCurve)
+		return &control.EachPair{KeyName: firstName, ValueName: valueName, Iterable: iterable, Body: p.body(ScopeLoop)}
+	} else if p.consume(l.In) {
 		// For each loop
-		return &control.Each{IName: iName, Iterable: p.element(), Body: p.body(ScopeLoop)}
-	} else {
-		// For I loop
-		p.expect(l.Colon)
-		from := p.expr(0)
-		p.expect(l.To)
-		to := p.expr(0)
-		var by ast.Expr
-		if p.consume(l.By) {
-			by = p.expr(0)
-		} else {
-			by = &fundamentals.Number{Content: "1"}
-		}
-		body := p.body(ScopeLoop)
-		return &control.For{
-			IName: iName,
-			From:  from,
-			To:    to,
-			By:    by,
-			Body:  body,
-		}
+		iterable := p.element()
+		p.expect(l.CloseCurve)
+		return &control.Each{IName: firstName, Iterable: iterable, Body: p.body(ScopeLoop)}
 	}
+	// For I loop
+	p.expect(l.Colon)
+	// Earlier we were using p.element(), check the side effects
+	from := p.element()
+	p.expect(l.To)
+	to := p.element()
+	var by ast.Expr
+	if p.consume(l.By) {
+		by = p.element()
+	} else {
+		by = &fundamentals.Number{Content: "1"}
+	}
+	p.expect(l.CloseCurve)
+	return &control.For{IName: firstName, From: from, To: to, By: by, Body: p.body(ScopeLoop)}
 }
 
 func (p *LangParser) ifSmt() ast.Expr {
