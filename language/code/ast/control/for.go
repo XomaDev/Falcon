@@ -29,7 +29,7 @@ func (f *For) Yail() string {
 }
 
 func (f *For) String() string {
-	return sugar.Format("for (%: % to % by %) {\n%}",
+	return sugar.Format("for (%: % .. % step %) {\n%}",
 		f.IName, f.From.String(), f.To.String(), f.By.String(), ast.PadBody(f.Body))
 }
 
