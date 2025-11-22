@@ -71,7 +71,7 @@ var signatures = map[string]*CallSignature{
 	"add":           makeSignature("list", "lists_add_items", "yail-list-add-to-list!", "", -1, false, ast.SignVoid),
 	"containsItem":  makeSignature("list", "lists_is_in", "yail-list-member?", "any list", 1, true, ast.SignBool),
 	"indexOf":       makeSignature("list", "lists_position_in", "yail-list-index", "any list", 1, true, ast.SignNumb),
-	"insert":        makeSignature("list", "lists_insert_item", "yail-list-insert-item!", "list number any", 2, true, ast.SignVoid),
+	"insert":        makeSignature("list", "lists_insert_item", "yail-list-insert-item!", "list number any", 2, false, ast.SignVoid),
 	"remove":        makeSignature("list", "lists_remove_item", "yail-list-remove-item!", "list-number", 1, false, ast.SignVoid),
 	"appendList":    makeSignature("list", "lists_append_list", "yail-list-append!", "list list", 1, false, ast.SignVoid),
 	"lookupInPairs": makeSignature("list", "lists_lookup_in_pairs", "yail-alist-lookup", "any list any", 2, true, ast.SignAny),
