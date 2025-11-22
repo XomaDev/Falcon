@@ -249,7 +249,7 @@ func (p *LangParser) forExpr() ast.Expr {
 	p.expect(l.Colon)
 	// Earlier we were using p.element(), check the side effects
 	from := p.parse()
-	p.expect(l.DoubleColon)
+	p.expect(l.DoubleDot)
 	to := p.parse()
 	var by ast.Expr
 	if p.consume(l.Step) {
