@@ -341,7 +341,7 @@ func (f *FuncCall) println() ast.Block {
 }
 
 var mathFuncMap = map[string]string{
-	"root":     "ROOT",
+	"sqrt":     "ROOT",
 	"abs":      "ABS",
 	"neg":      "NEG",
 	"log":      "LN",
