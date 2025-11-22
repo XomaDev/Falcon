@@ -59,8 +59,7 @@ const (
 	If
 	Else
 	For
-	To
-	By
+	Step
 	In
 	While
 	Do
