@@ -45,6 +45,7 @@ const (
 	Not
 	Colon
 	DoubleColon
+	DoubleDot
 	RightArrow
 	Underscore
 	At
@@ -59,8 +60,7 @@ const (
 	If
 	Else
 	For
-	To
-	By
+	Step
 	In
 	While
 	Do

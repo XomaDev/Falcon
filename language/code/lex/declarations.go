@@ -31,6 +31,7 @@ var Symbols = map[string]StaticToken{
 	"@":  staticOf(At),
 	":":  staticOf(Colon, Pair, Operator),
 	"::": staticOf(DoubleColon),
+	"..": staticOf(DoubleDot),
 
 	"(": staticOf(OpenCurve),
 	")": staticOf(CloseCurve),
@@ -54,8 +55,7 @@ var Keywords = map[string]StaticToken{
 	"if":        staticOf(If),
 	"else":      staticOf(Else),
 	"for":       staticOf(For),
-	"to":        staticOf(To),
-	"by":        staticOf(By),
+	"step":      staticOf(Step),
 	"in":        staticOf(In),
 	"while":     staticOf(While),
 	"do":        staticOf(Do),
