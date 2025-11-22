@@ -1,27 +1,23 @@
-func RunLengthEncode(input_string) = {
-  local encoded_string = ""
-  local current_char = input_string.segment(1, 1)
-  local current_count = 1
+func runLengthEncode(text) = {
+  if (text.textLen() == 0) {
+    ""
+  } else {
+    local result = ""
+    local currentChar = text[1]
+    local count = 1
 
-  // Falcon uses 1-based indexing, so loop from the second character
-  for (i: 2 to input_string.textLen()) {
-    local next_char = input_string.segment(i, 1)
-    if (next_char === current_char) {
-      current_count = current_count + 1
-    } else {
-      encoded_string = encoded_string _ current_char _ current_count
-      current_char = next_char
-      current_count = 1
+    for (i: 2 .. text.textLen()) {
+      if (text[i] == currentChar) {
+        count = count + 1
+      } else {
+        result = result _ count _ currentChar
+        currentChar = text[i]
+        count = 1
+      }
     }
+
+    // Encode the last run
+    result = result _ count _ currentChar
+    result
   }
-
-  // Append the last character and its count
-  encoded_string = encoded_string _ current_char _ current_count
-  encoded_string
 }
-
-func encodeGeneCode() = {
-  RunLengthEncode(geneCode)
-}
-
-println(encodeGeneCode())

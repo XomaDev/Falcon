@@ -73,10 +73,14 @@ func (s *SmartBody) createDoSmt(doResult ast.Expr, doBody []ast.Expr) ast.Block 
 		}
 		doExpr = doResult.Blockly(false)
 	} else {
+		if !doResult.Consumable() {
+			panic("Cannot include a statement for the required variable result")
+		}
 		doExpr = ast.Block{
 			Type:       "controls_do_then_return",
 			Statements: []ast.Statement{ast.CreateStatement("STM", doBody)},
-			Values:     []ast.Value{{Name: "VALUE", Block: doResult.Blockly(true)}},
+			// TODO: we have set the flag to false, previously was true, verify effects
+			Values: []ast.Value{{Name: "VALUE", Block: doResult.Blockly(false)}},
 		}
 	}
 	return doExpr
