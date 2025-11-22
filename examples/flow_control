@@ -1,0 +1,67 @@
+func CheckIsNumber(value) = {
+  // Checks if 'value' is of type number using the question operator
+  value ? number
+}
+----
+func CheckIsList(value) = {
+  // Checks if 'value' is of type list using the question operator
+  value ? list
+}
+----
+func CheckEmptyList(value) = {
+  // Checks if 'value' is an empty list using the question operator
+  value ? emptyList
+}
+----
+func IfElseResult(a, b) = {
+  // Uses the if-else expression to return the greater of 'a' and 'b'
+  if (a > b) a else b
+}
+----
+func SumToN(n) = {
+  local sum = 0
+  local i = 1
+  
+  // Sums numbers from 1 up to n using a while loop
+  while (i <= n) {
+    sum = sum + i
+    i = i + 1
+  }
+  
+  // The last expression is returned
+  sum
+}
+----
+func IterateAndBreak(list) = {
+  // Iterates the list. Prints elements until "Stop" is found, then breaks.
+  for (item in list) {
+    if (item === "Stop") { // Use === for text equality
+      break
+    }
+    println(item)
+  }
+}
+----
+func CheckHex(text) = {
+  // Checks if 'text' is a valid hexadecimal number string using the question operator
+  text ? hexa
+}
+----
+func ConvertBinToDec(binText) = {
+  // Converts a binary string to a decimal number
+  binToDec(binText)
+}
+----
+func DecToHex(number) = {
+  // Converts a decimal number to a hexadecimal string
+  decToHex(number)
+}
+----
+func SafeDivide(a, b) = {
+  // Returns a/b, or 0 if b is 0, using an if-else statement
+  if (b == 0) {
+    0
+  } else {
+    a / b
+  }
+}

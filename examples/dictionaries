@@ -1,0 +1,54 @@
+func GetDictValue(myDict, key) = {
+  // Retrieves the value for 'key'. Returns "NOT FOUND" if the key is missing.
+  // The 'get' method accepts a default/notfound value.
+  myDict.get(key, "NOT FOUND")
+}
+----
+func SetNewEntry(myDict, key, value) = {
+  // Sets or updates the key-value pair.
+  myDict.set(key, value)
+}
+----
+func DictLength(myDict) = {
+  // Returns the number of entries in the dictionary.
+  myDict.dictLen()
+}
+----
+func RemoveEntry(myDict, key) = {
+  // Deletes the entry associated with the key.
+  myDict.delete(key)
+}
+----
+func GetKeysList(myDict) = {
+  // Returns a list containing all the keys in the dictionary.
+  myDict.keys()
+}
+----
+func HasKey(myDict, key) = {
+  // Checks if the dictionary contains the specified key.
+  myDict.containsKey(key)
+}
+----
+func MergeDicts(dictA, dictB) = {
+  // Merges the entries of dictB into dictA.
+  // If keys overlap, dictB's values overwrite dictA's.
+  dictA.mergeInto(dictB)
+}
+----
+func IterateDict(myDict) = {
+  // Uses the 'each' loop (for key, value in dict) to iterate and print each pair.
+  for (key, value in myDict) {
+    println(key _ " is " _ value)
+  }
+}
+----
+func GetNestedValue(myDict, pathList) = {
+  // Retrieves a value using a list of nested keys (the path).
+  // Returns "NOT FOUND" if the path is invalid or the value is missing.
+  myDict.getAtPath(pathList, "NOT FOUND")
+}
+----
+func DictToPairs(myDict) = {
+  // Converts the dictionary into a list of key-value pairs (a list of lists).
+  myDict.toPairs()
+}

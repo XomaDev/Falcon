@@ -1,0 +1,55 @@
+func GetSecondElement(myList) = {
+  // Returns the element at the 2nd index (1-based)
+  myList[2]
+}
+----
+func AddToList(myList, item) {
+  // Adds the item to the end of the list using add()
+  myList.add(item)
+  // Conventionally returns the modified list or a success indicator,
+  // but for simplicity, the last expression is the list modification itself.
+}
+----
+func RemoveLast(myList) {
+  // Finds the index of the last element (listLen()) and removes it
+  local lastIndex = myList.listLen()
+  myList.remove(lastIndex)
+}
+----
+func CheckContains(myList, item) = {
+  // Returns true if the list contains the item
+  myList.containsItem(item)
+}
+----
+func ReverseOrder(myList) = {
+  // Returns a reversed copy of the list
+  myList.reverseList()
+}
+----
+func InsertAtFront(myList, item) {
+  // Inserts the item at index 1 (the front)
+  myList.insert(1, item)
+}
+----
+func JoinWithPipe(myList) = {
+  // Joins the list elements into a single string using "|" as a separator
+  myList.join("|")
+}
+----
+func SortDescending(numList) = {
+  // Sorts using a lambda: m precedes n if m is greater than n (descending order)
+  numList.sort { m, n -> m > n }
+}
+----
+func GetSlice(myList, from, to) = {
+  // Returns a sublist starting from 'from' (1-based) to 'to' (1-based, inclusive)
+  myList.slice(from, to)
+}
+----
+func SumOnlyPositive(numList) = {
+  // 1. Filter: Keep only positive numbers (n > 0)
+  // 2. Reduce: Sum the filtered list, starting with 0
+  numList
+    .filter { n -> n > 0 }
+    .reduce(0) { x, soFar -> x + soFar }
+}

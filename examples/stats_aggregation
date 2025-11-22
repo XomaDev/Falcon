@@ -1,0 +1,67 @@
+func CalculateMean(numList) = {
+  // Uses the built-in avgOf() function
+  avgOf(numList)
+}
+----
+func FindMedian(numList) = {
+  // Sort the list first
+  local sortedList = copyList(numList).sort()
+  local len = sortedList.listLen()
+
+  if (len % 2 != 0) {
+    // Odd length: median is the middle element.
+    // Falcon is 1-based, so the index is (len + 1) / 2
+    local middleIndex = (len + 1) / 2
+    sortedList[middleIndex]
+  } else {
+    // Even length: median is the average of the two middle elements.
+    local index1 = len / 2
+    local index2 = (len / 2) + 1
+
+    // Calculate the average of the two middle elements
+    (sortedList[index1] + sortedList[index2]) / 2
+  }
+}
+----
+func FindMode(numList) = {
+  // Uses the built-in modeOf() function
+  modeOf(numList)
+}
+----
+func FindRange(numList) = {
+  // Range = max(list) - min(list)
+  maxOf(numList) - minOf(numList)
+}
+----
+func SumListLambda(numList) = {
+  // Calculates the sum using the reduce lambda starting with an initial value of 0
+  numList.reduce(0) { x, soFar -> x + soFar }
+}
+----
+func CountNegative(numList) = {
+  // Filters the list to keep only elements less than 0, then finds the length of the resulting list
+  numList
+    .filter { n -> n < 0 }
+    .listLen()
+}
+----
+func StandardDeviation(numList) = {
+  // Uses the built-in stdDevOf() function
+  stdDevOf(numList)
+}
+----
+func GeometricMean(numList) = {
+  // Uses the built-in geoMeanOf() function
+  geoMeanOf(numList)
+}
+----
+func FindMaxLambda(numList) = {
+  // Finds the maximum element using the max lambda.
+  // The lambda { m, n -> n > m } defines the comparison: n is "greater" than m.
+  numList.max { m, n -> n > m }
+}
+----
+func SquareAll(numList) = {
+  // Returns a new list with all elements squared using the map lambda
+  numList.map { n -> n ^ 2 }
+}

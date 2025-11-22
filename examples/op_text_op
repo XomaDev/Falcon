@@ -1,0 +1,52 @@
+func LengthOfString(text) = {
+  // Returns the length of the string
+  text.textLen()
+}
+----
+func ToUpperCase(text) = {
+  // Returns the uppercase version of the string
+  text.uppercase()
+}
+----
+func IsStartWithHello(text) = {
+  // Checks if the text starts with the piece "Hello"
+  text.startsWith("Hello")
+}
+----
+func SplitByComma(text) = {
+  // Splits the text into a list using "," as the delimiter
+  text.split(",")
+}
+----
+func CheckForEmpty(text) = {
+  // Checks if the text is empty using the question operator
+  text ? emptyText
+}
+----
+func TrimAndCheck(text) = {
+  // 1. Trim whitespace from the text
+  local trimmedText = text.trim()
+
+  // 2. Check if the resulting trimmed text is empty
+  trimmedText ? emptyText
+}
+----
+func ReverseText(text) = {
+  // Returns the reversed string
+  text.reverse()
+}
+----
+func ReplaceAtoB(text) = {
+  // Replaces all instances of the target string "a" with the replacement string "b"
+  text.replace("a", "b")
+}
+----
+func GetSubstring(text, start, len) = {
+  // Returns a segment of the text starting at 'start' (1-based index) for 'len' characters
+  text.segment(start, len)
+}
+----
+func LexicographicCompare(t1, t2) = {
+  // Compares if t1 is lexicographically greater than t2 using the >> operator
+  t1 >> t2
+}

@@ -1,0 +1,56 @@
+func QuadraticEq1(a, b, c) = {
+  // Calculates the discriminant (D) = b^2 - 4ac
+  local discriminant = (b ^ 2) - (4 * a * c)
+
+  // First root: (-b + sqrt(D)) / (2a)
+  (-b + sqrt(discriminant)) / (2 * a)
+}
+----
+func QuadraticEq2(a, b, c) = {
+  // Calculates the discriminant (D) = b^2 - 4ac
+  local discriminant = (b ^ 2) - (4 * a * c)
+
+  // Second root: (-b - sqrt(D)) / (2a)
+  (-b - sqrt(discriminant)) / (2 * a)
+}
+----
+func AreaOfRectangle(l, w) = {
+  // Area = l * w
+  l * w
+}
+----
+func PerimeterOfTriangle(a, b, c) = {
+  // Perimeter = a + b + c
+  a + b + c
+}
+----
+func Hypotenuse(a, b) = {
+  // Pythagorean theorem: c = sqrt(a^2 + b^2)
+  sqrt((a ^ 2) + (b ^ 2))
+}
+----
+func SolveLinear(a, b) = {
+  // Solves for x in ax + b = 0, which means x = -b / a
+  -b / a
+}
+----
+func VolumeOfCube(s) = {
+  // Volume = s^3
+  s ^ 3
+}
+----
+global PI = 3.14159
+func Circumference(r) = {
+  // Circumference = 2 * PI * r
+  2 * this.PI * r
+}
+----
+func ConvertFahrenheitToCelsius(f) = {
+  // Formula: (5/9) * (f - 32)
+  (5 / 9) * (f - 32)
+}
+----
+func IsPythagoreanTriplet(a, b, c) = {
+  // Checks if a^2 + b^2 = c^2
+  (a ^ 2) + (b ^ 2) == (c ^ 2)
+}

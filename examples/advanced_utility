@@ -1,0 +1,82 @@
+func RandomInt(low, high) = {
+  // Returns a random integer between 'low' (inclusive) and 'high' (inclusive)
+  randInt(low, high)
+}
+----
+func ColorFromRGB(r, g, b) = {
+  // Returns a color number from an RGB list [r, g, b]
+  local rgbList = [r, g, b]
+  makeColor(rgbList)
+}
+----
+func SplitHexColor(color) = {
+  // Splits a color number (e.g., #FF0000) into its RGB list [r, g, b]
+  splitColor(color)
+}
+----
+func GetRandomItem(myList) = {
+  // Returns a random element from the list
+  myList.random()
+}
+----
+func ListToDictionary(pairList) = {
+  // Converts a list of key-value pairs to a dictionary
+  pairList.pairsToDict()
+}
+----
+func FilterByLength(textList, len) = {
+  // Filters strings where the length is equal to 'len'
+  textList.filter { text -> text.textLen() == len }
+}
+----
+func MaxTextByLength(textList) = {
+  // Finds the longest string using the max lambda based on textLen()
+  // The lambda { m, n -> n.textLen() > m.textLen() } means n is 'greater' (longer) than m
+  textList.max { m, n -> n.textLen() > m.textLen() }
+}
+----
+func FormatPrice(num) = {
+  // Formats a number to exactly two decimal places
+  formatDecimal(num, 2)
+}
+----
+func SumOfTextLengths(textList) = {
+  // 1. Map: Convert each string to its length (a number)
+  // 2. Reduce: Sum up all the lengths, starting with 0
+  textList
+    .map { text -> text.textLen() }
+    .reduce(0) { length, soFar -> length + soFar }
+}
+----
+func GetQuartile(dataList) = {
+  // Finds the first quartile (Q1), which is the median of the lower half of the data.
+  local sortedList = copyList(dataList).sort()
+  local len = sortedList.listLen()
+
+  // N/4, rounded up. Using slice for the lower half.
+  local q1Index = floor(len / 4)
+
+  // To keep logic simple and rely on existing functions, we will find the median of the first half.
+  // Falcon is 1-based, slicing up to the index of the median for the full list.
+  local medianIndex = (len + 1) / 2
+
+  // Calculate the length of the lower half to determine the slice end point (1-based index)
+  local lowerHalfEnd = floor(len / 2)
+
+  // Slice the lower half of the list (from index 1 to lowerHalfEnd)
+  local lowerHalf = sortedList.slice(1, lowerHalfEnd)
+
+  // Q1 is the median of the lower half. We reuse the logic from FindMedian.
+  local halfLen = lowerHalf.listLen()
+
+  if (halfLen % 2 != 0) {
+    // Odd length lower half
+    local middleIndex = (halfLen + 1) / 2
+    lowerHalf[middleIndex]
+  } else {
+    // Even length lower half
+    local index1 = halfLen / 2
+    local index2 = (halfLen / 2) + 1
+    (lowerHalf[index1] + lowerHalf[index2]) / 2
+  }
+}

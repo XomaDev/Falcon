@@ -1,0 +1,86 @@
+func FibRecursive(n) = {
+  if (n < 2) {
+    n
+  } else {
+    FibRecursive(n - 1) + FibRecursive(n - 2)
+  }
+}
+----
+func FibIterative(n) = {
+  if (n <= 1) {
+    n
+  } else {
+    local a = 0  // Represents F(i-2)
+    local b = 1  // Represents F(i-1)
+    local result = 0
+
+    // Loop from the 2nd term up to the n-th term
+    // Since Falcon uses 1-based indexing, we run the loop n-1 times
+    for (i: 2 .. n) {
+      result = a + b
+      a = b
+      b = result
+    }
+    // The last calculated result (b) is the n-th Fibonacci number
+    result
+  }
+}
+----
+func GeometricTerm(a, r, n) = {
+  // Formula: a * r^(n-1). n is 1-based.
+  a * (r ^ (n - 1))
+}
+----
+func ArithmeticTerm(a, d, n) = {
+  // Formula: a + (n-1)d. n is 1-based.
+  a + ((n - 1) * d)
+}
+----
+func SumOfFirstN(n) = {
+  // Formula for the sum of the first n natural numbers: n * (n + 1) / 2
+  n * (n + 1) / 2
+}
+----
+func SumOfPowersOfTwo(n) = {
+  // Formula for 1 + 2 + 4 + ... + 2^n is 2^(n+1) - 1
+  (2 ^ (n + 1)) - 1
+}
+----
+func LucasNumber(n) = {
+  // Base cases: L(0)=2, L(1)=1.
+  if (n == 0) {
+    2
+  } else if (n == 1) {
+    1
+  } else {
+    // Recursive step: L(n) = L(n-1) + L(n-2)
+    LucasNumber(n - 1) + LucasNumber(n - 2)
+  }
+}
+----
+func CollatzNext(n) = {
+  if (n % 2 == 0) {
+    // If n is even, next is n / 2
+    n / 2
+  } else {
+    // If n is odd, next is 3 * n + 1
+    3 * n + 1
+  }
+}
+----
+func CubeOfN(n) = {
+  // Calculates n^3
+  n ^ 3
+}
+----
+func CheckPerfectSquare(n) = {
+  // A number n is a perfect square if sqrt(n) is an integer.
+  // We can check this by seeing if the rounded result equals the original sqrt result.
+  // Alternatively, check if the rounded result squared equals the original number.
+  local s = sqrt(n)
+
+  // Use round() to get the nearest integer value of the square root
+  s == round(s)
+
+  // Alternative check: round(s) ^ 2 == n (If n is a positive number)
+}

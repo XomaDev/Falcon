@@ -1,0 +1,58 @@
+func PowerOfN(base, exponent) = {
+  // Use the built-in power operator ^
+  base ^ exponent
+}
+----
+func Factorial(n) = {
+  // Base case: 0! is 1
+  if (n == 0) {
+    1
+  } else {
+    // Recursive step: n! = n * (n - 1)!
+    n * Factorial(n - 1)
+  }
+}
+----
+func GCD(a, b) = {
+  // Base case: if b is 0, GCD is a
+  if (b == 0) {
+    a
+  } else {
+    // Recursive step: GCD(a, b) = GCD(b, a % b)
+    GCD(b, a % b)
+  }
+}
+----
+func GCD(a, b) = {
+  // Base case: if b is 0, GCD is a
+  if (b == 0) {
+    a
+  } else {
+    // Recursive step: GCD(a, b) = GCD(b, a % b)
+    GCD(b, a % b)
+  }
+}
+func LCM(a, b) = {
+  // Formula: (abs(a * b)) / GCD(a, b)
+  abs(a * b) / GCD(a, b)
+}
+----
+func IsDivisibleBy(n, d) = {
+  // If the remainder is 0, it is perfectly divisible
+  n % d == 0
+}
+----
+func IsPerfectNumber(n) = {
+  // Proper divisors start from 1 up to n-1
+  local sumOfDivisors = 0
+
+  // Iterate from 1 up to n-1 (1-based indexing for range)
+  for (i: 1 .. n - 1) {
+    if (n % i == 0) {
+      sumOfDivisors = sumOfDivisors + i
+    }
+  }
+
+  // A perfect number equals the sum of its proper divisors
+  sumOfDivisors == n
+}

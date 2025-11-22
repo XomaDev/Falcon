@@ -128,7 +128,11 @@ func (l *Lexer) parse() {
 			l.createOp("=")
 		}
 	case '.':
-		l.createOp(".")
+		if l.consume('.') {
+			l.createOp("..")
+		} else {
+			l.createOp(".")
+		}
 	case ',':
 		l.createOp(",")
 	case '?':

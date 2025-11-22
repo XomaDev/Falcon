@@ -1,0 +1,158 @@
+func GCD(a, b) = {
+    // Ensure a and b are non-negative for this basic implementation
+    local a_val = abs(a)
+    local b_val = abs(b)
+
+    // Check if both are zero
+    if (a_val == 0 && b_val == 0) {
+        // Technically undefined or 0 depending on context; we'll return 0
+        0
+    } else {
+        // Euclidean Algorithm using a while loop
+        while (b_val != 0) {
+            local remainder = a_val % b_val
+            // a_val becomes the old b_val
+            a_val = b_val
+            // b_val becomes the remainder
+            b_val = remainder
+        }
+        // The last non-zero value of a_val is the GCD
+        a_val
+    }
+}
+----
+func FibIterative(n) = {
+  if (n <= 1) {
+    n
+  } else {
+    local a = 0
+    local b = 1
+    local result = 1
+
+    // Loop from the 2nd term up to the n-th term (1-based index)
+    for (i: 2 .. n) {
+      result = a + b
+      a = b
+      b = result
+    }
+    result
+  }
+}
+----
+func SumArithmeticSeries(a, d, n) = {
+  // Formula: (n/2) * (2a + (n-1)d)
+  (n / 2) * ((2 * a) + ((n - 1) * d))
+}
+----
+func PrimeCheck(n) = {
+  if (n <= 1) {
+    false
+  } else if (n <= 3) {
+    true
+  } else if (n % 2 == 0) {
+    false
+  } else {
+    local limit = floor(sqrt(n))
+    local i = 3 // Start checking from 3 (already checked 2)
+    local isPrime = true
+
+    while (i <= limit) {
+      if (n % i == 0) {
+        isPrime = false
+        break
+      }
+      // Check only odd divisors
+      i = i + 2
+    }
+    isPrime
+  }
+}
+----
+func IsPerfectSquare(n) = {
+  // Checks if n is a perfect square. A number is a perfect square if its square root is an integer.
+  local s = sqrt(n)
+
+  // Checks if the square root is equal to its rounded integer value
+  s == round(s)
+}
+----
+func QuadraticRoot1(a, b, c) = {
+  // Calculates the discriminant (D) = b^2 - 4ac
+  local discriminant = (b ^ 2) - (4 * a * c)
+
+  // First root: (-b + sqrt(D)) / (2a). Assumes D >= 0.
+  (-b + sqrt(discriminant)) / (2 * a)
+}
+----
+func DegreesToRadians(degrees) = {
+  // Converts angle from degrees to radians
+  radians(degrees)
+}
+----
+func SumListReduce(numList) = {
+  // Calculates the sum using the reduce lambda
+  numList.reduce(0) { x, soFar -> x + soFar }
+}
+----
+func SquareAllMap(numList) = {
+  // Returns a new list with all elements squared
+  numList.map { n -> n ^ 2 }
+}
+----
+func SortAbsolute(numList) = {
+  // Sorts the list based on the absolute value of its elements
+  // The expression abs(m) < abs(n) means m precedes n if |m| is less than |n| (ascending by abs value)
+  numList.sort { m, n -> abs(m) < abs(n) }
+}
+----
+func FindMaxKey(myDict) = {
+  local maxKey = ""
+  local maxValue = null
+  local first = true
+
+  // Iterate through key-value pairs
+  for (key, value in myDict) {
+    if (value ? number) { // Ensure the value is a number before comparison
+      if (first) {
+        maxValue = value
+        maxKey = key
+        first = false
+      } else if (value > maxValue) {
+        maxValue = value
+        maxKey = key
+      }
+    }
+  }
+  // Returns the key associated with the maximum numerical value
+  maxKey
+}
+----
+func GeometricMean(numList) = {
+  // Calculates the geometric mean
+  geoMeanOf(numList)
+}
+----
+func BinToDec(binText) = {
+  // Converts a binary string to its decimal number
+  binToDec(binText)
+}
+----
+func CheckIsHex(text) = {
+  // Returns true if text is a valid hexadecimal number
+  text ? hexa
+}
+----
+func CountBetween(numList, low, high) = {
+  // Counts numbers within the inclusive range [low, high]
+  numList
+    .filter { n -> n >= low && n <= high }
+    .listLen()
+}
+----
+func SumInverse(numList) = {
+  // 1. Map: Calculates the inverse (1/n) for each element
+  // 2. Reduce: Sums the resulting inverse values, starting with 0
+  numList
+    .map { n -> 1 / n }
+    .reduce(0) { inverse, soFar -> inverse + soFar }
+}

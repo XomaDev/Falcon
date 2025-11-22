@@ -1,0 +1,75 @@
+func AvgAge(ageList) = {
+  // Uses the built-in avgOf() function to calculate the arithmetic mean
+  avgOf(ageList)
+}
+----
+func CountMinors(ageList) = {
+  // Filters the list for ages less than 18, then returns the length of the filtered list
+  ageList
+    .filter { age -> age < 18 }
+    .listLen()
+}
+----
+func CheckForElderly(ageList) = {
+  // Filters for ages >= 65. If the resulting list is NOT empty, it returns true.
+  local elderlyAges = ageList
+    .filter { age -> age >= 65 }
+
+  // Use the Question operator to check if the list is NOT empty
+  !(elderlyAges ? emptyList)
+}
+----
+func GetAdultAges(ageList) = {
+  // Filters the list to keep only ages greater than or equal to 18
+  ageList
+    .filter { age -> age >= 18 }
+}
+----
+func IndexOfOldest(ageList) = {
+  // 1. Find the maximum age
+  local maxAge = maxOf(ageList)
+
+  // 2. Find the 1-based index of that age
+  ageList.indexOf(maxAge)
+}
+----
+func OldestPersonAge(ageList) = {
+  // Uses the built-in maxOf() function
+  maxOf(ageList)
+}
+----
+func AgesToCategories(ageList) = {
+  // Uses the map lambda to transform each age into a category string
+  ageList.map { age ->
+    if (age < 18) "Minor" else if (age >= 65) "Senior" else "Adult"
+  }
+}
+----
+func CountSeniors(ageList) = {
+  // Filters for ages >= 65, then returns the length of the filtered list
+  ageList
+    .filter { age -> age >= 65 }
+    .listLen()
+}
+----
+func GetFirstAdult(ageList) = {
+  local len = ageList.listLen()
+  local i = 1 // Start at 1-based index
+  local firstAdultAge = null // Placeholder for the result
+
+  while (i <= len) {
+    if (ageList[i] >= 18) {
+      firstAdultAge = ageList[i]
+      break // Exit the loop immediately upon finding the first adult
+    }
+    i = i + 1
+  }
+
+  // The last expression is returned
+  firstAdultAge
+}
+----
+func AgeIncrease(ageList, years) = {
+  // Uses the map lambda to create a new list where each age is increased by 'years'
+  ageList.map { age -> age + years }
+}

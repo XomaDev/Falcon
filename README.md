@@ -122,12 +122,12 @@ while (true) {
 ## For n loop
 
 ```
-for (i: 1 to 10 by 2) {
+for (i: 1 .. 10 step 2) {
   println(i)
 }
 ```
 
-The `by` clause is optional and defaults to 1.
+The `step` clause is optional and defaults to 1.
 
 
 ## Each loop
