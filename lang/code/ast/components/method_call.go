@@ -1,0 +1,43 @@
+package components
+
+import (
+	"Falcon/code/ast"
+	"Falcon/code/sugar"
+)
+
+type MethodCall struct {
+	ComponentName string
+	ComponentType string
+	Method        string
+	Args          []ast.Expr
+}
+
+func (m *MethodCall) String() string {
+	return sugar.Format("%.%(%)", m.ComponentName, m.Method, ast.JoinExprs(", ", m.Args))
+}
+
+func (m *MethodCall) Blockly(flags ...bool) ast.Block {
+	return ast.Block{
+		Type: "component_method",
+		Mutation: &ast.Mutation{
+			MethodName:    m.Method,
+			IsGeneric:     false,
+			InstanceName:  m.ComponentName,
+			ComponentType: m.ComponentType,
+		},
+		Fields: []ast.Field{{Name: "COMPONENT_SELECTOR", Value: m.ComponentName}},
+		Values: ast.ValuesByPrefix("ARG", m.Args),
+	}
+}
+
+func (m *MethodCall) Continuous() bool {
+	return false
+}
+
+func (m *MethodCall) Consumable(flags ...bool) bool {
+	return false // may be consumable too
+}
+
+func (m *MethodCall) Signature() []ast.Signature {
+	return []ast.Signature{ast.SignAny}
+}
