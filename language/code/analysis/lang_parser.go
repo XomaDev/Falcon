@@ -249,10 +249,10 @@ func (p *LangParser) forExpr() ast.Expr {
 	p.expect(l.Colon)
 	// Earlier we were using p.element(), check the side effects
 	from := p.parse()
-	p.expect(l.To)
+	p.expect(l.DoubleColon)
 	to := p.parse()
 	var by ast.Expr
-	if p.consume(l.By) {
+	if p.consume(l.Step) {
 		by = p.parse()
 	} else {
 		by = &fundamentals.Number{Content: "1"}
