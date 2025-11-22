@@ -228,23 +228,6 @@ func (p *LangParser) whileExpr() *control.While {
 	return &control.While{Condition: condition, Body: body}
 }
 
-func (p *LangParser) eachExpr() ast.Expr {
-	p.skip()
-	if p.consume(l.OpenCurve) {
-		// a dictionary pair iteration
-		keyName := p.name()
-		p.expect(l.Comma)
-		valueName := p.name()
-		p.expect(l.CloseCurve)
-		p.expect(l.In)
-		return &control.EachPair{KeyName: keyName, ValueName: valueName, Iterable: p.element(), Body: p.body(ScopeLoop)}
-	} else {
-		keyName := p.name()
-		p.expect(l.In)
-		return &control.Each{IName: keyName, Iterable: p.element(), Body: p.body(ScopeLoop)}
-	}
-}
-
 func (p *LangParser) forExpr() ast.Expr {
 	p.skip()
 	p.expect(l.OpenCurve)
@@ -253,24 +236,24 @@ func (p *LangParser) forExpr() ast.Expr {
 		// Dictionary For each loop
 		valueName := p.name()
 		p.expect(l.In)
-		iterable := p.element()
+		iterable := p.parse()
 		p.expect(l.CloseCurve)
 		return &control.EachPair{KeyName: firstName, ValueName: valueName, Iterable: iterable, Body: p.body(ScopeLoop)}
 	} else if p.consume(l.In) {
 		// For each loop
-		iterable := p.element()
+		iterable := p.parse()
 		p.expect(l.CloseCurve)
 		return &control.Each{IName: firstName, Iterable: iterable, Body: p.body(ScopeLoop)}
 	}
 	// For I loop
 	p.expect(l.Colon)
 	// Earlier we were using p.element(), check the side effects
-	from := p.element()
+	from := p.parse()
 	p.expect(l.To)
-	to := p.element()
+	to := p.parse()
 	var by ast.Expr
 	if p.consume(l.By) {
-		by = p.element()
+		by = p.parse()
 	} else {
 		by = &fundamentals.Number{Content: "1"}
 	}
