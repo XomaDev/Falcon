@@ -213,6 +213,8 @@ func (p *XMLParser) parseBlock(block ast.Block) ast.Expr {
 		return p.mathIsNumber(block)
 	case "math_convert_number":
 		return p.mathConvertNumber(block)
+	case "math_convert_angles":
+		return p.mathConvertAngles(block)
 
 	case "lists_create_with":
 		return &fundamentals.List{Elements: p.fromMinVals(block.Values, 0)}
@@ -913,6 +915,17 @@ func (p *XMLParser) textCompare(block ast.Block) ast.Expr {
 		panic("Unknown Text Compare operation: " + block.SingleField())
 	}
 	return p.makeBinary(pOperation, p.fromMinVals(block.Values, 2))
+}
+
+func (p *XMLParser) mathConvertAngles(block ast.Block) ast.Expr {
+	var funcName string
+	switch block.SingleField() {
+	case "RADIANS_TO_DEGREES":
+		funcName = "degrees"
+	case "DEGREES_TO_RADIANS":
+		funcName = "radians"
+	}
+	return makeFuncCall(funcName, p.singleExpr(block))
 }
 
 func (p *XMLParser) mathConvertNumber(block ast.Block) ast.Expr {
