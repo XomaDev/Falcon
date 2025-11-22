@@ -45,6 +45,7 @@ const (
 	Not
 	Colon
 	DoubleColon
+	DoubleDot
 	RightArrow
 	Underscore
 	At
