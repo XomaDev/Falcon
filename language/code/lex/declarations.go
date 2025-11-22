@@ -31,6 +31,7 @@ var Symbols = map[string]StaticToken{
 	"@":  staticOf(At),
 	":":  staticOf(Colon, Pair, Operator),
 	"::": staticOf(DoubleColon),
+	"..": staticOf(DoubleDot),
 
 	"(": staticOf(OpenCurve),
 	")": staticOf(CloseCurve),
