@@ -64,7 +64,7 @@ func (t *Transformer) String() string {
 func (t *Transformer) Blockly(flags ...bool) ast.Block {
 	signature, ok := transformers[t.Name]
 	if !ok {
-		t.Where.Error("Unknown transformer '%'", t.Name)
+		t.Where.Error("Unknown list lambda! .% { }", t.Name)
 		panic("Unreachable")
 	}
 	gotArgs := len(t.Args)
@@ -93,7 +93,8 @@ func (t *Transformer) Blockly(flags ...bool) ast.Block {
 	case "max":
 		return t.max()
 	default:
-		panic("Unimplemented list transformer! " + t.Name)
+		t.Where.Error("Unknown list lambda! .% { }", t.Name)
+		panic("Unreachable")
 	}
 }
 

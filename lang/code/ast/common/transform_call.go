@@ -32,7 +32,7 @@ func (t *Transform) Blockly(flags ...bool) ast.Block {
 	default:
 		t.Where.Error("Unknown constant transform call ::%", t.Name)
 	}
-	panic("")
+	panic("never reached")
 }
 
 func (t *Transform) Continuous() bool {

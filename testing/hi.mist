@@ -1,1 +1,2 @@
-local name = "Kumaraswamy\" B G"
+local names = ["Cat", "Dog", "Meow", "Boww"]
+names.mean { x -> true }

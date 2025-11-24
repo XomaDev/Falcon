@@ -93,7 +93,8 @@ func (f *FuncCall) Blockly(flags ...bool) ast.Block {
 	case "every":
 		return f.everyComponent()
 	default:
-		panic("Unknown function " + f.Name)
+		f.Where.Error("Unknown function %()", f.Name)
+		panic("never reached")
 	}
 }
 
@@ -327,7 +328,6 @@ func (f *FuncCall) openScreen() ast.Block {
 }
 
 func (f *FuncCall) println() ast.Block {
-	println("yeah called")
 	f.assertArgLen(1)
 	return ast.Block{
 		Type:   "controls_eval_but_ignore",

@@ -118,7 +118,7 @@ func (c *Call) Blockly(flags ...bool) ast.Block {
 func (c *Call) getCallSignature() *CallSignature {
 	signature, ok := signatures[c.Name]
 	if !ok {
-		c.Where.Error("Cannot find method .%", c.Name)
+		c.Where.Error("Cannot find method .%()", c.Name)
 	}
 	gotArgLen := len(c.Args)
 	if signature.ParamCount >= 0 {
@@ -143,7 +143,7 @@ func (c *Call) Continuous() bool {
 func (c *Call) Consumable(flags ...bool) bool {
 	signature, ok := signatures[c.Name]
 	if !ok {
-		c.Where.Error("Cannot find method .%", c.Name)
+		c.Where.Error("Cannot find method .%()", c.Name)
 	}
 	return signature.Consumable
 }
