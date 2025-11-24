@@ -211,17 +211,27 @@ func (l *Lexer) colorCode() {
 }
 
 func (l *Lexer) text() {
-	startIndex := l.currIndex
-	for l.notEOF() && l.peek() != '"' {
-		l.skip()
+	var writer strings.Builder
+	for {
+		c := l.next()
+		if c == '"' {
+			break
+		}
+		if c == '\\' {
+			// Only handle escaping of (")
+			e := l.peek()
+			if e == '"' {
+				c = e
+				l.skip()
+			}
+		}
+		writer.WriteByte(c)
 	}
-	l.eat('"')
-	content := l.source[startIndex : l.currIndex-1]
+	content := writer.String()
 	l.appendToken(&Token{
 		Context: l.ctx,
 		Row:     l.currRow,
 		Column:  l.currColumn,
-
 		Type:    Text,
 		Content: &content,
 		Flags:   []Flag{Value, ConstantValue},

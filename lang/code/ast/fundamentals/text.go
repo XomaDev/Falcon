@@ -2,15 +2,15 @@ package fundamentals
 
 import (
 	"Falcon/code/ast"
+	"strings"
 )
 
 type Text struct {
 	Content string
 }
 
-// String TODO fix escaping problem
 func (t *Text) String() string {
-	return "\"" + t.Content + "\""
+	return "\"" + strings.Replace(t.Content, "\"", "\\\"", -1) + "\""
 }
 
 func (t *Text) Blockly(flags ...bool) ast.Block {
