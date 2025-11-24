@@ -29,6 +29,9 @@ func (f *FuncCall) String() string {
 }
 
 func (f *FuncCall) Blockly(flags ...bool) ast.Block {
+	if len(flags) > 0 && !flags[0] && !f.Consumable() {
+		f.Where.Error("Expected a consumable but got a statement")
+	}
 	switch f.Name {
 	case "sqrt", "abs", "neg", "log", "exp", "round", "ceil", "floor",
 		"sin", "cos", "tan", "asin", "acos", "atan", "degrees", "radians",
@@ -329,10 +332,7 @@ func (f *FuncCall) openScreen() ast.Block {
 
 func (f *FuncCall) println() ast.Block {
 	f.assertArgLen(1)
-	return ast.Block{
-		Type:   "controls_eval_but_ignore",
-		Values: ast.MakeValues(f.Args, "VALUE"),
-	}
+	return ast.Block{Type: "controls_eval_but_ignore", Values: ast.MakeValues(f.Args, "VALUE")}
 }
 
 var mathFuncMap = map[string]string{

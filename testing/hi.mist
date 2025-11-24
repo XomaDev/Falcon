@@ -1,2 +1,3 @@
-local names = ["Cat", "Dog", "Meow", "Boww"]
-names.mean { x -> true }
+func greet(name) = {
+  println("Katze!")
+}

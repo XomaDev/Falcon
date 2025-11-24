@@ -140,24 +140,29 @@ func MakeValueArgs(on Expr, onName string, operands []Expr, names ...string) []V
 
 func CreateStatement(name string, body []Expr) Statement {
 	// Pass true to indicate a statement
-	headBlock := body[0].Blockly(true)
+	headBlock := ensureStatement(body[0])
 	currBlock := &headBlock
-	if body[0].Consumable(true) {
-		panic("Cannot include a consumable in a statement! " + currBlock.Type)
-	}
 	bodyLen := len(body)
 	currI := 1
 
 	for currI < bodyLen {
-		aBlock := body[currI].Blockly(true)
-		if body[currI].Consumable(true) {
-			panic("Cannot include a consumable in a statement! " + aBlock.Type)
-		}
+		aBlock := ensureStatement(body[currI])
 		currBlock.Next = &Next{Block: &aBlock}
 		currBlock = &aBlock
 		currI++
 	}
 	return Statement{Name: name, Block: &headBlock}
+}
+
+func ensureStatement(expr Expr) Block {
+	// First evaluate Blockly(). True indicates we expect a statement.
+	// This gives time for if expressions to mutate to if statement.
+	aBlock := expr.Blockly(true)
+	if expr.Consumable(true) {
+		// It's still consumable, wrap around evaluate but ignore result
+		return Block{Type: "controls_eval_but_ignore", Values: []Value{{Block: aBlock}}}
+	}
+	return aBlock
 }
 
 func ToStatements(namePrefix string, bodies [][]Expr) []Statement {
