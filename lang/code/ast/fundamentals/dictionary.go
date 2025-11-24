@@ -38,10 +38,6 @@ type Pair struct {
 	Value ast.Expr
 }
 
-func (p *Pair) Yail() string {
-	panic("implement me")
-}
-
 func (p *Pair) String() string {
 	return sugar.Format("% : %", p.Key.String(), p.Value.String())
 }
@@ -66,10 +62,6 @@ func (p *Pair) Signature() []ast.Signature {
 }
 
 type WalkAll struct {
-}
-
-func (w *WalkAll) Yail() string {
-	return "(static-field com.google.appinventor.components.runtime.util.YailDictionary 'ALL)"
 }
 
 func (w *WalkAll) String() string {

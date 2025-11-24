@@ -220,7 +220,6 @@ func (p *LangParser) varExpr() ast.Expr {
 
 func (p *LangParser) whileExpr() *control.While {
 	p.skip()
-	// TODO: earlier we were using p.expr(0), check the side effects
 	p.expect(l.OpenCurve)
 	condition := p.parse()
 	p.expect(l.CloseCurve)
@@ -310,8 +309,6 @@ func (p *LangParser) bodyUntilCurly() []ast.Expr {
 	}
 	for p.notEOF() && !p.isNext(l.CloseCurly) {
 		expressions = append(expressions, p.parse())
-		// workaround for dictionary and smart block to coexist
-		//  TODO: work on a better solution later
 		p.consume(l.Comma)
 	}
 	return expressions

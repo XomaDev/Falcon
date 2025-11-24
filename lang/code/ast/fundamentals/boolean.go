@@ -45,11 +45,6 @@ type Not struct {
 	Expr ast.Expr
 }
 
-func (n *Not) Yail() string {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (n *Not) String() string {
 	return sugar.Format("!%", n.Expr.String())
 }
