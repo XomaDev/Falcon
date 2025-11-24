@@ -1,62 +1,28 @@
 package analysis
 
-import (
-	"Falcon/code/lex"
-)
+import "Falcon/code/ast"
 
-//go:generate stringer -type=Scope
-type Scope int
-
-const (
-	ScopeRetProc Scope = iota
-	ScopeProc
-	ScopeGenericEvent
-	ScopeEvent
-	ScopeLoop
-	ScopeIfBody
-	ScopeSmartBody
-)
-
-type ScopeCursor struct {
-	currScopes []Scope
+type Scope struct {
+	Type      ScopeType
+	Parent    *Scope
+	Variables map[string]ast.Signature
 }
 
-func (s *ScopeCursor) Enter(where *lex.Token, t Scope) {
-	s.checkScope(where, t)
-	s.currScopes = append(s.currScopes, t)
+func (s *Scope) DefineVariable(name string, signature ast.Signature) {
+	s.Variables[name] = signature
 }
 
-func (s *ScopeCursor) checkScope(where *lex.Token, t Scope) {
-	depth := len(s.currScopes)
-	if t == ScopeRetProc || t == ScopeProc {
-		if depth != 0 {
-			where.Error("Functions can only be defined at the root.")
-		}
-	} else if t == ScopeGenericEvent || t == ScopeEvent {
-		if depth != 0 {
-			where.Error("Events can only be defined at the root.")
-		}
+func (s *Scope) ResolveVariable(name string) (ast.Signature, bool) {
+	signature, ok := s.Variables[name]
+	if ok {
+		return signature, true
 	}
-}
-
-func (s *ScopeCursor) Exit(t Scope) {
-	topIndex := len(s.currScopes) - 1
-	current := s.currScopes[topIndex]
-	s.currScopes = s.currScopes[:topIndex]
-	if current != t {
-		panic("Bad scope exit! Expected " + current.String() + " but got " + t.String())
+	if s.Parent != nil {
+		return s.Parent.ResolveVariable(name)
 	}
+	return ast.SignVoid, false
 }
 
-func (s *ScopeCursor) In(t Scope) bool {
-	for _, scope := range s.currScopes {
-		if scope == t {
-			return true
-		}
-	}
-	return false
-}
-
-func (s *ScopeCursor) AtRoot() bool {
-	return len(s.currScopes) == 0
+func (s *Scope) IsRoot() bool {
+	return s.Parent == nil
 }

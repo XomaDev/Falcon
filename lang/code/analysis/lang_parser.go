@@ -15,18 +15,6 @@ import (
 )
 import l "Falcon/code/lex"
 
-type NameResolver struct {
-	Procedures        map[string]Procedure
-	ComponentTypesMap map[string]string // Button1 -> Button
-	ComponentNameMap  map[string][]string
-}
-
-type Procedure struct {
-	Name       string
-	Parameters []string
-	Returning  bool
-}
-
 type LangParser struct {
 	Tokens         []*l.Token
 	currIndex      int
@@ -43,11 +31,11 @@ func NewLangParser(tokens []*l.Token) *LangParser {
 		currIndex:      0,
 		currCheckpoint: 0,
 		Resolver: &NameResolver{
-			Procedures:        map[string]Procedure{},
+			Procedures:        map[string]*Procedure{},
 			ComponentTypesMap: map[string]string{},
 			ComponentNameMap:  map[string][]string{},
 		},
-		ScopeCursor: &ScopeCursor{currScopes: []Scope{}},
+		ScopeCursor: MakeScopeCursor(),
 	}
 }
 
@@ -165,7 +153,7 @@ func (p *LangParser) funcSmt() ast.Expr {
 	name := p.name()
 	var parameters = p.parameters()
 	returning := p.consume(l.Assign)
-	p.Resolver.Procedures[name] = Procedure{Name: name, Parameters: parameters, Returning: returning}
+	p.Resolver.Procedures[name] = &Procedure{Name: name, Parameters: parameters, Returning: returning}
 	if returning {
 		p.ScopeCursor.Enter(where, ScopeSmartBody)
 		var result ast.Expr
@@ -293,7 +281,7 @@ func (p *LangParser) ifSmt() ast.Expr {
 	return &control.If{Conditions: conditions, Bodies: bodies, ElseBody: elseBody}
 }
 
-func (p *LangParser) body(scope Scope) []ast.Expr {
+func (p *LangParser) body(scope ScopeType) []ast.Expr {
 	where := p.expect(l.OpenCurly)
 	p.ScopeCursor.Enter(where, scope)
 	expressions := p.bodyUntilCurly()

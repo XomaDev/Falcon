@@ -1,3 +1,2 @@
-func greet(name) = {
-  println("Katze!")
-}
+local name = 123
+name.trim()
