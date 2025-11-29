@@ -513,7 +513,7 @@ func (p *LangParser) checkCall(token *l.Token) ast.Expr {
 		if ok {
 			return &procedures.Call{Name: nameExpr.Name, Parameters: signature.Parameters, Arguments: p.arguments(), Returning: signature.Returning}
 		} else {
-			return &common.FuncCall{Where: nameExpr.Where, Name: nameExpr.Name, Args: p.arguments()}
+			return common.CreateFuncCall(nameExpr.Where, nameExpr.Name, p.arguments())
 		}
 	}
 	return value
@@ -618,7 +618,13 @@ func (p *LangParser) value(t *l.Token) ast.Expr {
 		return &variables.Get{Where: t, Global: false, Name: *t.Content, ValueSignature: signatures}
 	case l.This:
 		p.expect(l.Dot)
-		return &variables.Get{Where: t, Global: true, Name: p.name()}
+		nameToken := p.expect(l.Name)
+		name := *nameToken.Content
+		if signatures, ok := p.ScopeCursor.ResolveVariable(name); ok {
+			return &variables.Get{Where: t, Global: true, Name: name, ValueSignature: signatures}
+		}
+		nameToken.Error("Cannot find symbol '%'", name)
+		panic("not reached")
 	case l.ColorCode:
 		return &fundamentals.Color{Where: t, Hex: *t.Content}
 	default:

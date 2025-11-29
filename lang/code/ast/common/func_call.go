@@ -15,6 +15,12 @@ type FuncCall struct {
 	Args  []ast.Expr
 }
 
+func CreateFuncCall(where *lex.Token, name string, args []ast.Expr) *FuncCall {
+	call := &FuncCall{Where: where, Name: name, Args: args}
+	call.Signature() // Ensures a valid function name
+	return call
+}
+
 func (f *FuncCall) String() string {
 	if f.Name == "rem" {
 		return f.Args[0].String() + " % " + f.Args[1].String()
@@ -32,6 +38,9 @@ func (f *FuncCall) Blockly(flags ...bool) ast.Block {
 	if len(flags) > 0 && !flags[0] && !f.Consumable() {
 		f.Where.Error("Expected a consumable but got a statement")
 	}
+	// TODO:
+	//  We have to assert correct number of arguments
+	//  both here and in Signature()
 	switch f.Name {
 	case "sqrt", "abs", "neg", "log", "exp", "round", "ceil", "floor",
 		"sin", "cos", "tan", "asin", "acos", "atan", "degrees", "radians",
