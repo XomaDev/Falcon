@@ -170,6 +170,9 @@ func (p *LangParser) funcSmt() ast.Expr {
 	p.Resolver.Procedures[name] = &Procedure{Name: name, Parameters: parameters, Returning: returning}
 	if returning {
 		p.ScopeCursor.Enter(where, ScopeSmartBody)
+		for _, parameter := range parameters {
+			p.ScopeCursor.DefineVariable(parameter, []ast.Signature{ast.SignAny})
+		}
 		var result ast.Expr
 		if p.isNext(l.OpenCurly) {
 			result = p.smartBody()
@@ -179,7 +182,15 @@ func (p *LangParser) funcSmt() ast.Expr {
 		p.ScopeCursor.Exit(ScopeSmartBody)
 		return &procedures.RetProcedure{Name: name, Parameters: parameters, Result: result}
 	} else {
-		return &procedures.VoidProcedure{Name: name, Parameters: parameters, Body: p.body(ScopeProc)}
+		where := p.expect(l.OpenCurly)
+		p.ScopeCursor.Enter(where, ScopeProc)
+		for _, parameter := range parameters {
+			p.ScopeCursor.DefineVariable(parameter, []ast.Signature{ast.SignAny})
+		}
+		body := p.bodyUntilCurly()
+		p.ScopeCursor.Exit(ScopeProc)
+		p.expect(l.CloseCurly)
+		return &procedures.VoidProcedure{Name: name, Parameters: parameters, Body: body}
 	}
 }
 

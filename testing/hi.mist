@@ -1,3 +1,49 @@
-func hello() {
-  println(helleo())
+func lex(expr) = {
+  // Tokenize the expression into a list using a while loop and a stack (list)
+  local tokens = []
+  local i = 1
+  local len = expr.textLen()
+
+  while (i <= len) {
+    local ch = expr[i]
+
+    if (ch == " ") {
+      // Skip spaces
+      i = i + 1
+    } else if (ch == "(" || ch == ")" || ch == "+" || ch == "-" || ch == "*" || ch == "/") {
+      // Add the operator as a token
+      tokens.add(ch)
+      i = i + 1
+    } else if (ch ? number) {
+      // Read a number. Numbers can be decimal or integer.
+      local numStart = i
+
+      // Check for a decimal point to determine if it's a number or a dot operator
+      if (expr[i] == ".") {
+        i = i + 1
+      }
+
+      // Continue reading digits until a non-digit character is found
+      while (i <= len && expr[i] ? number) {
+        i = i + 1
+      }
+
+      // Add the number token. Falcon uses strings for numbers.
+      tokens.add(expr.slice(numStart, i - 1))
+    } else {
+      // Handle identifiers or other text tokens if needed
+      // For simplicity, we'll assume only numbers and operators are valid tokens
+      // This is a basic tokenizer and doesn't handle complex expressions or identifiers
+      println("Invalid character: " _ ch)
+      break
+    }
+  }
+
+  // The last token might be an empty string if the expression ends with a space
+  if (tokens.last() == "") {
+    tokens.removeLast()
+  }
+
+  // The result is a list of tokens
+  tokens
 }
