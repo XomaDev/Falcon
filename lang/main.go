@@ -5,7 +5,6 @@ package main
 import (
 	"Falcon/code/ast"
 	"Falcon/code/context"
-	"Falcon/code/diff"
 	"Falcon/code/lex"
 	codeAnalysis "Falcon/code/parser"
 	designAnalysis "Falcon/design"
@@ -59,28 +58,6 @@ func xmlTest() {
 		machineSourceCode.WriteRune('\n')
 	}
 	println(machineSourceCode.String())
-}
-
-func diffTest() {
-	diff0 := "diff0.mist"
-	diff1 := "diff1.mist"
-
-	diff0Path := "/home/ekina/GolandProjects/Falcon/testing/" + diff0
-	codeBytes, err := os.ReadFile(diff0Path)
-	if err != nil {
-		panic(err)
-	}
-	diff0Code := string(codeBytes)
-
-	diff1Path := "/home/ekina/GolandProjects/Falcon/testing/" + diff1
-	codeBytes, err = os.ReadFile(diff1Path)
-	if err != nil {
-		panic(err)
-	}
-	diff1Code := string(codeBytes)
-
-	syntaxDiff := diff.MakeSyntaxDiff(diff0Code, diff1Code)
-	println(syntaxDiff.Merge())
 }
 
 func analyzeSyntax() {
