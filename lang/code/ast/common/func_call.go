@@ -105,7 +105,7 @@ func (f *FuncCall) Blockly(flags ...bool) ast.Block {
 	case "every":
 		return f.everyComponent()
 	default:
-		f.Where.Error("Unknown function %()", f.Name)
+		f.Where.Error("Cannot find %()", f.Name)
 		panic("never reached")
 	}
 }
@@ -189,7 +189,8 @@ func (f *FuncCall) Signature() []ast.Signature {
 	case "every":
 		return []ast.Signature{ast.SignList}
 	default:
-		panic("Unknown function " + f.Name)
+		f.Where.Error("Cannot find %()", f.Name)
+		panic("unreached")
 	}
 }
 

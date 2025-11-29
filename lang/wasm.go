@@ -10,8 +10,8 @@ import (
 	"Falcon/code/context"
 	"Falcon/code/diff"
 	"Falcon/code/lex"
-	analysis2 "Falcon/code/parser"
-	design2 "Falcon/design"
+	"Falcon/code/parser"
+	"Falcon/design"
 	"encoding/xml"
 	"runtime/debug"
 	"strings"
@@ -64,7 +64,7 @@ func mistToXml(this js.Value, p []js.Value) any {
 		codeContext := &context.CodeContext{SourceCode: &sourceCode, FileName: "appinventor.live"}
 
 		tokens := lex.NewLexer(codeContext).Lex()
-		langParser := analysis2.NewLangParser(tokens)
+		langParser := parser.NewLangParser(true, tokens)
 		langParser.SetComponentDefinitions(componentContextMap, reverseComponentMap)
 		expressions := langParser.ParseAll()
 
@@ -92,7 +92,7 @@ func xmlToMist(this js.Value, p []js.Value) any {
 			return js.ValueOf("No XML content provided")
 		}
 		xmlContent := p[0].String()
-		exprs := analysis2.NewXMLParser(xmlContent).ParseBlockly()
+		exprs := parser.NewXMLParser(xmlContent).ParseBlockly()
 		var builder strings.Builder
 
 		for _, expr := range exprs {
@@ -125,7 +125,7 @@ func convertSchemaToXml(this js.Value, p []js.Value) any {
 		if len(p) < 1 {
 			return js.ValueOf("No schema provided")
 		}
-		schemaString, err := design2.NewSchemaParser(p[0].String()).ConvertSchemaToXml()
+		schemaString, err := design.NewSchemaParser(p[0].String()).ConvertSchemaToXml()
 		if err != nil {
 			panic(err)
 		}
@@ -138,7 +138,7 @@ func convertXmlToSchema(this js.Value, p []js.Value) any {
 		if len(p) < 1 {
 			return js.ValueOf("No schema provided")
 		}
-		schemaString, err := design2.NewXmlParser(p[0].String()).ConvertXmlToSchema()
+		schemaString, err := design.NewXmlParser(p[0].String()).ConvertXmlToSchema()
 		if err != nil {
 			panic(err)
 		}

@@ -20,22 +20,29 @@ type LangParser struct {
 	currIndex      int
 	tokenSize      int
 	currCheckpoint int
-	Resolver       *NameResolver
-	ScopeCursor    *ScopeCursor
+
+	strict bool
+
+	Resolver    *NameResolver
+	ScopeCursor *ScopeCursor
+
+	DynamicSymbols map[*l.Token]bool // [alpha symbol -> resolved ?]
 }
 
-func NewLangParser(tokens []*l.Token) *LangParser {
+func NewLangParser(strict bool, tokens []*l.Token) *LangParser {
 	return &LangParser{
 		Tokens:         tokens,
 		tokenSize:      len(tokens),
 		currIndex:      0,
 		currCheckpoint: 0,
+		strict:         strict,
 		Resolver: &NameResolver{
 			Procedures:        map[string]*Procedure{},
 			ComponentTypesMap: map[string]string{},
 			ComponentNameMap:  map[string][]string{},
 		},
-		ScopeCursor: MakeScopeCursor(),
+		ScopeCursor:    MakeScopeCursor(),
+		DynamicSymbols: map[*l.Token]bool{},
 	}
 }
 
@@ -59,9 +66,21 @@ func (p *LangParser) ParseAll() []ast.Expr {
 		p.defineStatements()
 	}
 	for p.notEOF() {
-		expressions = append(expressions, p.parse())
+		e := p.parse()
+		if p.strict {
+			p.checkDynamicSymbols()
+		}
+		expressions = append(expressions, e)
 	}
 	return expressions
+}
+
+func (p *LangParser) checkDynamicSymbols() {
+	for token, b := range p.DynamicSymbols {
+		if !b {
+			token.Error("Cannot find symbol '%'", *token.Content)
+		}
+	}
 }
 
 func (p *LangParser) defineStatements() {
@@ -339,6 +358,10 @@ func (p *LangParser) makeBinary(opToken *l.Token, left ast.Expr, right ast.Expr)
 		return &fundamentals.Pair{Key: left, Value: right}
 	case l.Assign:
 		if nameExpr, ok := left.(*variables.Get); ok {
+			if _, found := p.ScopeCursor.ResolveVariable(nameExpr.Name); !found {
+				nameExpr.Where.Error("Cannot find symbol '%'", nameExpr.Name)
+			}
+			p.DynamicSymbols[nameExpr.Where] = true
 			return &variables.Set{Global: nameExpr.Global, Name: nameExpr.Name, Expr: right}
 		} else if listGet, ok := left.(*list.Get); ok {
 			return &list.Set{List: listGet.List, Index: listGet.Index, Value: right}
@@ -415,6 +438,7 @@ func (p *LangParser) componentCall(compName string, compType string) ast.Expr {
 func (p *LangParser) helperDropdown(keyExpr ast.Expr) ast.Expr {
 	where := p.next()
 	if key, ok := keyExpr.(*variables.Get); ok {
+		p.DynamicSymbols[key.Where] = true
 		return &fundamentals.HelperDropdown{Key: key.Name, Option: p.name()}
 	}
 	where.Error("Invalid Helper Access operation ")
@@ -509,6 +533,7 @@ func (p *LangParser) smartBody() ast.Expr {
 func (p *LangParser) checkCall(token *l.Token) ast.Expr {
 	value := p.value(token)
 	if nameExpr, ok := value.(*variables.Get); ok && p.notEOF() && p.isNext(l.OpenCurve) {
+		p.DynamicSymbols[nameExpr.Where] = true
 		signature, ok := p.Resolver.Procedures[nameExpr.Name]
 		if ok {
 			return &procedures.Call{Name: nameExpr.Name, Parameters: signature.Parameters, Arguments: p.arguments(), Returning: signature.Returning}
@@ -613,8 +638,11 @@ func (p *LangParser) value(t *l.Token) ast.Expr {
 		if compType, exists := p.Resolver.ComponentTypesMap[*t.Content]; exists {
 			return &fundamentals.Component{Name: *t.Content, Type: compType}
 		}
-		signatures, _ := p.ScopeCursor.ResolveVariable(*t.Content)
 		// May not be variable reference always. It could be a func or a method call.
+		signatures, found := p.ScopeCursor.ResolveVariable(*t.Content)
+		if !found {
+			p.DynamicSymbols[t] = false
+		}
 		return &variables.Get{Where: t, Global: false, Name: *t.Content, ValueSignature: signatures}
 	case l.This:
 		p.expect(l.Dot)
