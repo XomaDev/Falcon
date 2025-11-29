@@ -166,9 +166,11 @@ func ensureStatement(expr Expr) Block {
 }
 
 func ToStatements(namePrefix string, bodies [][]Expr) []Statement {
-	statements := make([]Statement, len(bodies))
+	var statements []Statement
 	for i, aBody := range bodies {
-		statements[i] = CreateStatement(namePrefix+strconv.Itoa(i), aBody)
+		if len(aBody) > 0 {
+			statements = append(statements, CreateStatement(namePrefix+strconv.Itoa(i), aBody))
+		}
 	}
 	return statements
 }
