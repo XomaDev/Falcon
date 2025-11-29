@@ -1,4 +1,4 @@
-package analysis
+package parser
 
 import (
 	"Falcon/code/ast"
@@ -26,13 +26,13 @@ type ScopeCursor struct {
 }
 
 func MakeScopeCursor() *ScopeCursor {
-	headScope := &Scope{Type: ScopeRoot, Parent: nil, Variables: map[string]ast.Signature{}}
+	headScope := &Scope{Type: ScopeRoot, Parent: nil, Variables: map[string][]ast.Signature{}}
 	return &ScopeCursor{allScopes: []*Scope{headScope}, headScope: headScope, currScope: headScope}
 }
 
 func (s *ScopeCursor) Enter(where *lex.Token, t ScopeType) {
 	s.checkScope(where, t)
-	newScope := &Scope{Type: t, Parent: s.currScope, Variables: map[string]ast.Signature{}}
+	newScope := &Scope{Type: t, Parent: s.currScope, Variables: map[string][]ast.Signature{}}
 	s.allScopes = append(s.allScopes, newScope)
 	s.currScope = newScope
 }
@@ -40,11 +40,11 @@ func (s *ScopeCursor) Enter(where *lex.Token, t ScopeType) {
 func (s *ScopeCursor) checkScope(where *lex.Token, t ScopeType) {
 	depth := len(s.allScopes)
 	if t == ScopeRetProc || t == ScopeProc {
-		if depth != 0 {
+		if depth != 1 {
 			where.Error("Functions can only be defined at the root.")
 		}
 	} else if t == ScopeGenericEvent || t == ScopeEvent {
-		if depth != 0 {
+		if depth != 1 {
 			where.Error("Events can only be defined at the root.")
 		}
 	}
@@ -63,11 +63,11 @@ func (s *ScopeCursor) Exit(t ScopeType) {
 	s.currScope = s.allScopes[len(s.allScopes)-1]
 }
 
-func (s *ScopeCursor) DefineVariable(name string, signature ast.Signature) {
+func (s *ScopeCursor) DefineVariable(name string, signature []ast.Signature) {
 	s.currScope.DefineVariable(name, signature)
 }
 
-func (s *ScopeCursor) ResolveVariable(name string) (ast.Signature, bool) {
+func (s *ScopeCursor) ResolveVariable(name string) ([]ast.Signature, bool) {
 	return s.currScope.ResolveVariable(name)
 }
 

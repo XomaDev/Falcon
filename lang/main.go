@@ -3,11 +3,11 @@
 package main
 
 import (
-	codeAnalysis "Falcon/code/analysis"
 	"Falcon/code/ast"
 	"Falcon/code/context"
 	"Falcon/code/diff"
 	"Falcon/code/lex"
+	codeAnalysis "Falcon/code/parser"
 	designAnalysis "Falcon/design"
 	"encoding/xml"
 	"os"
@@ -93,7 +93,7 @@ func analyzeSyntax() {
 	sourceCode := string(codeBytes)
 	codeContext := &context.CodeContext{SourceCode: &sourceCode, FileName: fileName}
 
-	// lexical analysis
+	// lexical parser
 	tokens := lex.NewLexer(codeContext).Lex()
 	for _, token := range tokens {
 		println(token.Debug())

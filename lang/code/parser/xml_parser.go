@@ -1,4 +1,4 @@
-package analysis
+package parser
 
 import (
 	"Falcon/code/ast"

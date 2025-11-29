@@ -1,4 +1,4 @@
-package analysis
+package parser
 
 import (
 	"Falcon/code/ast"
@@ -122,12 +122,7 @@ func (p *LangParser) genericEvent() ast.Expr {
 		parameters = p.parameters()
 	}
 	body := p.body(ScopeGenericEvent)
-	return &components.GenericEvent{
-		ComponentType: componentType,
-		Event:         eventName,
-		Parameters:    parameters,
-		Body:          body,
-	}
+	return &components.GenericEvent{ComponentType: componentType, Event: eventName, Parameters: parameters, Body: body}
 }
 
 func (p *LangParser) event() ast.Expr {
@@ -176,7 +171,9 @@ func (p *LangParser) globVar() ast.Expr {
 	}
 	name := p.name()
 	p.expect(l.Assign)
-	return &variables.Global{Name: name, Value: p.parse()}
+	value := p.parse()
+	p.ScopeCursor.DefineVariable(name, value.Signature())
+	return &variables.Global{Name: name, Value: value}
 }
 
 func (p *LangParser) varExpr() ast.Expr {
@@ -201,6 +198,7 @@ func (p *LangParser) varExpr() ast.Expr {
 
 		names = append(names, name)
 		values = append(values, value)
+		p.ScopeCursor.DefineVariable(name, value.Signature())
 	}
 	// we have to parse rest of the body here
 	return &variables.Var{Names: names, Values: values, Body: p.bodyUntilCurly()}
@@ -615,7 +613,9 @@ func (p *LangParser) value(t *l.Token) ast.Expr {
 		if compType, exists := p.Resolver.ComponentTypesMap[*t.Content]; exists {
 			return &fundamentals.Component{Name: *t.Content, Type: compType}
 		}
-		return &variables.Get{Where: t, Global: false, Name: *t.Content}
+		signatures, _ := p.ScopeCursor.ResolveVariable(*t.Content)
+		// May not be variable reference always. It could be a func or a method call.
+		return &variables.Get{Where: t, Global: false, Name: *t.Content, ValueSignature: signatures}
 	case l.This:
 		p.expect(l.Dot)
 		return &variables.Get{Where: t, Global: true, Name: p.name()}

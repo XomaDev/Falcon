@@ -1,4 +1,4 @@
-package analysis
+package parser
 
 type NameResolver struct {
 	Procedures        map[string]*Procedure

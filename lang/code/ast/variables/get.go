@@ -6,9 +6,10 @@ import (
 )
 
 type Get struct {
-	Where  *lex.Token
-	Global bool
-	Name   string
+	Where          *lex.Token
+	Global         bool
+	Name           string
+	ValueSignature []ast.Signature
 }
 
 func (g *Get) String() string {

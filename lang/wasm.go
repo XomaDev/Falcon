@@ -6,11 +6,11 @@
 package main
 
 import (
-	analysis2 "Falcon/code/analysis"
 	"Falcon/code/ast"
 	"Falcon/code/context"
 	"Falcon/code/diff"
 	"Falcon/code/lex"
+	analysis2 "Falcon/code/parser"
 	design2 "Falcon/design"
 	"encoding/xml"
 	"runtime/debug"
