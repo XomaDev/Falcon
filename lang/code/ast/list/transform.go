@@ -17,16 +17,16 @@ type Transformer struct {
 	Transformer ast.Expr
 }
 
-type transformerSignature struct {
+type TransformerSignature struct {
 	ArgSize  int
 	NameSize int
 }
 
-func makeSignature(argSize int, nameSize int) *transformerSignature {
-	return &transformerSignature{ArgSize: argSize, NameSize: nameSize}
+func makeSignature(argSize int, nameSize int) *TransformerSignature {
+	return &TransformerSignature{ArgSize: argSize, NameSize: nameSize}
 }
 
-var transformers = map[string]*transformerSignature{
+var transformers = map[string]*TransformerSignature{
 	"map":       makeSignature(0, 1),
 	"filter":    makeSignature(0, 1),
 	"reduce":    makeSignature(1, 2),
@@ -34,6 +34,22 @@ var transformers = map[string]*transformerSignature{
 	"sortByKey": makeSignature(0, 1),
 	"min":       makeSignature(0, 2),
 	"max":       makeSignature(0, 2),
+}
+
+func TestSignature(transformerName string, argsCount int, namesCount int) (string, *TransformerSignature) {
+	signature, ok := transformers[transformerName]
+	if !ok {
+		return sugar.Format("Unknown list lambda! .% { }", transformerName), nil
+	}
+	if signature.ArgSize != argsCount {
+		return sugar.Format("Expected % args but got % for transformer .% {",
+			strconv.Itoa(signature.ArgSize), strconv.Itoa(argsCount), transformerName), nil
+	}
+	if signature.NameSize != namesCount {
+		return sugar.Format("Expected % names but got % for transformer .% {",
+			strconv.Itoa(signature.NameSize), strconv.Itoa(namesCount), transformerName), nil
+	}
+	return "", signature
 }
 
 func (t *Transformer) String() string {
@@ -62,20 +78,9 @@ func (t *Transformer) String() string {
 }
 
 func (t *Transformer) Blockly(flags ...bool) ast.Block {
-	signature, ok := transformers[t.Name]
-	if !ok {
-		t.Where.Error("Unknown list lambda! .% { }", t.Name)
-		panic("Unreachable")
-	}
-	gotArgs := len(t.Args)
-	if signature.ArgSize != gotArgs {
-		t.Where.Error("Expected % args but got % for transformer ::%",
-			strconv.Itoa(signature.ArgSize), strconv.Itoa(gotArgs), t.Name)
-	}
-	gotNamesLen := len(t.Names)
-	if signature.NameSize != gotNamesLen {
-		t.Where.Error("Expected % names but got % for transformer ::%",
-			strconv.Itoa(signature.NameSize), strconv.Itoa(gotNamesLen), t.Name)
+	errorMessage, signature := TestSignature(t.Name, len(t.Args), len(t.Names))
+	if signature == nil {
+		panic(errorMessage)
 	}
 	switch t.Name {
 	case "map":
@@ -107,8 +112,13 @@ func (t *Transformer) Consumable(flags ...bool) bool {
 }
 
 func (t *Transformer) Signature() []ast.Signature {
+	errorMessage, transformerSignature := TestSignature(t.Name, len(t.Args), len(t.Names))
+	if transformerSignature == nil {
+		panic(errorMessage)
+	}
+	// TODO: this has to be improved when we are improving type safety
 	if t.Name == "min" || t.Name == "max" || t.Name == "reduce" {
-		return t.Transformer.Signature()
+		return []ast.Signature{ast.SignAny}
 	}
 	return []ast.Signature{ast.SignList}
 }

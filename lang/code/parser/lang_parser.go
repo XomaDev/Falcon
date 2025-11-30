@@ -529,6 +529,12 @@ func (p *LangParser) objectCall(object ast.Expr) ast.Expr {
 	}
 	transformer := p.parse()
 	p.consume(l.CloseCurly)
+	errorMessage, signature := list.TestSignature(name, len(args), len(namesUsed))
+	if signature == nil {
+		p.aggregator.EnqueueSymbol(where, object, errorMessage)
+	} else {
+		p.aggregator.MarkResolved(where)
+	}
 	return &list.Transformer{
 		Where:       where,
 		List:        object,
