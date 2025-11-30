@@ -87,12 +87,13 @@ func (p *LangParser) checkPendingSymbols() {
 			}
 		} else if procCall, ok := parseError.Owner.(*procedures.Call); ok {
 			// a late resolution of procedure calls
-			procSignature, found := p.Resolver.Procedures[procCall.Name]
-			if found {
-				procCall.Parameters = procSignature.Parameters
-				procCall.Returning = procSignature.Returning
+			procedureErrorMessage, procedureSignature := p.Resolver.ResolveProcedure(procCall.Name, len(procCall.Arguments))
+			if procedureSignature != nil {
+				procCall.Parameters = procedureSignature.Parameters
+				procCall.Returning = procedureSignature.Returning
 				continue
 			}
+			parseError.ErrorMessage = procedureErrorMessage
 		}
 		errorMessages = append(errorMessages, token.BuildError(false, parseError.ErrorMessage))
 	}
@@ -606,30 +607,28 @@ func (p *LangParser) checkCall(token *l.Token) ast.Expr {
 	if nameExpr, ok := value.(*variables.Get); ok && !nameExpr.Global && p.isNext(l.OpenCurve) {
 		arguments := p.arguments()
 		// check for in-built function call
-		funcCallErrorMessage, funcCallSignature := common.TestSignature(nameExpr.Name, len(arguments))
+		_, funcCallSignature := common.TestSignature(nameExpr.Name, len(arguments))
 		if funcCallSignature != nil {
 			p.aggregator.MarkResolved(nameExpr.Where)
 			return &common.FuncCall{Where: nameExpr.Where, Name: nameExpr.Name, Args: arguments}
 		}
 		// check for a user defined procedure
-		procSignature, found := p.Resolver.Procedures[nameExpr.Name]
+		procedureErrorMessage, procedureSignature := p.Resolver.ResolveProcedure(nameExpr.Name, len(arguments))
 		var funcCall *procedures.Call
-		if found {
+		if procedureSignature != nil {
 			funcCall = &procedures.Call{
 				Name:       nameExpr.Name,
-				Parameters: procSignature.Parameters,
+				Parameters: procedureSignature.Parameters,
 				Arguments:  arguments,
-				Returning:  procSignature.Returning,
+				Returning:  procedureSignature.Returning,
 			}
+			p.aggregator.MarkResolved(nameExpr.Where)
 		} else {
 			// just fill in a template, could be resolved later
 			funcCall = &procedures.Call{Name: nameExpr.Name, Arguments: arguments}
+			p.aggregator.EnqueueSymbol(nameExpr.Where, funcCall, procedureErrorMessage)
 		}
-		if found {
-			p.aggregator.MarkResolved(nameExpr.Where)
-		} else {
-			p.aggregator.EnqueueSymbol(nameExpr.Where, funcCall, funcCallErrorMessage)
-		}
+		return funcCall
 	}
 	return value
 }

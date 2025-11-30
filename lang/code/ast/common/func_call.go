@@ -86,7 +86,7 @@ var signatures = map[string]*FuncCallSignature{
 	"every": makeSignature("every", 1, ast.SignAny),
 }
 
-func TestSignature(funcName string, argsCount int) (string, *ast.Signature) {
+func TestSignature(funcName string, argsCount int) (string, *FuncCallSignature) {
 	callSignature, ok := signatures[funcName]
 	if !ok {
 		return sugar.Format("Cannot find function .%()", funcName), nil
@@ -96,8 +96,10 @@ func TestSignature(funcName string, argsCount int) (string, *ast.Signature) {
 			return sugar.Format("Expected a positive number of args for function %()", funcName), nil
 		}
 	} else if callSignature.ParamCount >= 0 {
-		return sugar.Format("Expected % args but got % for function %()",
-			strconv.Itoa(callSignature.ParamCount), strconv.Itoa(argsCount), funcName), nil
+		if argsCount != callSignature.ParamCount {
+			return sugar.Format("Expected % args but got % for function %()",
+				strconv.Itoa(callSignature.ParamCount), strconv.Itoa(argsCount), funcName), nil
+		}
 	} else {
 		minArgs := -callSignature.ParamCount - 1 // -1 offset
 		if argsCount < minArgs {
@@ -105,7 +107,7 @@ func TestSignature(funcName string, argsCount int) (string, *ast.Signature) {
 				strconv.Itoa(minArgs), strconv.Itoa(argsCount), funcName), nil
 		}
 	}
-	return "", &callSignature.Signature
+	return "", callSignature
 }
 
 func (f *FuncCall) String() string {
@@ -217,7 +219,7 @@ func (f *FuncCall) Signature() []ast.Signature {
 	if signature == nil {
 		panic(errorMessage)
 	}
-	return []ast.Signature{*signature}
+	return []ast.Signature{signature.Signature}
 }
 
 func (f *FuncCall) everyComponent() ast.Block {
