@@ -15,10 +15,97 @@ type FuncCall struct {
 	Args  []ast.Expr
 }
 
-func CreateFuncCall(where *lex.Token, name string, args []ast.Expr) *FuncCall {
-	call := &FuncCall{Where: where, Name: name, Args: args}
-	call.Signature() // Ensures a valid function name
-	return call
+type FuncCallSignature struct {
+	Name       string
+	ParamCount int
+	Signature  ast.Signature
+}
+
+func makeSignature(name string, paramCount int, signature ast.Signature) *FuncCallSignature {
+	return &FuncCallSignature{Name: name, ParamCount: paramCount, Signature: signature}
+}
+
+var signatures = map[string]*FuncCallSignature{
+	"sqrt":     makeSignature("sqrt", 1, ast.SignNumb),
+	"abs":      makeSignature("abs", 1, ast.SignNumb),
+	"neg":      makeSignature("neg", 1, ast.SignNumb),
+	"log":      makeSignature("log", 1, ast.SignNumb),
+	"exp":      makeSignature("exp", 1, ast.SignNumb),
+	"round":    makeSignature("round", 1, ast.SignNumb),
+	"ceil":     makeSignature("ceil", 1, ast.SignNumb),
+	"floor":    makeSignature("floor", 1, ast.SignNumb),
+	"sin":      makeSignature("sin", 1, ast.SignNumb),
+	"cos":      makeSignature("cos", 1, ast.SignNumb),
+	"tan":      makeSignature("tan", 1, ast.SignNumb),
+	"asin":     makeSignature("asin", 1, ast.SignNumb),
+	"acos":     makeSignature("acos", 1, ast.SignNumb),
+	"atan":     makeSignature("atan", 1, ast.SignNumb),
+	"degrees":  makeSignature("degrees", 1, ast.SignNumb),
+	"radians":  makeSignature("radians", 1, ast.SignNumb),
+	"decToHex": makeSignature("decToHex", 1, ast.SignNumb),
+	"decToBin": makeSignature("decToBin", 1, ast.SignNumb),
+	"hexToDec": makeSignature("hexToDec", 1, ast.SignNumb),
+	"binToDec": makeSignature("binToDec", 1, ast.SignNumb),
+
+	"dec":         makeSignature("dec", 1, ast.SignNumb),
+	"bin":         makeSignature("bin", 1, ast.SignNumb),
+	"octal":       makeSignature("octal", 1, ast.SignNumb),
+	"hexa":        makeSignature("hexa", 1, ast.SignNumb),
+	"randInt":     makeSignature("randInt", 2, ast.SignNumb),
+	"randFloat":   makeSignature("randFloat", 0, ast.SignNumb),
+	"setRandSeed": makeSignature("setRandSeed", 1, ast.SignVoid),
+	"min":         makeSignature("min", -1, ast.SignNumb),
+	"max":         makeSignature("max", -1, ast.SignNumb),
+
+	"avgOf":     makeSignature("avgOf", 1, ast.SignNumb),
+	"maxOf":     makeSignature("maxOf", 1, ast.SignNumb),
+	"minOf":     makeSignature("minOf", 1, ast.SignNumb),
+	"geoMeanOf": makeSignature("geoMeanOf", 1, ast.SignNumb),
+	"stdDevOf":  makeSignature("stdDevOf", 1, ast.SignNumb),
+	"stdErrOf":  makeSignature("stdErrOf", 1, ast.SignNumb),
+
+	"println":              makeSignature("println", 1, ast.SignVoid),
+	"openScreen":           makeSignature("openScreen", 1, ast.SignVoid),
+	"openScreenWithValue":  makeSignature("openScreenWithValue", 2, ast.SignVoid),
+	"closeScreenWithValue": makeSignature("closeScreenWithValue", 1, ast.SignVoid),
+	"getStartValue":        makeSignature("getStartValue", 0, ast.SignText),
+
+	"closeScreen":              makeSignature("closeScreen", 0, ast.SignVoid),
+	"closeApp":                 makeSignature("closeApp", 0, ast.SignVoid),
+	"getPlainStartText":        makeSignature("getPlainStartText", 0, ast.SignText),
+	"closeScreenWithPlainText": makeSignature("closeScreenWithPlainText", 1, ast.SignVoid),
+
+	"copyList":   makeSignature("copyList", 1, ast.SignList),
+	"copyDict":   makeSignature("copyDict", 1, ast.SignDict),
+	"makeColor":  makeSignature("makeColor", 1, ast.SignNumb),
+	"splitColor": makeSignature("splitColor", 1, ast.SignList),
+
+	"set":   makeSignature("set", 4, ast.SignVoid),
+	"get":   makeSignature("get", 3, ast.SignAny),
+	"call":  makeSignature("call", -1-(3), ast.SignAny),
+	"every": makeSignature("every", 1, ast.SignAny),
+}
+
+func TestSignature(funcName string, argsCount int) (string, bool) {
+	callSignature, ok := signatures[funcName]
+	if !ok {
+		return sugar.Format("Cannot find method .%()", funcName), false
+	}
+	if callSignature.ParamCount == -1 {
+		if argsCount == 0 {
+			return sugar.Format("Expected a positive number of args for method .%()", funcName), false
+		}
+	} else if callSignature.ParamCount >= 0 {
+		return sugar.Format("Expected % args but got % for method .%()",
+			strconv.Itoa(callSignature.ParamCount), strconv.Itoa(argsCount), funcName), false
+	} else {
+		minArgs := -callSignature.ParamCount - 1 // -1 offset
+		if argsCount < minArgs {
+			return sugar.Format("Expected at least % args but got only % for method .%()",
+				strconv.Itoa(minArgs), strconv.Itoa(argsCount), funcName), false
+		}
+	}
+	return "", true
 }
 
 func (f *FuncCall) String() string {
@@ -38,9 +125,6 @@ func (f *FuncCall) Blockly(flags ...bool) ast.Block {
 	if len(flags) > 0 && !flags[0] && !f.Consumable() {
 		f.Where.Error("Expected a consumable but got a statement")
 	}
-	// TODO:
-	//  We have to assert correct number of arguments
-	//  both here and in Signature()
 	switch f.Name {
 	case "sqrt", "abs", "neg", "log", "exp", "round", "ceil", "floor",
 		"sin", "cos", "tan", "asin", "acos", "atan", "degrees", "radians",
@@ -125,73 +209,8 @@ func (f *FuncCall) Consumable(flags ...bool) bool {
 }
 
 func (f *FuncCall) Signature() []ast.Signature {
-	switch f.Name {
-	case "root", "abs", "neg", "log", "exp", "round", "ceil", "floor",
-		"sin", "cos", "tan", "asin", "acos", "atan", "degrees", "radians",
-		"decToHex", "decToBin", "hexToDec", "binToDec":
-		return []ast.Signature{ast.SignNumb}
-
-	case "dec", "bin", "octal", "hexa":
-		return []ast.Signature{ast.SignNumb}
-	case "randInt":
-		return []ast.Signature{ast.SignNumb}
-	case "randFloat":
-		return []ast.Signature{ast.SignNumb}
-	case "setRandSeed":
-		return []ast.Signature{ast.SignNumb}
-	case "min", "max":
-		return []ast.Signature{ast.SignNumb}
-	case "avgOf", "maxOf", "minOf", "geoMeanOf", "stdDevOf", "stdErrOf":
-		return []ast.Signature{ast.SignNumb}
-	case "modeOf":
-		return []ast.Signature{ast.SignNumb}
-	case "mod", "rem", "quot":
-		return []ast.Signature{ast.SignNumb}
-	case "aTan2":
-		return []ast.Signature{ast.SignNumb}
-	case "formatDecimal":
-		return []ast.Signature{ast.SignNumb}
-
-	case "println":
-		return []ast.Signature{ast.SignVoid}
-	case "openScreen":
-		return []ast.Signature{ast.SignVoid}
-	case "openScreenWithValue":
-		return []ast.Signature{ast.SignVoid}
-	case "closeScreenWithValue":
-		return []ast.Signature{ast.SignVoid}
-	case "getStartValue":
-		return []ast.Signature{ast.SignVoid}
-	case "closeScreen":
-		return []ast.Signature{ast.SignVoid}
-	case "closeApp":
-		return []ast.Signature{ast.SignVoid}
-	case "getPlainStartText":
-		return []ast.Signature{ast.SignText}
-	case "closeScreenWithPlainText":
-		return []ast.Signature{ast.SignText}
-	case "copyList":
-		return []ast.Signature{ast.SignList}
-	case "copyDict":
-		return []ast.Signature{ast.SignDict}
-
-	case "makeColor":
-		return []ast.Signature{ast.SignNumb}
-	case "splitColor":
-		return []ast.Signature{ast.SignList}
-
-	case "set":
-		return []ast.Signature{ast.SignVoid}
-	case "get":
-		return []ast.Signature{ast.SignAny}
-	case "call":
-		return []ast.Signature{ast.SignAny}
-	case "every":
-		return []ast.Signature{ast.SignList}
-	default:
-		f.Where.Error("Cannot find %()", f.Name)
-		panic("unreached")
-	}
+	callSignature, _ := signatures[f.Name] // signatures are already verified
+	return []ast.Signature{callSignature.Signature}
 }
 
 func (f *FuncCall) everyComponent() ast.Block {
@@ -231,7 +250,6 @@ func (f *FuncCall) genericCall() ast.Block {
 }
 
 func (f *FuncCall) genericGet() ast.Block {
-	f.assertArgLen(3)
 	compType, ok := f.Args[0].(*variables.Get)
 	if !ok || compType.Global {
 		f.Where.Error("Expected a component type for get() 1st argument!")
@@ -254,7 +272,6 @@ func (f *FuncCall) genericGet() ast.Block {
 }
 
 func (f *FuncCall) genericSet() ast.Block {
-	f.assertArgLen(4)
 	compType, ok := f.Args[0].(*variables.Get)
 	if !ok || compType.Global {
 		f.Where.Error("Expected a component type for set() 1st argument!")
@@ -309,7 +326,6 @@ func (f *FuncCall) ctrlSimpleBlock(blockType string) ast.Block {
 }
 
 func (f *FuncCall) closeScreenWithPlainText() ast.Block {
-	f.assertArgLen(1)
 	return ast.Block{
 		Type:   "controls_closeScreenWithPlainText",
 		Values: ast.MakeValues(f.Args, "TEXT"),
@@ -317,7 +333,6 @@ func (f *FuncCall) closeScreenWithPlainText() ast.Block {
 }
 
 func (f *FuncCall) closeScreenWithValue() ast.Block {
-	f.assertArgLen(1)
 	return ast.Block{
 		Type:   "controls_closeScreenWithValue",
 		Values: ast.MakeValues(f.Args, "SCREEN"),
@@ -325,7 +340,6 @@ func (f *FuncCall) closeScreenWithValue() ast.Block {
 }
 
 func (f *FuncCall) openScreenWithValue() ast.Block {
-	f.assertArgLen(2)
 	return ast.Block{
 		Type:   "controls_openAnotherScreenWithStartValue",
 		Values: ast.MakeValues(f.Args, "SCREENNAME", "STARTVALUE"),
@@ -333,7 +347,6 @@ func (f *FuncCall) openScreenWithValue() ast.Block {
 }
 
 func (f *FuncCall) openScreen() ast.Block {
-	f.assertArgLen(1)
 	return ast.Block{
 		Type:   "controls_openAnotherScreen",
 		Values: ast.MakeValues(f.Args, "SCREEN"),
@@ -341,7 +354,6 @@ func (f *FuncCall) openScreen() ast.Block {
 }
 
 func (f *FuncCall) println() ast.Block {
-	f.assertArgLen(1)
 	return ast.Block{Type: "controls_eval_but_ignore", Values: ast.MakeValues(f.Args, "VALUE")}
 }
 
@@ -369,7 +381,6 @@ var mathFuncMap = map[string]string{
 }
 
 func (f *FuncCall) mathConversions() ast.Block {
-	f.assertArgLen(1)
 	fieldOp, ok := mathFuncMap[f.Name]
 	if !ok {
 		f.Where.Error("Unknown Math Conversion %()", f.Name)
@@ -393,7 +404,6 @@ func (f *FuncCall) mathConversions() ast.Block {
 }
 
 func (f *FuncCall) formatDecimal() ast.Block {
-	f.assertArgLen(2)
 	return ast.Block{
 		Type:   "math_format_as_decimal",
 		Values: ast.MakeValues(f.Args, "NUM", "PLACES"),
@@ -401,7 +411,6 @@ func (f *FuncCall) formatDecimal() ast.Block {
 }
 
 func (f *FuncCall) atan2() ast.Block {
-	f.assertArgLen(2)
 	return ast.Block{
 		Type:   "math_atan2",
 		Values: ast.MakeValues(f.Args, "Y", "X"),
@@ -409,7 +418,6 @@ func (f *FuncCall) atan2() ast.Block {
 }
 
 func (f *FuncCall) mathDivide() ast.Block {
-	f.assertArgLen(2)
 	var fieldOp string
 	switch f.Name {
 	case "mod":
@@ -427,7 +435,6 @@ func (f *FuncCall) mathDivide() ast.Block {
 }
 
 func (f *FuncCall) modeOf() ast.Block {
-	f.assertArgLen(1)
 	return ast.Block{
 		Type:   "math_mode_of_list",
 		Values: ast.MakeValues(f.Args, "LIST"),
@@ -435,7 +442,6 @@ func (f *FuncCall) modeOf() ast.Block {
 }
 
 func (f *FuncCall) mathOnList() ast.Block {
-	f.assertArgLen(1)
 	var fieldOp string
 	switch f.Name {
 	case "avgOf":
@@ -479,7 +485,6 @@ func (f *FuncCall) minOrMax() ast.Block {
 }
 
 func (f *FuncCall) setRandSeed() ast.Block {
-	f.assertArgLen(1)
 	return ast.Block{
 		Type:   "math_random_set_seed",
 		Values: ast.MakeValues(f.Args, "NUM"),
@@ -487,12 +492,10 @@ func (f *FuncCall) setRandSeed() ast.Block {
 }
 
 func (f *FuncCall) randFloat() ast.Block {
-	f.assertArgLen(0)
 	return ast.Block{Type: "math_random_float"}
 }
 
 func (f *FuncCall) randInt() ast.Block {
-	f.assertArgLen(2)
 	return ast.Block{
 		Type:   "math_random_int",
 		Values: ast.MakeValues(f.Args, "FROM", "TO"),
@@ -500,7 +503,6 @@ func (f *FuncCall) randInt() ast.Block {
 }
 
 func (f *FuncCall) mathRadix() ast.Block {
-	f.assertArgLen(1)
 	var fieldOp string
 	switch f.Name {
 	case "dec":
@@ -522,12 +524,5 @@ func (f *FuncCall) mathRadix() ast.Block {
 			{Name: "OP", Value: fieldOp},
 			{Name: "NUM", Value: textExpr.Content},
 		},
-	}
-}
-
-func (f *FuncCall) assertArgLen(expectLen int) {
-	argsLen := len(f.Args)
-	if argsLen != expectLen {
-		f.Where.Error("Expected % argument for %() but got %", strconv.Itoa(expectLen), f.Name, strconv.Itoa(argsLen))
 	}
 }

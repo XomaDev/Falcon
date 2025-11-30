@@ -598,12 +598,18 @@ func (p *LangParser) checkCall(token *l.Token) ast.Expr {
 	value := p.value(token)
 	if nameExpr, ok := value.(*variables.Get); ok && p.notEOF() && p.isNext(l.OpenCurve) {
 		pendingSymbol := p.DynamicSymbols[nameExpr.Where]
-		pendingSymbol.Resolved = true
 		signature, ok := p.Resolver.Procedures[nameExpr.Name]
 		if ok {
+			pendingSymbol.Resolved = true
 			return &procedures.Call{Name: nameExpr.Name, Parameters: signature.Parameters, Arguments: p.arguments(), Returning: signature.Returning}
 		} else {
-			return common.CreateFuncCall(nameExpr.Where, nameExpr.Name, p.arguments())
+			arguments := p.arguments()
+			errMsg, success := common.TestSignature(nameExpr.Name, len(arguments))
+			if success {
+				println(errMsg)
+				pendingSymbol.Resolved = true
+			}
+			return &common.FuncCall{Where: nameExpr.Where, Name: nameExpr.Name, Args: arguments}
 		}
 	}
 	return value

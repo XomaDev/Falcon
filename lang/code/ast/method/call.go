@@ -123,13 +123,13 @@ func (c *Call) getCallSignature() *CallSignature {
 	gotArgLen := len(c.Args)
 	if signature.ParamCount >= 0 {
 		if signature.ParamCount != gotArgLen {
-			c.Where.Error("Expected % args but got % for method .%",
+			c.Where.Error("Expected % args but got % for method .%()",
 				strconv.Itoa(signature.ParamCount), strconv.Itoa(gotArgLen), c.Name)
 		}
 	} else {
 		minArgs := -signature.ParamCount
 		if gotArgLen < minArgs {
-			c.Where.Error("Expected at least % args but got only % for method .%",
+			c.Where.Error("Expected at least % args but got only % for method .%()",
 				strconv.Itoa(minArgs), strconv.Itoa(gotArgLen), c.Name)
 		}
 	}
