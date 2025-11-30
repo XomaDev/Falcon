@@ -32,7 +32,7 @@ type LangParser struct {
 	Resolver    *NameResolver
 	ScopeCursor *ScopeCursor
 
-	DynamicSymbols map[*l.Token]PendingSymbol // [alpha symbol -> resolved ?]
+	DynamicSymbols map[*l.Token]*PendingSymbol // [alpha symbol -> resolved ?]
 }
 
 func NewLangParser(strict bool, tokens []*l.Token) *LangParser {
@@ -48,7 +48,7 @@ func NewLangParser(strict bool, tokens []*l.Token) *LangParser {
 			ComponentNameMap:  map[string][]string{},
 		},
 		ScopeCursor:    MakeScopeCursor(),
-		DynamicSymbols: map[*l.Token]PendingSymbol{},
+		DynamicSymbols: map[*l.Token]*PendingSymbol{},
 	}
 }
 
@@ -73,10 +73,10 @@ func (p *LangParser) ParseAll() []ast.Expr {
 	}
 	for p.notEOF() {
 		e := p.parse()
-		if p.strict {
-			p.checkPendingSymbols()
-		}
 		expressions = append(expressions, e)
+	}
+	if p.strict {
+		p.checkPendingSymbols()
 	}
 	return expressions
 }
@@ -99,10 +99,12 @@ func (p *LangParser) checkPendingSymbols() {
 			}
 		}
 	}
-	var errorWriter strings.Builder
-	errorWriter.WriteString(sugar.Format("compile failed with % syntax errors", strconv.Itoa(len(errorMessages))))
-	errorWriter.WriteString(strings.Join(errorMessages, ""))
-	panic(errorWriter.String())
+	if len(errorMessages) > 0 {
+		var errorWriter strings.Builder
+		errorWriter.WriteString(sugar.Format("compile failed with % syntax errors", strconv.Itoa(len(errorMessages))))
+		errorWriter.WriteString(strings.Join(errorMessages, ""))
+		panic(errorWriter.String())
+	}
 }
 
 func (p *LangParser) defineStatements() {
@@ -705,7 +707,7 @@ func (p *LangParser) value(t *l.Token) ast.Expr {
 		signatures, found := p.ScopeCursor.ResolveVariable(*t.Content)
 		get := &variables.Get{Where: t, Global: false, Name: *t.Content, ValueSignature: signatures}
 		if !found {
-			p.DynamicSymbols[t] = PendingSymbol{Resolved: false, SymbolOwner: get}
+			p.DynamicSymbols[t] = &PendingSymbol{Resolved: false, SymbolOwner: get}
 		}
 		return get
 	case l.This:
@@ -715,7 +717,7 @@ func (p *LangParser) value(t *l.Token) ast.Expr {
 		signatures, found := p.ScopeCursor.ResolveVariable(name)
 		get := &variables.Get{Where: t, Global: true, Name: name, ValueSignature: signatures}
 		if !found {
-			p.DynamicSymbols[t] = PendingSymbol{Resolved: false, SymbolOwner: get}
+			p.DynamicSymbols[t] = &PendingSymbol{Resolved: false, SymbolOwner: get}
 		}
 		return get
 	case l.ColorCode:

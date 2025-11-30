@@ -1,4 +1,3 @@
 func fooBar(x, y) {
-  println(a)
-  println(c)
+  println(x)
 }
