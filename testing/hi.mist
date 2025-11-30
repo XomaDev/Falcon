@@ -1,2 +1,4 @@
-local a = 1
-a += 3
+func fooBar(x, y) {
+  println(a)
+  println(c)
+}

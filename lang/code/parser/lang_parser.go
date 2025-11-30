@@ -11,9 +11,15 @@ import (
 	"Falcon/code/ast/procedures"
 	"Falcon/code/ast/variables"
 	"Falcon/code/sugar"
+	"strconv"
 	"strings"
 )
 import l "Falcon/code/lex"
+
+type PendingSymbol struct {
+	Resolved    bool
+	SymbolOwner ast.Expr
+}
 
 type LangParser struct {
 	Tokens         []*l.Token
@@ -26,7 +32,7 @@ type LangParser struct {
 	Resolver    *NameResolver
 	ScopeCursor *ScopeCursor
 
-	DynamicSymbols map[*l.Token]bool // [alpha symbol -> resolved ?]
+	DynamicSymbols map[*l.Token]PendingSymbol // [alpha symbol -> resolved ?]
 }
 
 func NewLangParser(strict bool, tokens []*l.Token) *LangParser {
@@ -42,7 +48,7 @@ func NewLangParser(strict bool, tokens []*l.Token) *LangParser {
 			ComponentNameMap:  map[string][]string{},
 		},
 		ScopeCursor:    MakeScopeCursor(),
-		DynamicSymbols: map[*l.Token]bool{},
+		DynamicSymbols: map[*l.Token]PendingSymbol{},
 	}
 }
 
@@ -68,19 +74,35 @@ func (p *LangParser) ParseAll() []ast.Expr {
 	for p.notEOF() {
 		e := p.parse()
 		if p.strict {
-			p.checkDynamicSymbols()
+			p.checkPendingSymbols()
 		}
 		expressions = append(expressions, e)
 	}
 	return expressions
 }
 
-func (p *LangParser) checkDynamicSymbols() {
-	for token, b := range p.DynamicSymbols {
-		if !b {
-			token.Error("Cannot find symbol '%'", *token.Content)
+func (p *LangParser) checkPendingSymbols() {
+	var errorMessages []string
+	for _, pendingSymbol := range p.DynamicSymbols {
+		if pendingSymbol.Resolved {
+			continue
+		}
+		// try to resolve the symbols again
+		if get, ok := pendingSymbol.SymbolOwner.(*variables.Get); ok {
+			signatures, resolved := p.ScopeCursor.ResolveVariable(get.String())
+			if resolved {
+				get.ValueSignature = signatures
+				continue
+			} else {
+				errorMessage := get.Where.BuildError(false, "Cannot find symbol '%'", get.String())
+				errorMessages = append(errorMessages, errorMessage)
+			}
 		}
 	}
+	var errorWriter strings.Builder
+	errorWriter.WriteString(sugar.Format("compile failed with % syntax errors", strconv.Itoa(len(errorMessages))))
+	errorWriter.WriteString(strings.Join(errorMessages, ""))
+	panic(errorWriter.String())
 }
 
 func (p *LangParser) defineStatements() {
@@ -403,10 +425,8 @@ func (p *LangParser) makeBinary(opToken *l.Token, left ast.Expr, right ast.Expr)
 
 func (p *LangParser) assignSmt(left ast.Expr, right ast.Expr) (ast.Expr, bool) {
 	if nameExpr, ok := left.(*variables.Get); ok {
-		if _, found := p.ScopeCursor.ResolveVariable(nameExpr.Name); !found {
-			nameExpr.Where.Error("Cannot find symbol '%'", nameExpr.Name)
-		}
-		p.DynamicSymbols[nameExpr.Where] = true
+		pendingSymbol := p.DynamicSymbols[nameExpr.Where]
+		pendingSymbol.Resolved = true
 		return &variables.Set{Global: nameExpr.Global, Name: nameExpr.Name, Expr: right}, true
 	} else if listGet, ok := left.(*list.Get); ok {
 		return &list.Set{List: listGet.List, Index: listGet.Index, Value: right}, true
@@ -479,7 +499,8 @@ func (p *LangParser) componentCall(compName string, compType string) ast.Expr {
 func (p *LangParser) helperDropdown(keyExpr ast.Expr) ast.Expr {
 	where := p.next()
 	if key, ok := keyExpr.(*variables.Get); ok {
-		p.DynamicSymbols[key.Where] = true
+		pendingSymbol := p.DynamicSymbols[key.Where]
+		pendingSymbol.Resolved = true
 		return &fundamentals.HelperDropdown{Key: key.Name, Option: p.name()}
 	}
 	where.Error("Invalid Helper Access operation ")
@@ -574,7 +595,8 @@ func (p *LangParser) smartBody() ast.Expr {
 func (p *LangParser) checkCall(token *l.Token) ast.Expr {
 	value := p.value(token)
 	if nameExpr, ok := value.(*variables.Get); ok && p.notEOF() && p.isNext(l.OpenCurve) {
-		p.DynamicSymbols[nameExpr.Where] = true
+		pendingSymbol := p.DynamicSymbols[nameExpr.Where]
+		pendingSymbol.Resolved = true
 		signature, ok := p.Resolver.Procedures[nameExpr.Name]
 		if ok {
 			return &procedures.Call{Name: nameExpr.Name, Parameters: signature.Parameters, Arguments: p.arguments(), Returning: signature.Returning}
@@ -681,19 +703,21 @@ func (p *LangParser) value(t *l.Token) ast.Expr {
 		}
 		// May not be variable reference always. It could be a func or a method call.
 		signatures, found := p.ScopeCursor.ResolveVariable(*t.Content)
+		get := &variables.Get{Where: t, Global: false, Name: *t.Content, ValueSignature: signatures}
 		if !found {
-			p.DynamicSymbols[t] = false
+			p.DynamicSymbols[t] = PendingSymbol{Resolved: false, SymbolOwner: get}
 		}
-		return &variables.Get{Where: t, Global: false, Name: *t.Content, ValueSignature: signatures}
+		return get
 	case l.This:
 		p.expect(l.Dot)
 		nameToken := p.expect(l.Name)
 		name := *nameToken.Content
-		if signatures, ok := p.ScopeCursor.ResolveVariable(name); ok {
-			return &variables.Get{Where: t, Global: true, Name: name, ValueSignature: signatures}
+		signatures, found := p.ScopeCursor.ResolveVariable(name)
+		get := &variables.Get{Where: t, Global: true, Name: name, ValueSignature: signatures}
+		if !found {
+			p.DynamicSymbols[t] = PendingSymbol{Resolved: false, SymbolOwner: get}
 		}
-		nameToken.Error("Cannot find symbol '%'", name)
-		panic("not reached")
+		return get
 	case l.ColorCode:
 		return &fundamentals.Color{Where: t, Hex: *t.Content}
 	default:

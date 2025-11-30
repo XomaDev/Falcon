@@ -18,6 +18,17 @@ func (c *CodeContext) ReportError(
 	message string,
 	args ...string,
 ) {
+	panic(c.BuildError(true, column, row, highlightWordSize, message, args...))
+}
+
+func (c *CodeContext) BuildError(
+	decorate bool,
+	column int,
+	row int,
+	highlightWordSize int,
+	message string,
+	args ...string,
+) string {
 	err := sugar.Format(message, args...) + "\n[line " + strconv.Itoa(column) + "]"
 	code := *c.SourceCode
 	beginOfLine := sugar.IndexAfterNthOccurrence(code, column-1, '\n') + 1
@@ -33,7 +44,9 @@ func (c *CodeContext) ReportError(
 	boxTop := strings.Repeat(".", max(len(line), len(err)))
 
 	builder.WriteByte('\n')
-	builder.WriteString(boxTop)
+	if decorate {
+		builder.WriteString(boxTop)
+	}
 	builder.WriteByte('\n')
 	builder.WriteString(line)
 	builder.WriteByte('\n')
@@ -42,6 +55,8 @@ func (c *CodeContext) ReportError(
 	builder.WriteByte('\n')
 	builder.WriteString(err)
 	builder.WriteByte('\n')
-	builder.WriteString(boxTop)
-	panic(builder.String())
+	if decorate {
+		builder.WriteString(boxTop)
+	}
+	return builder.String()
 }

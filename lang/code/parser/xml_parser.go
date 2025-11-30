@@ -1082,11 +1082,7 @@ func (p *XMLParser) makeBinary(operator string, operands []ast.Expr) ast.Expr {
 }
 
 func makeFuncCall(name string, args ...ast.Expr) ast.Expr {
-	return &common.FuncCall{
-		Where: makeFakeToken(lex.Func),
-		Name:  name,
-		Args:  args,
-	}
+	return &common.FuncCall{Where: makeFakeToken(lex.Func), Name: name, Args: args}
 }
 
 // TODO: (future) it'll point to something meaningful
