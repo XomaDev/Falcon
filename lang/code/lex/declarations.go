@@ -1,18 +1,18 @@
 package lex
 
 var Symbols = map[string]StaticToken{
-	"+": staticOf(Plus, Binary, Operator),
-	"-": staticOf(Dash, Binary, Operator, Unary),
-	"*": staticOf(Times, BinaryL1, Operator, PreserveOrder),
-	"/": staticOf(Slash, BinaryL1, Operator, PreserveOrder),
-	"%": staticOf(Remainder, BinaryL1, Operator, PreserveOrder),
-	"^": staticOf(Power, BinaryL2, Operator, PreserveOrder),
+	"+": staticOf(Plus, Binary, Operator, Compoundable),
+	"-": staticOf(Dash, Binary, Operator, Unary, Compoundable),
+	"*": staticOf(Times, BinaryL1, Operator, PreserveOrder, Compoundable),
+	"/": staticOf(Slash, BinaryL1, Operator, PreserveOrder, Compoundable),
+	"%": staticOf(Remainder, BinaryL1, Operator, PreserveOrder, Compoundable),
+	"^": staticOf(Power, BinaryL2, Operator, PreserveOrder, Compoundable),
 
 	"||": staticOf(LogicOr, LLogicOr, Operator),
 	"&&": staticOf(LogicAnd, LLogicAnd, Operator),
-	"|":  staticOf(BitwiseOr, BBitwiseOr, Operator),
-	"&":  staticOf(BitwiseAnd, BBitwiseAnd, Operator),
-	"~":  staticOf(BitwiseXor, BBitwiseXor, Operator),
+	"|":  staticOf(BitwiseOr, BBitwiseOr, Operator, Compoundable),
+	"&":  staticOf(BitwiseAnd, BBitwiseAnd, Operator, Compoundable),
+	"~":  staticOf(BitwiseXor, BBitwiseXor, Operator, Compoundable),
 
 	"==":  staticOf(Equals, Equality, Operator),
 	"!=":  staticOf(NotEquals, Equality, Operator),
@@ -27,7 +27,7 @@ var Symbols = map[string]StaticToken{
 	"<<": staticOf(TextLessThan, Relational, Operator),
 	">>": staticOf(TextGreaterThan, Relational, Operator),
 
-	"_":  staticOf(Underscore, TextJoin, Operator),
+	"_":  staticOf(Underscore, TextJoin, Operator, Compoundable),
 	"@":  staticOf(At),
 	":":  staticOf(Colon, Pair, Operator),
 	"::": staticOf(DoubleColon),

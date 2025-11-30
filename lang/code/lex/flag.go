@@ -25,6 +25,7 @@ const (
 	ConstantValue
 
 	PreserveOrder
+	Compoundable
 )
 
 func PrecedenceOf(flag Flag) int {

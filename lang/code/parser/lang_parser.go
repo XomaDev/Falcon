@@ -342,6 +342,12 @@ func (p *LangParser) expr(minPrecedence int) ast.Expr {
 			break
 		}
 		p.skip()
+		if p.isNext(l.Assign) && opToken.HasFlag(l.Compoundable) {
+			// a compound operator e.g. a += 3
+			p.skip()
+			left = p.compoundOperator(opToken, left)
+			break
+		}
 		var right ast.Expr
 		if opToken.HasFlag(l.PreserveOrder) {
 			right = p.element()
@@ -363,25 +369,49 @@ func (p *LangParser) expr(minPrecedence int) ast.Expr {
 	return left
 }
 
+func (p *LangParser) compoundOperator(opToken *l.Token, left ast.Expr) ast.Expr {
+	right := p.parse()
+	var binaryOperator ast.Expr
+	if opToken.Type == l.Remainder {
+		binaryOperator = makeFuncCall("rem", left, right)
+	} else {
+		binaryOperator = p.makeBinary(opToken, left, right)
+	}
+	expr, done := p.assignSmt(left, binaryOperator)
+	if done {
+		return expr
+	} else {
+		opToken.Error("Unknown compound operator '%='", *opToken.Content)
+		panic("unreached")
+	}
+}
+
 func (p *LangParser) makeBinary(opToken *l.Token, left ast.Expr, right ast.Expr) ast.Expr {
 	switch opToken.Type {
 	case l.Colon:
 		return &fundamentals.Pair{Key: left, Value: right}
 	case l.Assign:
-		if nameExpr, ok := left.(*variables.Get); ok {
-			if _, found := p.ScopeCursor.ResolveVariable(nameExpr.Name); !found {
-				nameExpr.Where.Error("Cannot find symbol '%'", nameExpr.Name)
-			}
-			p.DynamicSymbols[nameExpr.Where] = true
-			return &variables.Set{Global: nameExpr.Global, Name: nameExpr.Name, Expr: right}
-		} else if listGet, ok := left.(*list.Get); ok {
-			return &list.Set{List: listGet.List, Index: listGet.Index, Value: right}
+		expr, done := p.assignSmt(left, right)
+		if done {
+			return expr
 		}
 	case l.Remainder:
-		// an AI compensating remainder operator
 		return makeFuncCall("rem", left, right)
 	}
 	return &common.BinaryExpr{Where: opToken, Operands: []ast.Expr{left, right}, Operator: opToken.Type}
+}
+
+func (p *LangParser) assignSmt(left ast.Expr, right ast.Expr) (ast.Expr, bool) {
+	if nameExpr, ok := left.(*variables.Get); ok {
+		if _, found := p.ScopeCursor.ResolveVariable(nameExpr.Name); !found {
+			nameExpr.Where.Error("Cannot find symbol '%'", nameExpr.Name)
+		}
+		p.DynamicSymbols[nameExpr.Where] = true
+		return &variables.Set{Global: nameExpr.Global, Name: nameExpr.Name, Expr: right}, true
+	} else if listGet, ok := left.(*list.Get); ok {
+		return &list.Set{List: listGet.List, Index: listGet.Index, Value: right}, true
+	}
+	return nil, false
 }
 
 func (p *LangParser) element() ast.Expr {
