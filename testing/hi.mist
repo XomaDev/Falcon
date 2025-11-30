@@ -1,3 +1,6 @@
+fooBar(1)
+
 func fooBar(x, y) {
   println(x.trim(1, 2))
 }
+

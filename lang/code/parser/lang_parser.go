@@ -85,6 +85,14 @@ func (p *LangParser) checkPendingSymbols() {
 				get.ValueSignature = signatures
 				continue
 			}
+		} else if procCall, ok := parseError.Owner.(*procedures.Call); ok {
+			// a late resolution of procedure calls
+			procSignature, found := p.Resolver.Procedures[procCall.Name]
+			if found {
+				procCall.Parameters = procSignature.Parameters
+				procCall.Returning = procSignature.Returning
+				continue
+			}
 		}
 		errorMessages = append(errorMessages, token.BuildError(false, parseError.ErrorMessage))
 	}
@@ -596,24 +604,31 @@ func (p *LangParser) smartBody() ast.Expr {
 func (p *LangParser) checkCall(token *l.Token) ast.Expr {
 	value := p.value(token)
 	if nameExpr, ok := value.(*variables.Get); ok && !nameExpr.Global && p.isNext(l.OpenCurve) {
-		procSignature, ok := p.Resolver.Procedures[nameExpr.Name]
-		if ok {
+		arguments := p.arguments()
+		// check for in-built function call
+		funcCallErrorMessage, funcCallSignature := common.TestSignature(nameExpr.Name, len(arguments))
+		if funcCallSignature != nil {
 			p.aggregator.MarkResolved(nameExpr.Where)
-			return &procedures.Call{
+			return &common.FuncCall{Where: nameExpr.Where, Name: nameExpr.Name, Args: arguments}
+		}
+		// check for a user defined procedure
+		procSignature, found := p.Resolver.Procedures[nameExpr.Name]
+		var funcCall *procedures.Call
+		if found {
+			funcCall = &procedures.Call{
 				Name:       nameExpr.Name,
 				Parameters: procSignature.Parameters,
-				Arguments:  p.arguments(),
+				Arguments:  arguments,
 				Returning:  procSignature.Returning,
 			}
 		} else {
-			arguments := p.arguments()
-			errorMessage, signature := common.TestSignature(nameExpr.Name, len(arguments))
-			if signature == nil {
-				p.aggregator.EnqueueSymbol(nameExpr.Where, nameExpr, errorMessage)
-			} else {
-				p.aggregator.MarkResolved(nameExpr.Where)
-			}
-			return &common.FuncCall{Where: nameExpr.Where, Name: nameExpr.Name, Args: arguments}
+			// just fill in a template, could be resolved later
+			funcCall = &procedures.Call{Name: nameExpr.Name, Arguments: arguments}
+		}
+		if found {
+			p.aggregator.MarkResolved(nameExpr.Where)
+		} else {
+			p.aggregator.EnqueueSymbol(nameExpr.Where, funcCall, funcCallErrorMessage)
 		}
 	}
 	return value
