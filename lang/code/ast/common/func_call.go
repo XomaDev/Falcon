@@ -86,26 +86,26 @@ var signatures = map[string]*FuncCallSignature{
 	"every": makeSignature("every", 1, ast.SignAny),
 }
 
-func TestSignature(funcName string, argsCount int) (string, bool) {
+func TestSignature(funcName string, argsCount int) (string, *ast.Signature) {
 	callSignature, ok := signatures[funcName]
 	if !ok {
-		return sugar.Format("Cannot find method .%()", funcName), false
+		return sugar.Format("Cannot find function .%()", funcName), nil
 	}
 	if callSignature.ParamCount == -1 {
 		if argsCount == 0 {
-			return sugar.Format("Expected a positive number of args for method .%()", funcName), false
+			return sugar.Format("Expected a positive number of args for function %()", funcName), nil
 		}
 	} else if callSignature.ParamCount >= 0 {
-		return sugar.Format("Expected % args but got % for method .%()",
-			strconv.Itoa(callSignature.ParamCount), strconv.Itoa(argsCount), funcName), false
+		return sugar.Format("Expected % args but got % for function %()",
+			strconv.Itoa(callSignature.ParamCount), strconv.Itoa(argsCount), funcName), nil
 	} else {
 		minArgs := -callSignature.ParamCount - 1 // -1 offset
 		if argsCount < minArgs {
-			return sugar.Format("Expected at least % args but got only % for method .%()",
-				strconv.Itoa(minArgs), strconv.Itoa(argsCount), funcName), false
+			return sugar.Format("Expected at least % args but got only % for function %()",
+				strconv.Itoa(minArgs), strconv.Itoa(argsCount), funcName), nil
 		}
 	}
-	return "", true
+	return "", &callSignature.Signature
 }
 
 func (f *FuncCall) String() string {
@@ -122,6 +122,10 @@ func (f *FuncCall) String() string {
 }
 
 func (f *FuncCall) Blockly(flags ...bool) ast.Block {
+	errorMessage, signature := TestSignature(f.Name, len(f.Args))
+	if signature == nil {
+		panic(errorMessage)
+	}
 	if len(flags) > 0 && !flags[0] && !f.Consumable() {
 		f.Where.Error("Expected a consumable but got a statement")
 	}
@@ -209,8 +213,11 @@ func (f *FuncCall) Consumable(flags ...bool) bool {
 }
 
 func (f *FuncCall) Signature() []ast.Signature {
-	callSignature, _ := signatures[f.Name] // signatures are already verified
-	return []ast.Signature{callSignature.Signature}
+	errorMessage, signature := TestSignature(f.Name, len(f.Args)) // signatures are already verified
+	if signature == nil {
+		panic(errorMessage)
+	}
+	return []ast.Signature{*signature}
 }
 
 func (f *FuncCall) everyComponent() ast.Block {

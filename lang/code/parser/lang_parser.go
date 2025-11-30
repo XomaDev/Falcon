@@ -16,11 +16,6 @@ import (
 )
 import l "Falcon/code/lex"
 
-type PendingSymbol struct {
-	Resolved    bool
-	SymbolOwner ast.Expr
-}
-
 type LangParser struct {
 	Tokens         []*l.Token
 	currIndex      int
@@ -31,8 +26,7 @@ type LangParser struct {
 
 	Resolver    *NameResolver
 	ScopeCursor *ScopeCursor
-
-	DynamicSymbols map[*l.Token]*PendingSymbol // [alpha symbol -> resolved ?]
+	aggregator  *ErrorAggregator
 }
 
 func NewLangParser(strict bool, tokens []*l.Token) *LangParser {
@@ -47,8 +41,8 @@ func NewLangParser(strict bool, tokens []*l.Token) *LangParser {
 			ComponentTypesMap: map[string]string{},
 			ComponentNameMap:  map[string][]string{},
 		},
-		ScopeCursor:    MakeScopeCursor(),
-		DynamicSymbols: map[*l.Token]*PendingSymbol{},
+		ScopeCursor: MakeScopeCursor(),
+		aggregator:  &ErrorAggregator{Errors: map[*l.Token]ParseError{}},
 	}
 }
 
@@ -83,21 +77,16 @@ func (p *LangParser) ParseAll() []ast.Expr {
 
 func (p *LangParser) checkPendingSymbols() {
 	var errorMessages []string
-	for _, pendingSymbol := range p.DynamicSymbols {
-		if pendingSymbol.Resolved {
-			continue
-		}
-		// try to resolve the symbols again
-		if get, ok := pendingSymbol.SymbolOwner.(*variables.Get); ok {
+	for token, parseError := range p.aggregator.Errors {
+		// try resolve global variables again
+		if get, ok := parseError.Owner.(*variables.Get); ok && get.Global {
 			signatures, resolved := p.ScopeCursor.ResolveVariable(get.String())
 			if resolved {
 				get.ValueSignature = signatures
 				continue
-			} else {
-				errorMessage := get.Where.BuildError(false, "Cannot find symbol '%'", get.String())
-				errorMessages = append(errorMessages, errorMessage)
 			}
 		}
+		errorMessages = append(errorMessages, token.BuildError(false, parseError.ErrorMessage))
 	}
 	if len(errorMessages) > 0 {
 		var errorWriter strings.Builder
@@ -427,8 +416,7 @@ func (p *LangParser) makeBinary(opToken *l.Token, left ast.Expr, right ast.Expr)
 
 func (p *LangParser) assignSmt(left ast.Expr, right ast.Expr) (ast.Expr, bool) {
 	if nameExpr, ok := left.(*variables.Get); ok {
-		pendingSymbol := p.DynamicSymbols[nameExpr.Where]
-		pendingSymbol.Resolved = true
+		p.aggregator.MarkResolved(nameExpr.Where)
 		return &variables.Set{Global: nameExpr.Global, Name: nameExpr.Name, Expr: right}, true
 	} else if listGet, ok := left.(*list.Get); ok {
 		return &list.Set{List: listGet.List, Index: listGet.Index, Value: right}, true
@@ -500,9 +488,8 @@ func (p *LangParser) componentCall(compName string, compType string) ast.Expr {
 
 func (p *LangParser) helperDropdown(keyExpr ast.Expr) ast.Expr {
 	where := p.next()
-	if key, ok := keyExpr.(*variables.Get); ok {
-		pendingSymbol := p.DynamicSymbols[key.Where]
-		pendingSymbol.Resolved = true
+	if key, ok := keyExpr.(*variables.Get); ok && !key.Global {
+		p.aggregator.MarkResolved(key.Where)
 		return &fundamentals.HelperDropdown{Key: key.Name, Option: p.name()}
 	}
 	where.Error("Invalid Helper Access operation ")
@@ -519,6 +506,12 @@ func (p *LangParser) objectCall(object ast.Expr) ast.Expr {
 		args = p.arguments()
 		if !p.isNext(l.OpenCurly) {
 			// he's a simple call!
+			errorMessage, signature := method.TestSignature(name, len(args))
+			if signature == nil {
+				p.aggregator.EnqueueSymbol(where, object, errorMessage)
+			} else {
+				p.aggregator.MarkResolved(where)
+			}
 			return &method.Call{Where: where, On: object, Name: name, Args: args}
 		}
 	}
@@ -596,18 +589,23 @@ func (p *LangParser) smartBody() ast.Expr {
 
 func (p *LangParser) checkCall(token *l.Token) ast.Expr {
 	value := p.value(token)
-	if nameExpr, ok := value.(*variables.Get); ok && p.notEOF() && p.isNext(l.OpenCurve) {
-		pendingSymbol := p.DynamicSymbols[nameExpr.Where]
-		signature, ok := p.Resolver.Procedures[nameExpr.Name]
+	if nameExpr, ok := value.(*variables.Get); ok && !nameExpr.Global && p.isNext(l.OpenCurve) {
+		procSignature, ok := p.Resolver.Procedures[nameExpr.Name]
 		if ok {
-			pendingSymbol.Resolved = true
-			return &procedures.Call{Name: nameExpr.Name, Parameters: signature.Parameters, Arguments: p.arguments(), Returning: signature.Returning}
+			p.aggregator.MarkResolved(nameExpr.Where)
+			return &procedures.Call{
+				Name:       nameExpr.Name,
+				Parameters: procSignature.Parameters,
+				Arguments:  p.arguments(),
+				Returning:  procSignature.Returning,
+			}
 		} else {
 			arguments := p.arguments()
-			errMsg, success := common.TestSignature(nameExpr.Name, len(arguments))
-			if success {
-				println(errMsg)
-				pendingSymbol.Resolved = true
+			errorMessage, signature := common.TestSignature(nameExpr.Name, len(arguments))
+			if signature == nil {
+				p.aggregator.EnqueueSymbol(nameExpr.Where, nameExpr, errorMessage)
+			} else {
+				p.aggregator.MarkResolved(nameExpr.Where)
 			}
 			return &common.FuncCall{Where: nameExpr.Where, Name: nameExpr.Name, Args: arguments}
 		}
@@ -713,7 +711,7 @@ func (p *LangParser) value(t *l.Token) ast.Expr {
 		signatures, found := p.ScopeCursor.ResolveVariable(*t.Content)
 		get := &variables.Get{Where: t, Global: false, Name: *t.Content, ValueSignature: signatures}
 		if !found {
-			p.DynamicSymbols[t] = &PendingSymbol{Resolved: false, SymbolOwner: get}
+			p.aggregator.EnqueueSymbol(t, get, "Cannot find symbol '"+*t.Content+"'")
 		}
 		return get
 	case l.This:
@@ -723,7 +721,7 @@ func (p *LangParser) value(t *l.Token) ast.Expr {
 		signatures, found := p.ScopeCursor.ResolveVariable(name)
 		get := &variables.Get{Where: t, Global: true, Name: name, ValueSignature: signatures}
 		if !found {
-			p.DynamicSymbols[t] = &PendingSymbol{Resolved: false, SymbolOwner: get}
+			p.aggregator.EnqueueSymbol(t, get, "Cannot find symbol '"+*t.Content+"'")
 		}
 		return get
 	case l.ColorCode:

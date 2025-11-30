@@ -93,6 +93,26 @@ var signatures = map[string]*CallSignature{
 	"toPairs":     makeSignature("dict", "dictionaries_dict_to_alist", 0, true, ast.SignList),
 }
 
+func TestSignature(methodName string, argsCount int) (string, *CallSignature) {
+	signature, ok := signatures[methodName]
+	if !ok {
+		return sugar.Format("Cannot find method .%()", methodName), nil
+	}
+	if signature.ParamCount >= 0 {
+		if signature.ParamCount != argsCount {
+			return sugar.Format("Expected % args but got % for method .%()",
+				strconv.Itoa(signature.ParamCount), strconv.Itoa(argsCount), methodName), nil
+		}
+	} else {
+		minArgs := -signature.ParamCount
+		if argsCount < minArgs {
+			return sugar.Format("Expected at least % args but got only % for method .%()",
+				strconv.Itoa(minArgs), strconv.Itoa(argsCount), methodName), nil
+		}
+	}
+	return "", signature
+}
+
 func (c *Call) String() string {
 	pFormat := "%.%(%)"
 	if !c.On.Continuous() {
@@ -102,7 +122,10 @@ func (c *Call) String() string {
 }
 
 func (c *Call) Blockly(flags ...bool) ast.Block {
-	signature := c.getCallSignature()
+	errorMessage, signature := TestSignature(c.Name, len(c.Args))
+	if signature == nil {
+		panic(errorMessage)
+	}
 	switch signature.Module {
 	case "text":
 		return c.textMethods(signature)
@@ -113,27 +136,6 @@ func (c *Call) Blockly(flags ...bool) ast.Block {
 	default:
 		panic("Unknown module " + signature.Module)
 	}
-}
-
-func (c *Call) getCallSignature() *CallSignature {
-	signature, ok := signatures[c.Name]
-	if !ok {
-		c.Where.Error("Cannot find method .%()", c.Name)
-	}
-	gotArgLen := len(c.Args)
-	if signature.ParamCount >= 0 {
-		if signature.ParamCount != gotArgLen {
-			c.Where.Error("Expected % args but got % for method .%()",
-				strconv.Itoa(signature.ParamCount), strconv.Itoa(gotArgLen), c.Name)
-		}
-	} else {
-		minArgs := -signature.ParamCount
-		if gotArgLen < minArgs {
-			c.Where.Error("Expected at least % args but got only % for method .%()",
-				strconv.Itoa(minArgs), strconv.Itoa(gotArgLen), c.Name)
-		}
-	}
-	return signature
 }
 
 func (c *Call) Continuous() bool {
@@ -149,7 +151,11 @@ func (c *Call) Consumable(flags ...bool) bool {
 }
 
 func (c *Call) Signature() []ast.Signature {
-	return []ast.Signature{c.getCallSignature().Signature}
+	errorMessage, signature := TestSignature(c.Name, len(c.Args))
+	if signature == nil {
+		panic(errorMessage)
+	}
+	return []ast.Signature{signature.Signature}
 }
 
 func (c *Call) simpleOperand(blockType string, valueName string) ast.Block {
